@@ -112,13 +112,14 @@ void makeLISTOFVAROFINTERESTZJETS(){
 
 //--- W Jets ------------------------------------
 
-const int NVAROFINTERESTWJETS(54);
+const int NVAROFINTERESTWJETS(55);
 variableStruct VAROFINTERESTWJETS[] = {
     //--  Name  ------------------ log - decrease - Mu SVD kterm - Mu Bayes kterm - E SVD kterm - E Bayes kterm
     {"ZNGoodJets_Zexc",             1,      1,           4,              4,             4,            3,           7},
 
     //-- jet Pt distribution
-    {"FirstJetPt_Zinc1jet",         1,      1,           9,              5,             9,            5,           7}, 
+    {"FirstJetPt_Zinc1jet",         1,      1,           9,              5,             9,            5,           7},
+    {"FirstJetPt_2_Zinc1jet",       1,      1,          14,              6,            14,           10 ,          7},
     {"SecondJetPt_Zinc2jet",        1,      1,           8,              6,             8,            7,           7}, 
     {"ThirdJetPt_Zinc3jet",         1,      1,           5,              4,             5,            5,           7}, 
     {"FourthJetPt_Zinc4jet",        1,      1,           5,              3,             4,            4,           7}, 

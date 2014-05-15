@@ -4,6 +4,8 @@
 #include <TH1.h>
 #include <TH2.h>
 #include <TLorentzVector.h>
+#include <vector>
+#include <cstdarg>
 #include "functions.h"
 
 using namespace std;
@@ -28,21 +30,109 @@ bool JetDescendingOrder(jetStruct j1, jetStruct j2){
     return (j1.pt > j2.pt);
 }
 
+//***************************** begin edit ********************************************//
+bool JetYDescendingOrder(TLorentzVector tj1, TLorentzVector tj2){
+    return (tj1.Rapidity() > tj2.Rapidity());
+}
 
-//TH1D *newHisto(string name, string title, string xTitle, int nBins, double *xBins ){
-//   TH1D* hist = new TH1D(name.c_str(), title.c_str(), nBins, xBins);
-//   hist->GetXaxis()->SetTitle(xTitle.c_str());
-//   hist->GetYaxis()->SetTitle("# Events");
-//   return hist;
-//}
-//
-//TH1D *newHisto(string name, string title, string xTitle, int nBins, double xLow, double xUp ){
-//   TH1D* hist = new TH1D(name.c_str(), title.c_str(), nBins, xLow, xUp);
-//   hist->GetXaxis()->SetTitle(xTitle.c_str());
-//   hist->GetYaxis()->SetTitle("# Events");
-//   hist->SetOption("HIST");
-//   return hist;
-//}
+double deltaRYPhi(TLorentzVector j1, TLorentzVector j2){
+    double dY = j1.Rapidity() - j2.Rapidity();
+    double dPhi = deltaPhi(j1, j2);
+    return sqrt(dY * dY + dPhi * dPhi);
+}
+//***************************** end edit ********************************************//
+
+vector<double> makeVector(int num, ...)
+{
+    va_list list;
+    va_start(list, num);
+    vector<double> vec;
+    for (int i(0); i < num; i++) {
+        double next = va_arg(list, double);
+        vec.push_back(next);
+    }
+    va_end(list);
+    return vec;
+}
+
+void insertVector(vector<double>& veca, int num, ...)
+{
+    va_list list;
+    va_start(list, num);
+    vector<double> vecb;
+    for (int i(0); i < num; i++) {
+        double next = va_arg(list, double);
+        vecb.push_back(next);
+    }
+    va_end(list);
+    veca.insert(veca.end(), vecb.begin(), vecb.end());
+}
+
+TH1D* newTH1D(string name, string title, string xTitle, int nBins, double *xBins)
+{
+    TH1D* hist = new TH1D(name.c_str(), title.c_str(), nBins, xBins);
+    hist->GetXaxis()->SetTitle(xTitle.c_str());
+    hist->GetYaxis()->SetTitle("# Events");
+    return hist;
+}
+
+TH1D* newTH1D(string name, string title, string xTitle, vector<double>& xBinsVect)
+{
+    int nBins = xBinsVect.size()-1;
+    double *xBins = new double[xBinsVect.size()];
+    std::copy(xBinsVect.begin(), xBinsVect.end(), xBins);
+    TH1D* hist = new TH1D(name.c_str(), title.c_str(), nBins, xBins);
+    hist->GetXaxis()->SetTitle(xTitle.c_str());
+    hist->GetYaxis()->SetTitle("# Events");
+    delete [] xBins;
+    return hist;
+}
+
+
+TH1D* newTH1D(string name, string title, string xTitle, int nBins, double xLow, double xUp){
+    TH1D* hist = new TH1D(name.c_str(), title.c_str(), nBins, xLow, xUp);
+    hist->GetXaxis()->SetTitle(xTitle.c_str());
+    hist->GetYaxis()->SetTitle("# Events");
+    hist->SetOption("HIST");
+    return hist;
+}
+
+TH2D* newTH2D(string name, string title, int nBinsX, double *xBins, int nBinsY, double *yBinsY){
+    TH2D* hist = new TH2D(name.c_str(), title.c_str(), nBinsX, xBins, nBinsY, yBinsY);
+    hist->GetZaxis()->SetTitle("# Events");
+    return hist;
+}
+
+TH2D* newTH2D(string name, string title, int nBinsX, double *xBins, int nBinsY, double yLow, double yUp){
+    TH2D* hist = new TH2D(name.c_str(), title.c_str(), nBinsX, xBins, nBinsY, yLow, yUp);
+    hist->GetZaxis()->SetTitle("# Events");
+    return hist;
+}
+
+TH2D* newTH2D(string name, string title, int nBinsX, double xLow, double xUp, int nBinsY, double *yBins){
+    TH2D* hist = new TH2D(name.c_str(), title.c_str(), nBinsX, xLow, xUp, nBinsY, yBins);
+    hist->GetZaxis()->SetTitle("# Events");
+    return hist;
+}
+
+TH2D* newTH2D(string name, string title, int nBinsX, double xLow, double xUp, int nBinsY, double yLow, double yUp){
+    TH2D* hist = new TH2D(name.c_str(), title.c_str(), nBinsX, xLow, xUp, nBinsY, yLow, yUp);
+    hist->GetZaxis()->SetTitle("# Events");
+    hist->SetOption("HIST");
+    return hist;
+}
+
+RooUnfoldResponse* newResp(TH1D* reco, TH1D* gen)
+{
+    RooUnfoldResponse *response = new RooUnfoldResponse(reco, gen);
+    return response;
+}
+
+RooUnfoldResponse* newResp(TH2D* reco, TH2D* gen)
+{
+    RooUnfoldResponse *response = new RooUnfoldResponse(reco, gen);
+    return response;
+}
 
 double phi0to2pi(double phi){
     double pi = 3.141592653589793238;

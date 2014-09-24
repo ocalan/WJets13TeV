@@ -29,7 +29,7 @@ TRandom3* RandGen = new TRandom3();
 ClassImp(ZJetsAndDPS);
 
 void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSign, bool doInvMassCut, 
-        int doBJets, int doPUStudy, bool doFlat, bool useRoch, bool doVarWidth,  bool hasPartonInfo, string pdfSet, int pdfMember, int startEvent,  int skipEvent )
+        int doBJets, int doPUStudy, bool doFlat, bool useRoch, bool doVarWidth,  bool hasPartonInfo, string pdfSet, int pdfMember)
 {
 
     //--- Initialize PDF from LHAPDF if needed ---
@@ -86,7 +86,7 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
     //==========================================================================================================//
     //         Output file name           //
     //===================================//
-    string outputFileName = CreateOutputFileName(useRoch, doFlat, doPUStudy, doVarWidth, doBJets, doQCD, doSSign , doInvMassCut, pdfSet, pdfMember, startEvent, skipEvent );
+    string outputFileName = CreateOutputFileName(useRoch, doFlat, doPUStudy, doVarWidth, doBJets, doQCD, doSSign , doInvMassCut, pdfSet, pdfMember);
     TFile *outputFile = new TFile(outputFileName.c_str(), "RECREATE");
     //TFile *outputFile = new TFile("TEST.root", "RECREATE");
     //==========================================================================================================//
@@ -255,14 +255,12 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
         std::cout << "We plane to run on 100000 events" << std::endl;
     }
     std::cout << "We will run on " << nentries << " events" << std::endl;
-    if ( startEvent != 0 || skipEvent != 1 ) cout << " it seems we will do Pulls !!! " << startEvent <<"  " << skipEvent<< endl;
     //------------------------------------
     
     
     cout << " run on " << nentries << "events" << endl;
     
-    for (Long64_t jentry(startEvent); jentry < nentries; jentry+=skipEvent){
-    //for (Long64_t jentry(startEvent); jentry < 20; jentry+=skipEvent){
+    for (Long64_t jentry(0); jentry < nentries; jentry++){
         Long64_t ientry = LoadTree(jentry);
         if (ientry < 0) break;
 
@@ -3575,7 +3573,7 @@ ZJetsAndDPS::~ZJetsAndDPS(){
     delete fChain->GetCurrentFile();
 }
 
-string ZJetsAndDPS::CreateOutputFileName(bool useRoch, bool doFlat, int doPUStudy, bool doVarWidth, int doBJets, int doQCD, bool doSSign, bool doInvMassCut, string pdfSet, int pdfMember, int startEvent, int skipEvent )
+string ZJetsAndDPS::CreateOutputFileName(bool useRoch, bool doFlat, int doPUStudy, bool doVarWidth, int doBJets, int doQCD, bool doSSign, bool doInvMassCut, string pdfSet, int pdfMember)
 {
     ostringstream result;
     result << outputDirectory << fileName;
@@ -3603,9 +3601,7 @@ string ZJetsAndDPS::CreateOutputFileName(bool useRoch, bool doFlat, int doPUStud
     if (doQCD>0) result << "_QCD" << doQCD;
     if (METcut > 0) result << "_MET" << METcut;
     if (pdfSet != "") result << "_PDF_" << pdfSet << "_" << pdfMember;
-    if (startEvent > 0 || skipEvent > 1) {
-        result << "_PullStart_"<<startEvent<< "_steps_"<< skipEvent ;
-    }
+
     //--- Add your test names here ---
     //result << "_NoPUCut";
     //result << "_LooseID";

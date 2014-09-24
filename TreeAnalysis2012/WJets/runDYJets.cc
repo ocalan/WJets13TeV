@@ -24,7 +24,7 @@
     int doFlat   = 0;
     int doBJets = -1; // 0 - no infor on B-jets will be used ; 1, 2 .. require at least 1, 2, .. ;  -1, -2, .... veto the event if you have 1, 2 ... number off b-jets
     int doMETcut = 0 ; // if you want to apply MET cut
-    int doQCD    = 4; // 1-4 : 4 combination between isolation/anti-isolation and MT cuts
+    int doQCD    = 0; // 1-4 : 4 combination between isolation/anti-isolation and MT cuts
     int doPUStudy = -10 ; // default int the ZJets
     bool doSSign  =  0;   // contribution of QCD to emu in TTbar 
     bool doInvMassCut = 0 ; 

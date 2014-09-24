@@ -119,9 +119,10 @@ variableStruct VAROFINTERESTWJETS[] = {
 
     //-- jet Pt distribution
     {"FirstJetPt_Zinc1jet",         1,      1,           9,              5,             9,            5,           7},
-    {"FirstJetPt_2_Zinc1jet",       1,      1,          14,              6,            14,           10 ,          7},
-    {"SecondJetPt_Zinc2jet",        1,      1,           8,              6,             8,            7,           7}, 
-    {"ThirdJetPt_Zinc3jet",         1,      1,           5,              4,             5,            5,           7}, 
+    {"FirstJetPt_2_Zinc1jet",       1,      1,          14,              6,            14,           10 ,          7}, // I add this later
+    {"SecondJetPt_Zinc2jet",        1,      1,           8,              6,             8,            7,           7},
+    {"SecondJetPt_1_Zinc2jet",      1,      1,          15,              8,            14,            8 ,          8}, // I add this later: without study
+    {"ThirdJetPt_Zinc3jet",         1,      1,           5,              4,             5,            5,           7},
     {"FourthJetPt_Zinc4jet",        1,      1,           5,              3,             4,            4,           7}, 
     {"FifthJetPt_Zinc5jet",         1,      1,           4,              3,             3,            2,           7},
 
@@ -141,9 +142,12 @@ variableStruct VAROFINTERESTWJETS[] = {
     {"ThirdHighestJetPt_Zinc5jet",  1,      1,           3,              3,             3,            3,           7},
 
     //-- jets HT distribution
-    {"JetsHT_Zinc1jet",             1,      1,           8,              4,             9,            3,           7}, 
+    {"JetsHT_Zinc1jet",             1,      1,           8,              4,             9,            3,           7},
+    {"JetsHT_1_Zinc1jet",           1,      1,           9,              4,             8,            4 ,          4}, // I add this later: without study
     {"JetsHT_Zinc2jet",             1,      1,          10,              4,            10,            4,           7},
+    {"JetsHT_2_Zinc2jet",           1,      1,           7,              3,             8,            4 ,          2}, // I add this later
     {"JetsHT_Zinc3jet",             1,      1,           7,              3,             7,            5,           7},
+    {"JetsHT_2_Zinc3jet",           1,      1,           7,              3,             7,            5,           7}, // I add this later: without study
     {"JetsHT_Zinc4jet",             1,      1,           6,              3,             5,            9,           7},
     {"JetsHT_Zinc5jet",             1,      1,           3,              2,             4,            2,           7},
 
@@ -155,7 +159,7 @@ variableStruct VAROFINTERESTWJETS[] = {
     {"FifthJetEta_Zinc5jet",        0,      1,           3,              2,             2,            2,           7}, 
 
     //-- Z Mass distribution
-    //{"ZMass_Zinc0jet",              0,      1,          19,             17,             7,         36,           7},
+    {"ZMass_Zinc0jet",              0,      1,          19,              4,             7,           36,           7},
 
     //-- Jets Mass distribution
     {"JetsMass_Zexc2jet",           0,      1,           9,              6,            10,            7,           7},
@@ -198,4 +202,7 @@ void makeLISTOFVAROFINTERESTWJETS(){
     }
 }
 #endif
+
+
+
 

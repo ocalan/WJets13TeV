@@ -1,5 +1,5 @@
-#ifndef _FastPlots_h_
-#define _FastPlots_h_
+#ifndef _myFastPlots_h_
+#define _myFastPlots_h_
 
 using namespace std;
 

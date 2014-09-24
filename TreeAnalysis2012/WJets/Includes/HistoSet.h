@@ -224,23 +224,7 @@ class HistoSet: public TObject{
         TH1D *SecondJetmass_1_Zinc2jet;
         TH1D *ThirdJetmass_1_Zinc3jet;
         TH1D *FourthJetmass_1_Zinc4jet;
-/*            TH1D *genFirstJetmass_Zinc1jet;
-            TH1D *genSecondJetmass_Zinc2jet;
-            TH1D *genThirdJetmass_Zinc3jet;
-            TH1D *genFourthJetmass_Zinc4jet;
-            TH1D *genFirstJetmass_1_Zinc1jet;
-            TH1D *genSecondJetmass_1_Zinc2jet;
-            TH1D *genThirdJetmass_1_Zinc3jet;
-            TH1D *genFourthJetmass_1_Zinc4jet;
-        RooUnfoldResponse *responseFirstJetmass_Zinc1jet;
-        RooUnfoldResponse *responseSecondJetmass_Zinc2jet;
-        RooUnfoldResponse *responseThirdJetmass_Zinc3jet;
-        RooUnfoldResponse *responseFourthJetmass_Zinc4jet;
-        RooUnfoldResponse *responseFirstJetmass_1_Zinc1jet;
-        RooUnfoldResponse *responseSecondJetmass_1_Zinc2jet;
-        RooUnfoldResponse *responseThirdJetmass_1_Zinc3jet;
-        RooUnfoldResponse *responseFourthJetmass_1_Zinc4jet;
-*/    
+   
         // dijet Rapidity
         TH1D *dRapidityJets_Zinc2jet;
         TH1D *dRapidityJets_Zinc3jet;
@@ -294,6 +278,25 @@ class HistoSet: public TObject{
         RooUnfoldResponse *responsediJetPt_Zinc2jet;
         RooUnfoldResponse *responsediJetPt_Zinc3jet;
         RooUnfoldResponse *responsediJetPt_Zinc4jet;
+    
+        // mean number of jets
+        TH1D *MeanNJetsHT_1D_Zinc1jet;
+        TH1D *MeanNJetsHT_1D_Zinc2jet;
+        TH1D *MeanNJetsdRapidity_1D_Zinc2jet;
+        TH1D *MeanNJetsdRapidityFB_1D_Zinc2jet;
+    
+        TH2D *MeanNJetsHT_Zinc1jet;
+        TH2D *MeanNJetsHT_Zinc2jet;
+        TH2D *MeanNJetsdRapidity_Zinc2jet;
+        TH2D *MeanNJetsdRapidityFB_Zinc2jet;
+            TH2D *genMeanNJetsHT_Zinc1jet;
+            TH2D *genMeanNJetsHT_Zinc2jet;
+            TH2D *genMeanNJetsdRapidity_Zinc2jet;
+            TH2D *genMeanNJetsdRapidityFB_Zinc2jet;
+        RooUnfoldResponse *responseMeanNJetsHT_Zinc1jet;
+        RooUnfoldResponse *responseMeanNJetsHT_Zinc2jet;
+        RooUnfoldResponse *responseMeanNJetsdRapidity_Zinc2jet;
+        RooUnfoldResponse *responseMeanNJetsdRapidityFB_Zinc2jet;
         //***************************** end additional plots *****************************//
 
         TH1D *FirstJetPhi_Zinc1jet;

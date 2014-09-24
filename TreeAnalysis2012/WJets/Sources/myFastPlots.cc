@@ -107,7 +107,7 @@ void FastPlotsRun(const int *sel, int nsel, string leptonFlavor, string variable
     else if (leptonFlavor == "Muon" || leptonFlavor == "SE") leptonFlavor = "SE_";
     else if (leptonFlavor == "Electron" || leptonFlavor == "SMu") leptonFlavor = "SMu_";
 
-    //--- retreive the year from curren location and set the energy accordingly
+    //--- retreive the year from current location and set the energy accordingly
     string energy = getEnergy();
 
     //if (variable.find("JetPt")!= string::npos && variable.find("Highest") == string::npos && JetPtMin == 30)  JetPtMin = 20 ;
@@ -190,17 +190,20 @@ void FastPlotsRun(const int *sel, int nsel, string leptonFlavor, string variable
     //-- draw normalized response matrix --------------------------------------------
     plotHNormResp(hNormResp, leptonFlavor, variable, energy, outputDirectory, outputRootFile, closureTest);
     
-    //-- draw SVD selected kTerm and +/- 1 ------------------------------------------
-    myplotSelectedMethod2("SVD", response, genMad, SVDkterm, meas, hBG, nBG, leptonFlavor, variable, logZ, decrease, outputDirectory, outputRootFile, closureTest, true);
     
     //-- draw Bayes selected kTerm and +/- 1 ----------------------------------------
-    //plotSelectedMethod("Bayes", response, genMad, Bayeskterm, meas, hBG, nBG, leptonFlavor, variable, logZ, decrease, outputDirectory, outputRootFile, closureTest);
     myplotSelectedMethod2("Bayes", response, genMad, Bayeskterm, meas, hBG, nBG, leptonFlavor, variable, logZ, decrease, outputDirectory, outputRootFile, closureTest, true);
     
     //-- draw chi2 of change --------------------------------------------------------
     myplotChi2OfChange(response, Bayeskterm, meas, hBG, nBG, leptonFlavor, variable, energy, outputDirectory, outputRootFile, closureTest);
     
-    myplotSelectedMethod2("BinByBin", response, genMad, 0, meas, hBG, nBG, leptonFlavor, variable, logZ, decrease, outputDirectory, outputRootFile, closureTest, true);
+    
+    //-- Bin by bin method ----------------------------------------------------------
+    //myplotSelectedMethod2("BinByBin", response, genMad, 0, meas, hBG, nBG, leptonFlavor, variable, logZ, decrease, outputDirectory, outputRootFile, closureTest, true);
+    
+    
+    //-- draw SVD selected kTerm and +/- 1 ------------------------------------------
+    //myplotSelectedMethod2("SVD", response, genMad, SVDkterm, meas, hBG, nBG, leptonFlavor, variable, logZ, decrease, outputDirectory, outputRootFile, closureTest, true);
 
     //-- close every files ----------------------------------------------------------
     outputRootFile->Close();
@@ -215,6 +218,8 @@ void FastPlotsRun(const int *sel, int nsel, string leptonFlavor, string variable
 
 void myplotSelectedMethod2(string method, RooUnfoldResponse *response, TH1D *genMad, int kterm, TH1D *hData, TH1D *hBG[], int nBG, string leptonFlavor, string variable, bool logZ, bool decrease, string outputDirectory, TFile *outputRootFile, bool closureTest, bool save)
 {
+    cout << " Start processing Unfolding using method: " << method << endl;
+    
     if (leptonFlavor == "Muons" || leptonFlavor == "DMu") leptonFlavor = "DMu_";
     else if (leptonFlavor == "Electrons" || leptonFlavor == "DE") leptonFlavor = "DE_";
     else if (leptonFlavor == "Muon" || leptonFlavor == "SE") leptonFlavor = "SE_";
@@ -250,10 +255,12 @@ void myplotSelectedMethod2(string method, RooUnfoldResponse *response, TH1D *gen
     
     TH1D *hUnfoldedC = NULL, *hUnfoldedD = NULL, *hUnfoldedU = NULL;
     if (method == "SVD") {
+        cout << " Unfolding using Center Kterm " << endl;
         RooUnfoldSvd unfoldC(response, hMeas, kterm);
         unfoldC.SetVerbose(0);
         hUnfoldedC = (TH1D*) unfoldC.Hreco();
         if (kterm > 1){
+            cout << " Unfolding using Down Kterm " << endl;
             RooUnfoldSvd unfoldD(response, hMeas, kterm - 1);
             unfoldD.SetVerbose(0);
             hUnfoldedD = (TH1D*) unfoldD.Hreco();
@@ -261,6 +268,7 @@ void myplotSelectedMethod2(string method, RooUnfoldResponse *response, TH1D *gen
         else cout << "       Impossible to show kterm - 1" << endl;
         
         if (kterm < nBins){
+            cout << " Unfolding using Up Kterm" << endl;
             RooUnfoldSvd unfoldU(response, hMeas, kterm + 1);
             unfoldU.SetVerbose(0);
             hUnfoldedU = (TH1D*) unfoldU.Hreco();
@@ -269,16 +277,19 @@ void myplotSelectedMethod2(string method, RooUnfoldResponse *response, TH1D *gen
         
     }
     else if (method == "Bayes") {
+        cout << " Unfolding using Center Kterm " << endl;
         RooUnfoldBayes unfoldC(response, hMeas, kterm);
         unfoldC.SetVerbose(0);
         hUnfoldedC = (TH1D*) unfoldC.Hreco();
         if (kterm > 1){
+            cout << " Unfolding using Down Kterm " << endl;
             RooUnfoldBayes unfoldD(response, hMeas, kterm - 1);
             unfoldD.SetVerbose(0);
             hUnfoldedD = (TH1D*) unfoldD.Hreco();
         }
         else cout << "       Impossible to show kterm - 1" << endl;
         if (kterm < nBins){
+            cout << " Unfolding using Up Kterm" << endl;
             RooUnfoldBayes unfoldU(response, hMeas, kterm + 1);
             unfoldU.SetVerbose(0);
             hUnfoldedU = (TH1D*) unfoldU.Hreco();
@@ -291,6 +302,10 @@ void myplotSelectedMethod2(string method, RooUnfoldResponse *response, TH1D *gen
         unfoldC.SetVerbose(0);
         hUnfoldedC = (TH1D*) unfoldC.Hreco();
     }
+    
+    // save unfolded histo to root file
+    outputRootFile->cd();
+    hUnfoldedC->Write(name.c_str());
     
     TLatex *cmsColl = new TLatex();
     cmsColl->SetTextSize(0.025);
@@ -322,8 +337,10 @@ void myplotSelectedMethod2(string method, RooUnfoldResponse *response, TH1D *gen
     TPad *pad1 = new TPad("pad1", "pad1", 0, 0.3, 1, 1);
     pad1->SetTopMargin(0.11);
     pad1->SetBottomMargin(0);
-    //pad1->SetRightMargin(0.04);
-    pad1->SetRightMargin(0.02);
+    
+    if (variable == "FirstJetPt_2_Zinc1jet") pad1->SetRightMargin(0.04);
+    else pad1->SetRightMargin(0.02);
+    
     pad1->Draw();
     pad1->cd();
     if (logZ) pad1->SetLogy();
@@ -397,8 +414,10 @@ void myplotSelectedMethod2(string method, RooUnfoldResponse *response, TH1D *gen
     TPad *pad2 = new TPad("pad2", "pad2", 0, 0, 1, 0.3);
     pad2->SetTopMargin(0);
     pad2->SetBottomMargin(0.3);
-    //pad2->SetRightMargin(0.04);
-    pad2->SetRightMargin(0.02);
+    
+    if (variable == "FirstJetPt_2_Zinc1jet") pad2->SetRightMargin(0.04);
+    else pad2->SetRightMargin(0.02);
+    
     pad2->SetTicks();
     pad2->SetGridy();
     pad2->Draw();
@@ -431,20 +450,32 @@ void myplotSelectedMethod2(string method, RooUnfoldResponse *response, TH1D *gen
     
     for (int j(1); j <= nBins; j++){
         double content(hUnfoldedC->GetBinContent(j));
+        double contentErr(hUnfoldedC->GetBinError(j));
         if (content > 0){
             hUnfoldedC->SetBinContent(j, 1./content);
+            hUnfoldedC->SetBinError(j, contentErr/(content * content));
         }
+        
         if(method != "BinByBin"){
-            content = (hUnfoldedD->GetBinContent(j));
-            if (content > 0){
-                hUnfoldedD->SetBinContent(j, 1./content);
+            if(kterm > 1){
+                content = (hUnfoldedD->GetBinContent(j));
+                contentErr = (hUnfoldedD->GetBinError(j));
+                if (content > 0){
+                    hUnfoldedD->SetBinContent(j, 1./content);
+                    hUnfoldedD->SetBinError(j, contentErr/(content * content));                    
+                }
             }
-            content = (hUnfoldedU->GetBinContent(j));
-            if (content > 0){
-                hUnfoldedU->SetBinContent(j, 1./content);
-        }
+            if(kterm < nBins){
+                content = (hUnfoldedU->GetBinContent(j));
+                contentErr = (hUnfoldedU->GetBinError(j));
+                if (content > 0){
+                    hUnfoldedU->SetBinContent(j, 1./content);
+                    hUnfoldedU->SetBinError(j, contentErr/(content * content));
+                }
+            }
         }
     }
+    
     hUnfoldedC->DrawCopy("E1");
     if (kterm > 1 && method != "BinByBin") hUnfoldedD->DrawCopy("E1same");
     if (kterm < nBins && method != "BinByBin") hUnfoldedU->DrawCopy("E1same");
@@ -469,13 +500,20 @@ void myplotChi2OfChange(RooUnfoldResponse *response, int kterm, TH1D *hData, TH1
     TH1D *hMeas = (TH1D*) hData->Clone();
     int nBins(hMeas->GetNbinsX()  );
     
+    // not allow this to go futher than kterm = 20
+    int iterNum = nBins;
+    if (iterNum > 20) {iterNum = 20;}
+    
     for (int i(0); i < nBG; i++){
         hMeas->Add(hBG[i], -1);
     }
-    RooUnfoldBayes unfoldBayesChi2(response, hMeas, nBins);
+    
+    cout << " Start processing Chi2OfChange Plot " << endl;
+    
+    RooUnfoldBayes unfoldBayesChi2(response, hMeas, iterNum);
     unfoldBayesChi2.SetVerbose(0);
     TH1D *tmp = (TH1D*) unfoldBayesChi2.Hreco();
-    nBins = tmp->GetNbinsX();
+            //nBins = tmp->GetNbinsX();
     TH1D *Chi2OfChange = unfoldBayesChi2.Chi2OfChange;
     
     double hmax(Chi2OfChange->GetMaximum());
@@ -501,14 +539,14 @@ void myplotChi2OfChange(RooUnfoldResponse *response, int kterm, TH1D *hData, TH1
     Chi2OfChange->SetTitle(chi2Title.c_str());
     Chi2OfChange->SetLineWidth(3);
     Chi2OfChange->SetLineColor(kBlack);
-    Chi2OfChange->GetXaxis()->SetTitle("Bin Numb.");
+    Chi2OfChange->GetXaxis()->SetTitle("kterm");
     Chi2OfChange->GetXaxis()->SetTitleSize(0.04);
     Chi2OfChange->GetXaxis()->SetTitleOffset(1.0);
     Chi2OfChange->GetYaxis()->SetTitleSize(0.04);
     Chi2OfChange->GetYaxis()->SetTitleOffset(1.15);
     Chi2OfChange->GetXaxis()->CenterLabels();
-    Chi2OfChange->GetXaxis()->SetLabelSize(0.1/sqrt(nBins));
-    Chi2OfChange->GetXaxis()->SetNdivisions(nBins, 0, 0);
+    Chi2OfChange->GetXaxis()->SetLabelSize(0.1/sqrt(iterNum));
+    Chi2OfChange->GetXaxis()->SetNdivisions(iterNum, 0, 0);
     Chi2OfChange->GetYaxis()->SetTitle("#chi^{2}");
     TCanvas *canChi2 = new TCanvas(canNameChi2.c_str(), canNameChi2.c_str(), 700, 700);
     canChi2->cd();

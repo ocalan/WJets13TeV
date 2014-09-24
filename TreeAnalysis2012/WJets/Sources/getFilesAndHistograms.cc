@@ -5,152 +5,197 @@
 #include "fileNames.h"
 #include "getFilesAndHistograms.h"
 #include <string.h>
+#include <algorithm>
 using namespace std;
 
+//------------------------------------------------------------
+// getEnergy() returns a string, either "7TeV" or "8TeV"
+// according to the name of the directory from which the 
+// code is being executed.
+//------------------------------------------------------------
 string getEnergy()
 {
     string energy = "";
     ostringstream fileBeingProcessed; fileBeingProcessed << __FILE__;
     if (fileBeingProcessed.str().find("Analysis2012") != string::npos) {
-        cout << "This is 2012 !" << endl;
         energy = "8TeV";
     }
     else if (fileBeingProcessed.str().find("Analysis2011") != string::npos) {
-        cout << "This is 2011 !" << endl;
         energy = "7TeV";
     }
     else 
     {
-        cout << "WARNING ! Impossible to retrieve te energy form the current location !" << endl;
+        std::cout << "WARNING ! Impossible to retrieve te energy from the current location !" << std::endl;
+        energy = "Unknown";
     }
     fileBeingProcessed.str("");
 
     return energy;
 }
+//------------------------------------------------------------
 
-TFile* getFile(string histoFilesDirectory, string leptonFlavor, string energy, string Name, int JetPtMin, int JetPtMax, bool doFlat, bool doVarWidth, int doQCD,  bool doSSign,  bool doInvMassCut, int MET,  int doBJets , string closureTest, string syst, bool dodR ,bool useUnfoldingFiles )
+TFile* getFile(string histoFilesDirectory, string leptonFlavor, string energy, string Name, int JetPtMin, int JetPtMax, bool doFlat, bool doVarWidth, int doQCD, bool doSSign, bool doInvMassCut, int MET, int doBJets, string closureTest, string syst, bool dodR, bool useUnfoldingFiles)
 {
+    
+    string fileName = histoFilesDirectory; // string to contain the name of the file
+
+    //--- make sure leptonFlavor is short version ---
     if (leptonFlavor == "Muons" || leptonFlavor == "DMu_") leptonFlavor = "DMu";
     else if (leptonFlavor == "Electrons" || leptonFlavor == "DE_") leptonFlavor = "DE";
     else if (leptonFlavor == "Electron" || leptonFlavor == "SE_") leptonFlavor = "SE";
     else if (leptonFlavor == "Muon" || leptonFlavor == "SMu_") leptonFlavor = "SMu";
     else if (leptonFlavor == "MuonElectron" || leptonFlavor == "SMuE_") leptonFlavor = "SMuE";
-    ostringstream JetPtMinStr;  JetPtMinStr << JetPtMin;
-    ostringstream JetPtMaxStr;  JetPtMaxStr << JetPtMax;
-    ostringstream doQCDStr ; doQCDStr << doQCD ;
-    ostringstream METStr  ; METStr << MET ;
+
+    fileName += leptonFlavor + "_" + energy + "_" + Name; // update fileName with lepton information
+    //-----------------------------------------------
+
+
+    //--- make string from numbers ---
+    ostringstream JetPtMinStr; JetPtMinStr << JetPtMin;
+    ostringstream JetPtMaxStr; JetPtMaxStr << JetPtMax;
+    ostringstream doQCDStr; doQCDStr << doQCD;
+    ostringstream METStr; METStr << MET;
+    //--------------------------------
+
+    //--- deal with efficiency correction applied or not ---
     string effiCorr = "1", trigCorr = "0";
-    if (Name.find("Data") == 0) effiCorr = "0";
-    if (Name.find("Data") == 0 || energy == "8TeV") trigCorr = "1";
-    if (Name.find("HepMC") !=  string::npos ||  Name.find("UNF")  !=  string::npos )  trigCorr = "1";
-    if (Name.find("HepMC") !=  string::npos || Name.find("Powh") !=  string::npos) {trigCorr = "0"; effiCorr = "0";}
-    if ( useUnfoldingFiles ){
-        effiCorr = "0";
+    if (Name.find("Data") == 0 || energy == "8TeV") trigCorr = "1"; // trigger correction is applied to data and MC at 8TeV but only to data at 7TeV 
+    if (useUnfoldingFiles) { // for cross-section measurement: correct data for efficiencies difference wrt MC
         if (Name.find("Data") == 0) effiCorr = "1";
+        else effiCorr = "0";
     }
-    string fileName = histoFilesDirectory + leptonFlavor + "_" + energy + "_" + Name;
-    fileName += "_EffiCorr_" + effiCorr + "_TrigCorr_" + trigCorr + "_Syst_" + syst + "_JetPtMin_" + JetPtMinStr.str();
+    else { // for control plots: correct MC forefficiencies difference wrt Data
+        if (Name.find("Data") == 0) effiCorr = "0";
+        else effiCorr = "1";
+    }
+
+    //--- special case for the generator comparison ---
+    if (Name.find("Powheg") != string::npos || Name.find("Sherpa") != string::npos) {
+        trigCorr = "0"; 
+        effiCorr = "0";
+    }
+    //-------------------------------------------------
+
+    fileName += "_EffiCorr_" + effiCorr + "_TrigCorr_" + trigCorr; // update fileName with efficiency correction information
+    //------------------------------------------------------
+
+    //--- update fileName for a bunch of other things ---
+    fileName += "_Syst_" + syst + "_JetPtMin_" + JetPtMinStr.str();
     if (JetPtMax != 0 && JetPtMax > JetPtMin) fileName += "_JetPtMax_" + JetPtMaxStr.str();
     if (doFlat && Name.find("Data") == string::npos) fileName += "_Flat";
-    if ( closureTest.size()  ) fileName += closureTest;
-    if (doVarWidth )  fileName += "_VarWidth";
-    if ( dodR ) fileName += "_dR5";
+    if (closureTest != "") fileName += closureTest;
+    if (doVarWidth) fileName += "_VarWidth";
+    if (dodR) fileName += "_dR5";
     if (doInvMassCut) fileName += "_InvMass";
-    if (doSSign )   fileName += "_SS";
-    if (doBJets > 0 ) fileName += "_BJets";
-    if (doBJets < 0 ) fileName += "_BVeto";
+    if (doSSign) fileName += "_SS";
+    if (doBJets > 0) fileName += "_BJets";
+    if (doBJets < 0) fileName += "_BVeto";
+    if (doQCD > 0) fileName += "_QCD" + doQCDStr.str();
+    if (MET > 0) fileName += "_MET" + METStr.str();
+    //---------------------------------------------------
 
-    /*   if ( doQCD > 0){
-         if ( leptonFlavor == "SMuE") fileName +="_SS";
-         else  fileName += "_QCD" + doQCDStr.str();
-         }
-         */
-    if (doQCD>0) fileName += "_QCD" + doQCDStr.str();
-    //   if (doInvMassCut)  fileName += "_InvMass";
-    if ( MET > 0 )  fileName += "_MET"+METStr.str();
+    //--- fileName is complete: just add the extension and open it ---
     fileName += ".root";
-
-    TFile *File; 
-    File = new TFile(fileName.c_str(), "READ");
-    cout << "Opening: " << fileName << "   --->   Opened ? " << File->IsOpen() << endl;
-    return File; 
+    TFile *File = new TFile(fileName.c_str(), "READ");
+    std::cout << "Opening: " << fileName << "   --->   Opened ? " << File->IsOpen() << std::endl;
+    return File;
+    //----------------------------------------------------------------
 }
 
-void getFiles(string histoFilesDirectory, TFile *Files[], string leptonFlavor, string energy, string Name, int JetPtMin, int JetPtMax, bool doFlat,  bool doVarWidth, int doQCD, bool doSSign, bool doInvMassCut, int MET, int doBJets, bool useUnfoldingFiles )
+void getFiles(string histoFilesDirectory, TFile *Files[], string leptonFlavor, string energy, string Name, int JetPtMin, int JetPtMax, bool doFlat, bool doVarWidth, int doQCD, bool doSSign, bool doInvMassCut, int MET, int doBJets, bool useUnfoldingFiles)
 {
-    bool isDoubleLep(0);
 
-    if (leptonFlavor == "Muons" || leptonFlavor == "DMu") {leptonFlavor = "DMu";isDoubleLep = 1 ;}
-    else if (leptonFlavor == "Electrons" || leptonFlavor == "DE") {leptonFlavor = "DE"; isDoubleLep = 1 ;}
+    //--- make sure leptonFlavor is short version ---
+    if (leptonFlavor == "Muons" || leptonFlavor == "DMu_") leptonFlavor = "DMu";
+    else if (leptonFlavor == "Electrons" || leptonFlavor == "DE_") leptonFlavor = "DE";
+    else if (leptonFlavor == "Electron" || leptonFlavor == "SE_") leptonFlavor = "SE";
+    else if (leptonFlavor == "Muon" || leptonFlavor == "SMu_") leptonFlavor = "SMu";
+    else if (leptonFlavor == "MuonElectron" || leptonFlavor == "SMuE_") leptonFlavor = "SMuE";
+    //-----------------------------------------------
+
+    //--- set the double lepton flag ---
+    bool isDoubleLep(0);
+    if (leptonFlavor == "DMu" || leptonFlavor == "DE") isDoubleLep = 1;
+    //----------------------------------
 
     vector<string> Syst;
-    if (Name.find("Data") != string::npos){ 
-        Syst.push_back("0");
-        Syst.push_back("2_Up");
-        Syst.push_back("2_Down");
-        if ( leptonFlavor == "DE" ) {
-            Syst.push_back("5_Up");
-            Syst.push_back("5_Down");
+    if (Name.find("Data") != string::npos) { // for data we have:
+        Syst.push_back("0");                 //   0: central
+        Syst.push_back("2_Up");              //   2 up: JES up
+        Syst.push_back("2_Down");            //   2 down: JES down
+        if (leptonFlavor == "DE") {          // additionaly for electron:
+            Syst.push_back("5_Up");          //   5 up: scale factor up
+            Syst.push_back("5_Down");        //   5 down: scale factor down
         }
     }
-    else if (Name.find("UNFOLDING") != string::npos && ((isDoubleLep && Name.find("DYJets") != string::npos )  || (!isDoubleLep && Name.find("WJets") != string::npos ))){
-        Syst.push_back("0");
-        Syst.push_back("1_Up");
-        Syst.push_back("1_Down");
-        Syst.push_back("4_Up");
+    else if (Name.find("UNFOLDING") != string::npos && ((isDoubleLep && Name.find("DYJets") != string::npos) || (!isDoubleLep && Name.find("WJets") != string::npos))) {
+        // for DYJets in case of Z+Jets or for WJets in case of W+Jets analysis we have:
+        Syst.push_back("0");         // 0: central
+        Syst.push_back("1_Up");      // 1 up: PU up
+        Syst.push_back("1_Down");    // 1 down: PU down
+        Syst.push_back("4_Up");      // 4 up: JER up
     }
-    else {
-        Syst.push_back("0");
-        Syst.push_back("1_Up");
-        Syst.push_back("1_Down");
-        Syst.push_back("3_Up");
-        Syst.push_back("3_Down");
+    else { // for background we have
+        Syst.push_back("0");         // 0: central
+        Syst.push_back("1_Up");      // 1 up: PU up
+        Syst.push_back("1_Down");    // 1 down: PU down
+        Syst.push_back("3_Up");      // 3 up: XSec up
+        Syst.push_back("3_Down");    // 3 down: Xsec down
     };
 
+    //--- determnie how many files we have and open them all ---
     int nSyst(Syst.size());
-
     for (int i(0); i < nSyst; i++) {
-        Files[i] = getFile(histoFilesDirectory, leptonFlavor, energy, Name, JetPtMin, JetPtMax, doFlat, doVarWidth , doQCD, doSSign, doInvMassCut,MET,doBJets,   "", Syst[i], false, useUnfoldingFiles );
-        cout << endl;
+        Files[i] = getFile(histoFilesDirectory, leptonFlavor, energy, Name, JetPtMin, JetPtMax, doFlat, doVarWidth, doQCD, doSSign, doInvMassCut, MET, doBJets, "", Syst[i], false, useUnfoldingFiles);
     }
-
+    //----------------------------------------------------------
 }
 
-
-
-
-void closeFile(TFile *File){
-    if (File->IsOpen()) File->Close();
-    cout << "Closing file: " << File->GetName() << "   --->   Closed ? " << (!(File->IsOpen())) << endl;
+//------------------------------------------------------------
+// Close the file if open and delete the pointer
+//------------------------------------------------------------
+void closeFile(TFile *File)
+{
+    if (File) {
+        if (File->IsOpen()) File->Close();
+        std::cout << "Closing: " << File->GetName() << "   --->   Closed ? " << (!(File->IsOpen())) << std::endl;
+        //delete File;
+        //File = NULL;
+    }
 }
 
 void closeFiles(TFile *Files[])
 {
-    string fileName = Files[0]->GetName();
-    int nFiles;
-    if (fileName.find("Data") != string::npos) nFiles = 3; 
-    else if (fileName.find("UNFOLDING") != string::npos) nFiles = 4; 
-    else nFiles = 5;
+    if (Files[0]) {
+        string fileName = Files[0]->GetName();
+        int nFiles;
+        if (fileName.find("Data") != string::npos) {
+            nFiles = 3; 
+            if (fileName.find("DE") != string::npos) nFiles = 5;
+        }
+        else if (fileName.find("UNFOLDING") != string::npos) nFiles = 4; 
+        else nFiles = 5;
 
-    for (int i(0); i < nFiles; i++){
-        closeFile(Files[i]);
+        for (int i(0); i < nFiles; i++){
+            closeFile(Files[i]);
+        }
     }
 }
 
 void closeFiles(TFile *Files[], int nFiles)
 {
     string fileName = Files[0]->GetName();
-
     for (int i(0); i < nFiles; i++){
         closeFile(Files[i]);
-        cout << "Closing file: " << Files[i]->GetName() << "   --->   Closed ? " << (!(Files[i]->IsOpen())) << endl;
+        std::cout << "Closing file: " << Files[i]->GetName() << "   --->   Closed ? " << (!(Files[i]->IsOpen())) << std::endl;
     }
 }
 
 
-TH1D* getHisto(TFile *File, string variable)
+TH1D* getHisto(TFile *File, const string variable)
 {
     TH1D *histo = (TH1D*) File->Get(variable.c_str());
+    histo->SetDirectory(0);
     return histo;
 }
 
@@ -160,26 +205,25 @@ void getHistos(TH1D *histograms[], TFile *Files[], string variable, bool isDoubl
     int nFiles;
     if (fileName.find("Data") != string::npos) {
         nFiles = 3; 
-        if ( fileName.find("DE") != string::npos )  nFiles = 5;
+        if (fileName.find("DE") != string::npos) nFiles = 5;
     }
-    else if ( ((isDoubleLep && fileName.find("DYJets") != string::npos) || ( !isDoubleLep && fileName.find("WJets") != string::npos)) &&fileName.find("UNFOLDING") != string::npos) nFiles = 4; 
+    else if (((isDoubleLep && fileName.find("DYJets") != string::npos) || (!isDoubleLep && fileName.find("WJets") != string::npos)) && fileName.find("UNFOLDING") != string::npos) nFiles = 4; 
     else nFiles = 5;
 
     for (int i(0); i < nFiles; i++){
-        TH1D* histTemp = (TH1D*) Files[i]->Get(variable.c_str());
-        histograms[i] = (TH1D*) histTemp->Clone();
+        histograms[i] = (TH1D*) Files[i]->Get(variable.c_str());
     } 
 }
 
 void getResp(RooUnfoldResponse *response, TFile *File, string variable)
 {
     response = (RooUnfoldResponse*) File->Get(variable.c_str());
-    if (!response) cout << "Couldn't load response" << endl;
+    if (!response) std::cout << "Couldn't load response" << std::endl;
 }
 
 RooUnfoldResponse* getResp(TFile *File, string variable)
 {
-    cout << "fetching: "<< variable <<" from " << File->GetName() << "   --->   Opened ? " << File->IsOpen() << endl;
+    std::cout << "fetching: "<< variable <<" from " << File->GetName() << "   --->   Opened ? " << File->IsOpen() << std::endl;
     RooUnfoldResponse *response = (RooUnfoldResponse*) File->Get(variable.c_str());
     return response;
 }
@@ -198,11 +242,12 @@ void getResps(RooUnfoldResponse *responses[], TFile *Files[], string variable)
 }
 
 
-void getStatistics( string leptonFlavor,int JetPtMin , int JetPtMax,  bool doFlat  , bool doVarWidth, int doQCD , bool doSSign ,  bool doInvMassCut, int MET, int doBJets  ){
+void getStatistics(string leptonFlavor, int JetPtMin, int JetPtMax, bool doFlat, bool doVarWidth, int doQCD, bool doSSign, bool doInvMassCut, int MET, int doBJets)
+{
     std::string  variable = "ZNGoodJets_Zexc";
     string energy = getEnergy();
 
-    cout <<" let us get jet multiplicity statistics " <<endl;
+    std::cout <<" let us get jet multiplicity statistics " << std::endl;
     // jet counter
     int NBins = 11 ;
     double DataEv[20][20] = {{0}};
@@ -215,19 +260,17 @@ void getStatistics( string leptonFlavor,int JetPtMin , int JetPtMax,  bool doFla
         doDY = true;
         NBins = 8 ; /// FIXED !!!!
     }
-    for ( int i = 0 ; i < usedFiles ; i++){
+    for (int i(0); i < usedFiles; i++) {
         TFile *fData;
-        int sel = i ; 
-        if ( doDY ) sel = FilesDYJets[i];
-        else if  ( leptonFlavor.find("SMuE") != string::npos  ) sel = FilesTTbar[i] ;
+        int sel = i; 
+        if (doDY) sel = FilesDYJets[i];
+        else if (leptonFlavor.find("SMuE") != string::npos) sel = FilesTTbar[i];
         else sel = FilesTTbarWJets[i];
 
         if ((doQCD > 0 || doInvMassCut || doSSign ) && ProcessInfo[sel].filename.find("QCD") != string::npos) continue;
         fData = getFile(FILESDIRECTORY,  leptonFlavor, energy, ProcessInfo[sel].filename, JetPtMin, JetPtMax, doFlat, doVarWidth, doQCD , doSSign,  doInvMassCut, MET, doBJets,  "","0");
-        cout <<"opened :  " << i << "   " << sel <<"   " << FilesTTbarWJets[i] <<"  " << ProcessInfo[sel].filename <<"   " << leptonFlavor.find("SMuE") << endl;
+        std::cout << "opened :  " << i << "   " << sel <<"   " << FilesTTbarWJets[i] <<"  " << ProcessInfo[sel].filename <<"   " << leptonFlavor.find("SMuE") << std::endl;
         TH1D *hTemp = getHisto(fData, variable);
-        //NBins = hTemp ->GetNbinsX();
-
 
         for (int j = 1 ; j < NBins + 1 ; j++ ){
             Double_t binContent = hTemp->GetBinContent(j);
@@ -238,7 +281,7 @@ void getStatistics( string leptonFlavor,int JetPtMin , int JetPtMax,  bool doFla
         fData->Close();
     }
 
-    cout << "Closed all files" << endl;
+    std::cout << "Closed all files" << std::endl;
 
     ostringstream nameStr;  nameStr << "outputTable_" << leptonFlavor <<"_JetPtMin_" <<JetPtMin;
     if (doInvMassCut) nameStr << "_InvMass";
@@ -259,7 +302,7 @@ void getStatistics( string leptonFlavor,int JetPtMin , int JetPtMax,  bool doFla
         if ( doDY ) sel = FilesDYJets[i];
         else sel = FilesTTbarWJets[i];
 
-        if ( i < usedFiles )	fprintf( outFile, " %s        & ", ProcessInfo[sel].legend.c_str()  );
+        if (i < usedFiles) fprintf(outFile, " %s        & ", ProcessInfo[sel].legend.c_str());
         else {
             fprintf( outFile, "\\hline \n");
             fprintf( outFile, " TOTAL & ");
@@ -269,7 +312,7 @@ void getStatistics( string leptonFlavor,int JetPtMin , int JetPtMax,  bool doFla
             else fprintf( outFile, "%d \\\\ \n ", int(DataEv[i][j]));
 
         }
-        cout << endl;
+        std::cout << std::endl;
     }
 
     // print data statistics
@@ -283,40 +326,13 @@ void getStatistics( string leptonFlavor,int JetPtMin , int JetPtMax,  bool doFla
     fprintf( outFile, " Ratio          & ");
     for (int j=1; j<NBins + 1; j++){
         double temp= DataEv[usedFiles][j]/DataEv[0][j];
-        cout << DataEv[usedFiles][j]<<"   " <<DataEv[0][j]<< endl;
+        std:: cout << DataEv[usedFiles][j] << "   " << DataEv[0][j] << std::endl;
         if (j<NBins) fprintf( outFile, "%f & ", float(temp));
         else fprintf( outFile, "%f \\\\ \n ",temp);
 
     }
     fprintf( outFile, "\\end{tabular}}");
     fclose(outFile);
-
-
-
-}
-TH1D* newTH1D(string name, string title, string xTitle, int nBins, double xLow, double xUp){
-    TH1D* hist = new TH1D(name.c_str(), title.c_str(), nBins, xLow, xUp);
-    hist->GetXaxis()->SetTitle(xTitle.c_str());
-    hist->GetYaxis()->SetTitle("# Events");
-    hist->SetOption("HIST");
-    return hist;
-}
-TH2D* newTH2D(string name, string title, int nBinsX, double xLow, double xUp, int nBinsY, double yLow, double yUp){
-    TH2D* hist = new TH2D(name.c_str(), title.c_str(), nBinsX, xLow, xUp, nBinsY, yLow, yUp);
-    hist->GetZaxis()->SetTitle("# Events");
-    hist->SetOption("HIST");
-    return hist;
-}
-TH1D* newTH1D(string name, string title, string xTitle, int nBins, double *xBins){
-    TH1D* hist = new TH1D(name.c_str(), title.c_str(), nBins, xBins);
-    hist->GetXaxis()->SetTitle(xTitle.c_str());
-    hist->GetYaxis()->SetTitle("# Events");
-    return hist;
-}
-TH2D* newTH2D(string name, string title, int nBinsX, double *xBins, int nBinsY, double *yBins){
-    TH2D* hist = new TH2D(name.c_str(), title.c_str(), nBinsX, xBins, nBinsY, yBins);
-    hist->GetZaxis()->SetTitle("# Events");
-    return hist;
 }
 
 

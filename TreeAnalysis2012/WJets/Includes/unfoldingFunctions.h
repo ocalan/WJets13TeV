@@ -18,6 +18,7 @@
 
 #include "writeFastPlotsTex.h"
 #include "getFilesAndHistograms.h"
+#include "functions.h"
 
 using namespace std;
 

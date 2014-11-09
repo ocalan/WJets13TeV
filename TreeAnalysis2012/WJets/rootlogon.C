@@ -16,6 +16,8 @@
   gSystem->AddIncludePath(string("-I" + lhapdfdir).c_str());
   cout << "Adding " << roounfolddir << "src" << " to includes directories..." << endl;
   gSystem->AddIncludePath(string("-I" + roounfolddir + "src").c_str());
+  cout << "Include Path -D__USE_XOPEN2K8 to fix lxplus6 compatibility" << endl;
+  gSystem->AddIncludePath("-D__USE_XOPEN2K8");
   cout << "Loading RooUnfold libraries..." << endl;
   gSystem->Load(string(roounfolddir + "libRooUnfold").c_str());
   cout << "\n";

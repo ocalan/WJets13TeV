@@ -15,11 +15,7 @@
 
     //Plotter("SMu",30);
     Plotter("SMu", 30, 0, 0, 0, 0, -1); 
-    //Plotter("SMuE");
-    //Plotter("Muons", 20);
-    //Plotter("Electrons");
-    //Plotter("Electrons, 20");
-
+    getStatistics("SMu", 30, 0, false, true, 0, false, false, 0, -1);
 
 
     //--- clean the *_cc.d and *_cc.so files ---

@@ -458,7 +458,11 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
 
                     // select the good muons only
                     if (!doTT && elePassesEtaCut && int(patElecID_->at(i)) >= 2 && ele.pt >= 15. && patElecPfIsoRho_->at(i) < 0.2 )  electrons.push_back(ele); /// DO I WANT THIS !!!!!!
-                    if (doW && fabs(patElecScEta_->at(i)) > 2.1) elePassesEtaCut = false ; // we want o veto all loose electrons therefore this goes after the line above
+                    
+                    // we want to veto all loose electrons therefore this goes after the line above
+                    if (doW && fabs(patElecScEta_->at(i)) > 2.1) elePassesEtaCut = false ;
+                    //(we use the same eta cut for both loose and tight electron, this line is not needed)
+                    
                     if (elePassesPtCut && elePassesEtaCut && elePassesIdCut && (!useTriggerCorrection || elePassesAnyTrig || eventTrigger)){
                         //-- isolation Cut
                         //if (doQCD > 1  && !elePassesIsoCut) leptons.push_back(ele);
@@ -752,38 +756,44 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                 if (genLepSt_->at(i) == 3 && abs(genLepId_->at(i)) == LeptonID ) countTauS3--;
 
                 
-                
                 if (!lepSelector) continue ;
                 double charge(genLepQ_->at(i)); 
-                if (abs(genLepId_->at(i)) == 12 || abs(genLepId_->at(i)) == 14 || abs(genLepId_->at(i)) == 16) charge = 0.; // filling of ntuples not best 
+                if (abs(genLepId_->at(i)) == 12 || abs(genLepId_->at(i)) == 14 || abs(genLepId_->at(i)) == 16) charge = 0.;
                 leptonStruct genLep = {genLepPt_->at(i), genLepEta_->at(i), genLepPhi_->at(i), genLepE_->at(i), charge, 0., 0.};
                 leptonStruct genLepNoFSR = {genLepPt_->at(i), genLepEta_->at(i), genLepPhi_->at(i), genLepE_->at(i), charge, 0., 0. };
+                
                 //-- dress the leptons with photon (cone size = 0.1). Only for status 1 leptons (after FSR)
-                if ( ( genLepSt_->at(i) == 1 && lepSelector &&  abs(genLepId_->at(i)) == LeptonID) || ( doW && charge == 0 ) ){
-                    TLorentzVector tmpGenLep;
-                    tmpGenLep.SetPtEtaPhiM(genLep.pt, genLep.eta, genLep.phi, leptonMass);
-                    for (unsigned short j(0); j < nTotGenPhotons; j++){
-                        TLorentzVector tmpGenPho;
-                        tmpGenPho.SetPtEtaPhiM(genPhoPt_->at(j), genPhoEta_->at(j), genPhoPhi_->at(j), 0.);
-                        int used(0);
-                        for (unsigned short k(0); k < usedGenPho.size(); k++){
-                            if (j == usedGenPho[k]) used = 1;
+                if ( ( genLepSt_->at(i) == 1 && lepSelector && abs(genLepId_->at(i)) == LeptonID) || ( doW && charge == 0 ) ){
+                    // only charged lepton(s) will be dressed
+                    if( fabs(genLep.charge) > 0 ){
+                        TLorentzVector tmpGenLep;
+                        tmpGenLep.SetPtEtaPhiM(genLep.pt, genLep.eta, genLep.phi, leptonMass);
+                        // loop over all photons
+                        for (unsigned short j(0); j < nTotGenPhotons; j++){
+                            TLorentzVector tmpGenPho;
+                            tmpGenPho.SetPtEtaPhiM(genPhoPt_->at(j), genPhoEta_->at(j), genPhoPhi_->at(j), 0.);
+                            int used(0);
+                            for (unsigned short k(0); k < usedGenPho.size(); k++){
+                                if (j == usedGenPho[k]) used = 1;
+                            }
+                            if (deltaR(tmpGenPho.Phi(), tmpGenPho.Eta(), genLepNoFSR.phi, genLepNoFSR.eta) <= 0.1 && !used){
+                                tmpGenLep += tmpGenPho;
+                                usedGenPho.push_back(j);
+                            }
                         }
-                        if (deltaR(tmpGenPho.Phi(), tmpGenPho.Eta(), genLepNoFSR.phi, genLepNoFSR.eta) < 0.1 && !used){
-                            tmpGenLep += tmpGenPho;
-                            usedGenPho.push_back(j);
-                        }
-                    }   
-                    genLep.pt = tmpGenLep.Pt(); 
-                    genLep.eta = tmpGenLep.Eta(); 
-                    genLep.phi = tmpGenLep.Phi();
-                    genLep.energy = tmpGenLep.E();
+                        genLep.pt = tmpGenLep.Pt();
+                        genLep.eta = tmpGenLep.Eta();
+                        genLep.phi = tmpGenLep.Phi();
+                        genLep.energy = tmpGenLep.E();
+                    }
+                    
+                    //-- store lepton in the collection
                     if (doZ && genLep.pt >= 20 && fabs(genLep.eta) <= 2.4 && fabs(genLep.charge) > 0){
                         genLeptons.push_back(genLep);
                     }
-                    //if (doW && ((fabs(genLep.charge) > 0 && genLep.pt >= 30 && fabs(genLep.eta) <= 2.1) || (fabs(genLep.charge) == 0 && genLep.pt >= METcut))){
-                    if (doW && ((fabs(genLep.charge) > 0 && genLep.pt >= 25 && fabs(genLep.eta) <= 2.1)||(fabs(genLep.charge) == 0))){
-                    //if (doW && ((fabs(genLep.charge) > 0 && genLep.pt >= 30 && fabs(genLep.eta) <= 2.1)||(fabs(genLep.charge) == 0))){
+                    
+                    //if (doW && ((fabs(genLep.charge) > 0 && genLep.pt >= 25 && fabs(genLep.eta) <= 2.1)||(fabs(genLep.charge) == 0))){
+                    if (doW && ((fabs(genLep.charge) > 0 && genLep.pt >= 25 && fabs(genLep.eta) <= 2.1) || (fabs(genLep.charge) == 0 && genLep.pt >= METcut))){
                         genLeptons.push_back(genLep); 
                     }
                 }
@@ -828,7 +838,7 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                 genLep2.SetPtEtaPhiE(genLepton2.pt, genLepton2.eta, genLepton2.phi, genLepton2.energy);
 
                 genZ = genLep1 + genLep2;
-                double genMT = sqrt(2 *lepton2.pt * lepton1.pt * (1 - cos(lepton2.phi - lepton1.phi)));
+                double genMT = sqrt(2 *genLepton2.pt * genLepton1.pt * (1 - cos(genLepton2.phi - genLepton1.phi)));
 
                 // apply charge, mass and eta cut
                 if (doZ && genLepton1.charge*genLepton2.charge < 0 
@@ -1288,24 +1298,22 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                     }
                     if ( deltaR(genJet.phi, genJet.eta, genLeptons[j].phi, genLeptons[j].eta) < dRmin ) dRmin = deltaR(genJet.phi, genJet.eta, genLeptons[j].phi, genLeptons[j].eta);
                     // I need this line because for to me unknown reason I CAN NO REMOVE ELECTRONS FROM Z IN SHERPA !!!!
-                    if ((doDR || (leptonFlavor == "Electrons" && fileName.find("HepMC") != string::npos))
-                            && deltaR(genJet.phi, genJet.eta, genLeptons[j].phi, genLeptons[j].eta) < 0.5){
-                            //&& (deltaR(genJet.phi, genJet.eta, genLeptons[j].phi, genLeptons[j].eta) < 0.5)
-                            //&& (genLeptons[j].charge != 0)){
+                    if ((genLeptons[j].charge != 0)
+                        && (doDR || (leptonFlavor == "Electrons" && fileName.find("HepMC") != string::npos))
+                        && (deltaR(genJet.phi, genJet.eta, genLeptons[j].phi, genLeptons[j].eta) < 0.5)){
                         genJetPassesdRCut = 0;
                     }
                 }
-                if (genJet.pt >= 10 && genJet.pt < 1000. && fabs(genJet.eta) <= 4.7 && genJetPassesdRCut){
+                //if (genJet.pt >= 10 && genJet.pt < 1000. && fabs(genJet.eta) <= 4.7 && genJetPassesdRCut){
+                if (genJetPassesdRCut && genJet.pt >= 10 && fabs(genJet.eta) <= 4.7){
                     passesGenEWKJetPt = (genJet.pt >= 50);
                     passesGenEWKJetFwdEta = (fabs(genJet.eta) > 2.4);
                     genJets.push_back(genJet);                  
                     if (genJet.pt >=  15.) genJetsAdditional.push_back(genJet);
-
                 }
             }
             nGoodGenJets = genJets.size();
             nGenJetsAdd = genJetsAdditional.size();
-
         }
         //=======================================================================================================//
 

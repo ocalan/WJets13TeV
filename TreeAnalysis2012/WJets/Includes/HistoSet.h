@@ -36,20 +36,16 @@ class HistoSet: public TObject{
         double j_Y_range[NbinsEta2D];
 
 
-        //    const int NbinsEta2D(9) ;
         RooUnfoldResponse* newResp(TH1D*, TH1D*);
         RooUnfoldResponse* newResp(TH2D*, TH2D*);
 
-
-
         TH1D *NumberPFcandidates;
         TH1D *ZMass_lowDeltaR;
-        TH1D *ZMass_Zinc0jet_test;
+    
         TH1D *ZMassAllPassLep;
         TH1D *AllPassLepID;
         TH1D *AllPassWithMassCutLepID;
         TH1D *AllPassWithMassCutLepIDCharge;
-
 
         TH1D *ZMass_Zinc0jet;
         TH1D *ZMass_Zinc1jet;
@@ -58,7 +54,6 @@ class HistoSet: public TObject{
         TH1D *ZMass_Zinc4jet;
         TH1D *ZMass_Zinc5jet;
         TH1D *ZMass_Zinc6jet;
-        TH1D *genZMass_Zinc0jet_test;
         TH1D *genZMass_Zinc0jet;
         TH1D *genZMass_Zinc1jet;
         TH1D *genZMass_Zinc2jet;
@@ -136,20 +131,19 @@ class HistoSet: public TObject{
         TH1D *ZEta_Zexc4jet;
         TH1D *ZEta_Zexc5jet;
         TH1D *ZEta_Zexc6jet;
+    
         TH1D *lepEta_Zinc0jet;
         TH1D *lepEta_Zinc1jet;
         TH1D *lepEta_Zinc2jet;
         TH1D *lepEta_Zinc3jet;
         TH1D *lepEta_Zinc4jet;
         TH1D *lepEta_Zinc5jet;
-
         TH1D *lepPhi_Zexc0jet;
         TH1D *lepPhi_Zexc1jet;
         TH1D *lepPhi_Zexc2jet;
         TH1D *lepPhi_Zexc3jet;
         TH1D *lepPhi_Zexc4jet;
         TH1D *lepPhi_Zexc5jet;
-
         TH1D *lepPhi_Zinc0jet;
         TH1D *lepPhi_Zinc1jet;
         TH1D *genlepEta_Zinc0jet;
@@ -162,27 +156,31 @@ class HistoSet: public TObject{
         TH1D *lepEta_Zexc4jet;
         TH1D *lepEta_Zexc5jet;
         TH2D *lepEtaEta_Zinc0jet;
+    
         TH1D *FirstJetEta_Zinc1jet;
         TH1D *SecondJetEta_Zinc2jet;
         TH1D *ThirdJetEta_Zinc3jet;
         TH1D *FourthJetEta_Zinc4jet;
         TH1D *FifthJetEta_Zinc5jet;
         TH1D *SixthJetEta_Zinc6jet;
+    
         TH1D *FirstJetEtaFull_Zinc1jet;
         TH1D *SecondJetEtaFull_Zinc2jet;
         TH1D *ThirdJetEtaFull_Zinc3jet;
         TH1D *FourthJetEtaFull_Zinc4jet;
         TH1D *FifthJetEtaFull_Zinc5jet;
         TH1D *SixthJetEtaFull_Zinc6jet;
-
+    
         TH1D *genFirstJetEta_Zinc1jet;
         TH1D *genSecondJetEta_Zinc2jet;
         TH1D *genThirdJetEta_Zinc3jet;
         TH1D *genFourthJetEta_Zinc4jet;
         TH1D *genFifthJetEta_Zinc5jet;
         TH1D *genSixthJetEta_Zinc6jet;
+    
         TH1D *FirstJetEta_Zexc1jet;
         TH1D *SecondJetEta_Zexc2jet;
+    
         TH1D *AllJetEta_Zinc1jet;
         TH1D *AllJetEta_Zinc2jet;
         TH1D *AllJetEta_Zinc3jet;
@@ -311,6 +309,7 @@ class HistoSet: public TObject{
         TH1D *AllJetPhi_Zinc2jet;
         TH1D *AllJetPhi_Zinc3jet;
         TH1D *AllJetPhi_Zinc4jet;
+    
         TH1D *lepPt_Zinc0jet;
         TH1D *lepPt_Zinc1jet;
         TH1D *lepPt_Zinc2jet;
@@ -372,110 +371,78 @@ class HistoSet: public TObject{
         TH1D *genSpTLeptons_Zinc2jet;
 
         TH1D *JetsHT_Zinc1jet;
-        TH1D *JetsHT_1_Zinc1jet;
-        TH1D *JetsHT_2_Zinc1jet;
-        TH1D *JetsHT_3_Zinc1jet;
-        TH1D *JetsHT_4_Zinc1jet;
-
         TH1D *JetsHT_Zinc2jet;
-        TH1D *JetsHT_1_Zinc2jet;
-        TH1D *JetsHT_2_Zinc2jet;
-        TH1D *JetsHT_3_Zinc2jet;
-        TH1D *JetsHT_4_Zinc2jet;
-
         TH1D *JetsHT_Zinc3jet;
-        TH1D *JetsHT_1_Zinc3jet;
-        TH1D *JetsHT_2_Zinc3jet;
-        TH1D *JetsHT_3_Zinc3jet;
-        TH1D *JetsHT_4_Zinc3jet;
-
         TH1D *JetsHT_Zinc4jet;
         TH1D *JetsHT_Zinc5jet;
         TH1D *JetsHT_Zinc6jet;
+        TH1D *JetsHT_1_Zinc1jet;
+        TH1D *JetsHT_1_Zinc2jet;
+        TH1D *JetsHT_1_Zinc3jet;
+        TH1D *JetsHT_1_Zinc4jet;
+        TH1D *JetsHT_1_Zinc5jet;
+        TH1D *JetsHT_1_Zinc6jet;
 
         TH1D *genJetsHT_Zinc1jet;
-        TH1D *genJetsHT_1_Zinc1jet;
-        TH1D *genJetsHT_2_Zinc1jet;
-        TH1D *genJetsHT_3_Zinc1jet;
-        TH1D *genJetsHT_4_Zinc1jet;
-
         TH1D *genJetsHT_Zinc2jet;
-        TH1D *genJetsHT_1_Zinc2jet;
-        TH1D *genJetsHT_2_Zinc2jet;
-        TH1D *genJetsHT_3_Zinc2jet;
-        TH1D *genJetsHT_4_Zinc2jet;
-
         TH1D *genJetsHT_Zinc3jet;
-        TH1D *genJetsHT_1_Zinc3jet;
-        TH1D *genJetsHT_2_Zinc3jet;
-        TH1D *genJetsHT_3_Zinc3jet;
-        TH1D *genJetsHT_4_Zinc3jet;
-
         TH1D *genJetsHT_Zinc4jet;
         TH1D *genJetsHT_Zinc5jet;
         TH1D *genJetsHT_Zinc6jet;
+        TH1D *genJetsHT_1_Zinc1jet;
+        TH1D *genJetsHT_1_Zinc2jet;
+        TH1D *genJetsHT_1_Zinc3jet;
+        TH1D *genJetsHT_1_Zinc4jet;
+        TH1D *genJetsHT_1_Zinc5jet;
+        TH1D *genJetsHT_1_Zinc6jet;
 
+    
+    
         TH1D *FirstJetPt_Zinc1jet;
         TH1D *FirstJetPt_1_Zinc1jet;
         TH1D *FirstJetPt_2_Zinc1jet;
-        TH1D *FirstJetPt_3_Zinc1jet;
-        TH1D *FirstJetPt_4_Zinc1jet;
-
+    
         TH1D *SecondJetPt_Zinc2jet;
         TH1D *SecondJetPt_1_Zinc2jet;
-        TH1D *SecondJetPt_2_Zinc2jet;
-        TH1D *SecondJetPt_3_Zinc2jet;
-        TH1D *SecondJetPt_4_Zinc2jet;
-
+    
         TH1D *ThirdJetPt_Zinc3jet;
         TH1D *ThirdJetPt_1_Zinc3jet;
-        TH1D *ThirdJetPt_2_Zinc3jet;
-        TH1D *ThirdJetPt_3_Zinc3jet;
-        TH1D *ThirdJetPt_4_Zinc3jet;
-
+    
         TH1D *FourthJetPt_Zinc4jet;
+        TH1D *FourthJetPt_1_Zinc4jet;
+    
         TH1D *FifthJetPt_Zinc5jet;
+        TH1D *FifthJetPt_1_Zinc5jet;
+    
         TH1D *SixthJetPt_Zinc6jet;
-        TH1D *RatioJetPt21_Zinc2jet;
-        TH1D *RatioJetPt32_Zinc3jet;
-
+        TH1D *SixthJetPt_1_Zinc6jet;
+    
         TH1D *genFirstJetPt_Zinc1jet;
         TH1D *genFirstJetPt_1_Zinc1jet;
         TH1D *genFirstJetPt_2_Zinc1jet;
-        TH1D *genFirstJetPt_3_Zinc1jet;
-        TH1D *genFirstJetPt_4_Zinc1jet;
-
+    
         TH1D *genSecondJetPt_Zinc2jet;
         TH1D *genSecondJetPt_1_Zinc2jet;
-        TH1D *genSecondJetPt_2_Zinc2jet;
-        TH1D *genSecondJetPt_3_Zinc2jet;
-        TH1D *genSecondJetPt_4_Zinc2jet;
-
+    
         TH1D *genThirdJetPt_Zinc3jet;
         TH1D *genThirdJetPt_1_Zinc3jet;
-        TH1D *genThirdJetPt_2_Zinc3jet;
-        TH1D *genThirdJetPt_3_Zinc3jet;
-        TH1D *genThirdJetPt_4_Zinc3jet;
-
+    
         TH1D *genFourthJetPt_Zinc4jet;
+        TH1D *genFourthJetPt_1_Zinc4jet;
+    
         TH1D *genFifthJetPt_Zinc5jet;
+        TH1D *genFifthJetPt_1_Zinc5jet;
+    
         TH1D *genSixthJetPt_Zinc6jet;
+        TH1D *genSixthJetPt_1_Zinc6jet;
+    
+ 
+    
+        TH1D *RatioJetPt21_Zinc2jet;
+        TH1D *RatioJetPt32_Zinc3jet;
         TH1D *genRatioJetPt21_Zinc2jet;
         TH1D *genRatioJetPt32_Zinc3jet;
-        TH1D *FirstJetPt_Zinc1jet_test;
-        TH1D *SecondJetPt_Zinc2jet_test;
-        TH1D *ThirdJetPt_Zinc3jet_test;
-        TH1D *FourthJetPt_Zinc4jet_test;
-        TH1D *FifthJetPt_Zinc5jet_test;
-        TH1D *SixthJetPt_Zinc6jet_test;
-        TH1D *genFirstJetPt_Zinc1jet_test;
-        TH1D *genSecondJetPt_Zinc2jet_test;
-        TH1D *genThirdJetPt_Zinc3jet_test;
-        TH1D *genFourthJetPt_Zinc4jet_test;
-        TH1D *genFifthJetPt_Zinc5jet_test;
-        TH1D *genSixthJetPt_Zinc6jet_test;
-        TH1D *genRatioJetPt21_Zinc2jet_test;
-        TH1D *genRatioJetPt32_Zinc3jet_test;
+    
         TH1D *FirstJetPt_Zexc1jet;
         TH1D *SecondJetPt_Zexc2jet;
         TH1D *genFirstJetPt_Zexc1jet;
@@ -492,18 +459,8 @@ class HistoSet: public TObject{
         TH1D *genFirstHighestJetPt_Zinc4jet;
         TH1D *genFirstHighestJetPt_Zinc5jet;
         TH1D *genFirstHighestJetPt_Zinc6jet;
-        TH1D *FirstHighestJetPt_Zinc1jet_test;
-        TH1D *FirstHighestJetPt_Zinc2jet_test;
-        TH1D *FirstHighestJetPt_Zinc3jet_test;
-        TH1D *FirstHighestJetPt_Zinc4jet_test;
-        TH1D *FirstHighestJetPt_Zinc5jet_test;
-        TH1D *FirstHighestJetPt_Zinc6jet_test;
-        TH1D *genFirstHighestJetPt_Zinc1jet_test;
-        TH1D *genFirstHighestJetPt_Zinc2jet_test;
-        TH1D *genFirstHighestJetPt_Zinc3jet_test;
-        TH1D *genFirstHighestJetPt_Zinc4jet_test;
-        TH1D *genFirstHighestJetPt_Zinc5jet_test;
-        TH1D *genFirstHighestJetPt_Zinc6jet_test;
+    
+    
         TH1D *SecondHighestJetPt_Zinc2jet;
         TH1D *SecondHighestJetPt_Zinc3jet;
         TH1D *SecondHighestJetPt_Zinc4jet;
@@ -514,16 +471,7 @@ class HistoSet: public TObject{
         TH1D *genSecondHighestJetPt_Zinc4jet;
         TH1D *genSecondHighestJetPt_Zinc5jet;
         TH1D *genSecondHighestJetPt_Zinc6jet;
-        TH1D *SecondHighestJetPt_Zinc2jet_test;
-        TH1D *SecondHighestJetPt_Zinc3jet_test;
-        TH1D *SecondHighestJetPt_Zinc4jet_test;
-        TH1D *SecondHighestJetPt_Zinc5jet_test;
-        TH1D *SecondHighestJetPt_Zinc6jet_test;
-        TH1D *genSecondHighestJetPt_Zinc2jet_test;
-        TH1D *genSecondHighestJetPt_Zinc3jet_test;
-        TH1D *genSecondHighestJetPt_Zinc4jet_test;
-        TH1D *genSecondHighestJetPt_Zinc5jet_test;
-        TH1D *genSecondHighestJetPt_Zinc6jet_test;
+    
         TH1D *ThirdHighestJetPt_Zinc3jet;
         TH1D *ThirdHighestJetPt_Zinc4jet;
         TH1D *ThirdHighestJetPt_Zinc5jet;
@@ -532,14 +480,7 @@ class HistoSet: public TObject{
         TH1D *genThirdHighestJetPt_Zinc4jet;
         TH1D *genThirdHighestJetPt_Zinc5jet;
         TH1D *genThirdHighestJetPt_Zinc6jet;
-        TH1D *ThirdHighestJetPt_Zinc3jet_test;
-        TH1D *ThirdHighestJetPt_Zinc4jet_test;
-        TH1D *ThirdHighestJetPt_Zinc5jet_test;
-        TH1D *ThirdHighestJetPt_Zinc6jet_test;
-        TH1D *genThirdHighestJetPt_Zinc3jet_test;
-        TH1D *genThirdHighestJetPt_Zinc4jet_test;
-        TH1D *genThirdHighestJetPt_Zinc5jet_test;
-        TH1D *genThirdHighestJetPt_Zinc6jet_test;
+    
         TH1D *AllJetPt_Zinc1jet;
         TH1D *AllJetPt_Zinc2jet;
         TH1D *AllJetPt_Zinc3jet;
@@ -560,8 +501,7 @@ class HistoSet: public TObject{
         TH2D *genSixthJetPtEta_Zinc6jet;
         TH1D *ZNGoodJets_Zexc;
         TH2D *ZNGoodJetsNVtx_Zexc;
-        TH1D *ZNGoodJets_Zexc_test;
-        TH1D *ZNGoodJets_Zinc_test;
+    
         TH1D *ZNGoodJets_Zinc;
         TH1D *ZNGoodJets_Zexc_check;
         TH1D *ZNGoodJets_Zexc_NoWeight;
@@ -572,8 +512,7 @@ class HistoSet: public TObject{
         TH1D *genTwoJetsPtDiff_Zexc2jet;
         TH1D *JetsMass_Zexc2jet;
         TH1D *genJetsMass_Zexc2jet;
-        TH1D *JetsMass_Zexc2jet_test;
-        TH1D *genJetsMass_Zexc2jet_test;
+    
         TH1D *ptBal_Zexc2jet;
         TH1D *genptBal_Zexc2jet;
         TH1D *dPhiJets_Zexc2jet;
@@ -605,8 +544,7 @@ class HistoSet: public TObject{
         TH1D *genJetsMass_Zinc2jet;
         TH1D *BestJetsMass_Zinc2jet;
         TH1D *genBestJetsMass_Zinc2jet;
-        TH1D *JetsMass_Zinc2jet_test;
-        TH1D *genJetsMass_Zinc2jet_test;
+    
         TH1D *ptBal_Zinc2jet;
         TH1D *genptBal_Zinc2jet;
         TH1D *dPhiJets_Zinc2jet;
@@ -844,9 +782,9 @@ class HistoSet: public TObject{
         TH1D *genSpTDPS_Zexc2jet;
         TH1D *genSpTDPSDeltaR_Zexc2jet;
         TH1D *genSpTDPSPartons_Zexc2jet;
-        TH1D *genZNGoodJets_Zinc_test;
+    
         TH1D *genZNGoodJets_Zinc;
-        TH1D *genZNGoodJets_Zexc_test;
+    
         TH1D *genZNGoodJets_Zexc;
         TH2D *gendPhiJetsDPSDeltaR_ZpT_Zexc2jet;
         TH2D *partonX2D;
@@ -1181,62 +1119,57 @@ class HistoSet: public TObject{
         RooUnfoldResponse *responseBestJetsMassInc;            
         RooUnfoldResponse *responseJetsMassLowPtExc;           
         RooUnfoldResponse *responseJetsMassLowPtInc;           
-        RooUnfoldResponse *responseBestJetsMassLowPtInc;       
+        RooUnfoldResponse *responseBestJetsMassLowPtInc;    
+ 
+     
         RooUnfoldResponse *responseFirstJetPt;                 
         RooUnfoldResponse *responseFirstJetPt_1;                 
-        RooUnfoldResponse *responseFirstJetPt_2;                 
-        RooUnfoldResponse *responseFirstJetPt_3;                 
-        RooUnfoldResponse *responseFirstJetPt_4;                 
-
+        RooUnfoldResponse *responseFirstJetPt_2;
         RooUnfoldResponse *responseSecondJetPt;                
-        RooUnfoldResponse *responseSecondJetPt_1;                
-        RooUnfoldResponse *responseSecondJetPt_2;                
-        RooUnfoldResponse *responseSecondJetPt_3;                
-        RooUnfoldResponse *responseSecondJetPt_4;                
-
+        RooUnfoldResponse *responseSecondJetPt_1;
         RooUnfoldResponse *responseThirdJetPt;                 
-        RooUnfoldResponse *responseThirdJetPt_1;                 
-        RooUnfoldResponse *responseThirdJetPt_2;                 
-        RooUnfoldResponse *responseThirdJetPt_3;                 
-        RooUnfoldResponse *responseThirdJetPt_4;                 
+        RooUnfoldResponse *responseThirdJetPt_1;
+        RooUnfoldResponse *responseFourthJetPt;
+        RooUnfoldResponse *responseFourthJetPt_1;
+        RooUnfoldResponse *responseFifthJetPt;
+        RooUnfoldResponse *responseFifthJetPt_1;
+        RooUnfoldResponse *responseSixthJetPt;
+        RooUnfoldResponse *responseSixthJetPt_1;
 
+    
         RooUnfoldResponse *responseFirstJetEta;                
         RooUnfoldResponse *responseFirstJetPtEta;             
         RooUnfoldResponse *responseSecondJetEta;               
         RooUnfoldResponse *responseSecondJetPtEta;             
         RooUnfoldResponse *responseThirdJetEta;                
-        RooUnfoldResponse *responseThirdJetPtEta;              
-        RooUnfoldResponse *responseFourthJetPt;                
+        RooUnfoldResponse *responseThirdJetPtEta;
         RooUnfoldResponse *responseFourthJetEta;               
-        RooUnfoldResponse *responseFourthJetPtEta;             
-        RooUnfoldResponse *responseFifthJetPt;                 
+        RooUnfoldResponse *responseFourthJetPtEta;
         RooUnfoldResponse *responseFifthJetEta;                
-        RooUnfoldResponse *responseFifthJetPtEta;              
-        RooUnfoldResponse *responseSixthJetPt;                 
+        RooUnfoldResponse *responseFifthJetPtEta;
         RooUnfoldResponse *responseSixthJetEta;                
         RooUnfoldResponse *responseSixthJetPtEta;              
 
+    
         RooUnfoldResponse *responseJetsHt1Jet;                 
         RooUnfoldResponse *responseJetsHt1Jet_1;                 
-        RooUnfoldResponse *responseJetsHt1Jet_2;                 
-        RooUnfoldResponse *responseJetsHt1Jet_3;                 
-        RooUnfoldResponse *responseJetsHt1Jet_4;                 
-
+    
         RooUnfoldResponse *responseJetsHt2Jet;                 
-        RooUnfoldResponse *responseJetsHt2Jet_1;                 
-        RooUnfoldResponse *responseJetsHt2Jet_2;                 
-        RooUnfoldResponse *responseJetsHt2Jet_3;                 
-        RooUnfoldResponse *responseJetsHt2Jet_4;                 
+        RooUnfoldResponse *responseJetsHt2Jet_1;
 
         RooUnfoldResponse *responseJetsHt3Jet;                 
         RooUnfoldResponse *responseJetsHt3Jet_1;                 
-        RooUnfoldResponse *responseJetsHt3Jet_2;                 
-        RooUnfoldResponse *responseJetsHt3Jet_3;                 
-        RooUnfoldResponse *responseJetsHt3Jet_4;                 
-
-        RooUnfoldResponse *responseJetsHt4Jet;                 
-        RooUnfoldResponse *responseJetsHt5Jet;                 
-        RooUnfoldResponse *responseJetsHt6Jet;                 
+    
+        RooUnfoldResponse *responseJetsHt4Jet;
+        RooUnfoldResponse *responseJetsHt4Jet_1;
+    
+        RooUnfoldResponse *responseJetsHt5Jet;
+        RooUnfoldResponse *responseJetsHt5Jet_1;
+    
+        RooUnfoldResponse *responseJetsHt6Jet;
+        RooUnfoldResponse *responseJetsHt6Jet_1;
+    
+    
         RooUnfoldResponse *responseFirstHighestJetPt_Zinc1jet; 
         RooUnfoldResponse *responseFirstHighestJetPt_Zinc2jet; 
         RooUnfoldResponse *responseFirstHighestJetPt_Zinc3jet; 

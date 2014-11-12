@@ -141,7 +141,10 @@ void FastPlotsRun(const int *sel, int nsel, string leptonFlavor, string variable
     TFile *DY = NULL;
     if (!closureTest) DY = getFile(FILESDIRECTORY, leptonFlavor, energy, ProcessInfo[sel[nsel-1]].filename, JetPtMin, JetPtMax, doFlat, doVarWidth, 0, 0, 0, 0, -1, "", "0", false, 0);
     else DY = getFile(FILESDIRECTORY, leptonFlavor, energy, ProcessInfo[sel[nsel-1]].filename, JetPtMin, JetPtMax, doFlat, doVarWidth, 0, 0, 0, 0, -1, "", "0", false, 0);
-
+    
+    TH1D *recoMad = (TH1D*) getHisto(DY, variable);
+    outputRootFile->cd();
+    recoMad->Write("recoMad");
 
     //-- get Powheg histograms -------------------------------------------------------
     //TFile *Powheg = getFile(FILESDIRECTORY, leptonFlavor, energy, DYPOWHEGFILENAME, JetPtMin, JetPtMax, doFlat);
@@ -305,7 +308,9 @@ void myplotSelectedMethod2(string method, RooUnfoldResponse *response, TH1D *gen
     
     // save unfolded histo to root file
     outputRootFile->cd();
-    hUnfoldedC->Write(name.c_str());
+    hMeas->Write("DataSubBG");
+    hUnfoldedC->Write("Central");
+    genMad->Write("genMad");
     
     TLatex *cmsColl = new TLatex();
     cmsColl->SetTextSize(0.025);

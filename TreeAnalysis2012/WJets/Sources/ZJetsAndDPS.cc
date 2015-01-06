@@ -384,7 +384,8 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                 for (unsigned short i(0); i < nTotLeptons; i++) {
                     int whichTrigger(patMuonTrig_->at(i));
                     if (energy == "7TeV" && whichTrigger > 0) eventTrigger = true;
-                    if (energy == "8TeV" && (whichTrigger % 2) == 1 && doW) eventTrigger = true;
+                    //if (energy == "8TeV" && (whichTrigger % 2) == 1 && doW) eventTrigger = true;
+                    if (energy == "8TeV" && (whichTrigger & 0x1) && doW) eventTrigger = true;
                     if (energy == "8TeV" && doTT && whichTrigger >= 16) eventTrigger = true; // for TT background
                 }
 
@@ -393,12 +394,16 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                     int whichTrigger(patMuonTrig_->at(i));
                     bool muPassesPtCut(( (doZ || doTT) && mu.pt >= 20.) || (doW && mu.pt >= 25.));
                     //bool muPassesPtCut(( (doZ || doTT) && mu.pt >= 20.) || (doW && mu.pt >= 30.));
-                    bool muPassesEtaCut(( (doZ || doTT) &&fabs(mu.eta) <= 2.4) || (doW &&fabs(mu.eta) <= 2.1));
+                    
+                    bool muPassesEtaLooseCut(fabs(mu.eta) <= 2.4);
+                    bool muPassesEtaCut( ((doZ || doTT) && muPassesEtaLooseCut) || (doW && fabs(mu.eta) <= 2.1) );
+                    
                     // We use Tight muon, only for tight the patMuonCombId_ is odd
                     bool muPassesIdCut(int(patMuonCombId_->at(i)) % 2 == 1); // this is for tight ID --> odd number
                     //bool muPassesIdCut(int(patMuonCombId_->at(i)) >= 1 ); // this is for Loose ID
 
-                    bool muPassesDxyCut(patMuonDxy_->at(i) < 0.02); 
+                    //bool muPassesDxyCut(patMuonDxy_->at(i) < 0.02);
+                    bool muPassesDxyCut(patMuonDxy_->at(i) < 0.2);
                     bool muPassesIsoCut((!doW && patMuonPfIsoDbeta_->at(i) < 0.2) || (doW && patMuonPfIsoDbeta_->at(i) < 0.12));  
                     bool muPassesQCDIsoCut(doW && patMuonPfIsoDbeta_->at(i) >= 0.2);  
                     bool muPassesEMuAndWJetsTrig( whichTrigger == 1 || whichTrigger == 16 || whichTrigger == 17 || whichTrigger == 32 || whichTrigger == 33 || whichTrigger == 48 || whichTrigger ==  49  ) ;
@@ -409,9 +414,12 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
 
                     // select the good muons only
                     //-- no Isolation Cut
-                    if (!doTT  && fabs(mu.eta) <= 2.4 && patMuonCombId_->at(i) > 0 && mu.pt >= 15) muons.push_back(mu);
+                    //if (!doTT  && fabs(mu.eta) <= 2.4 && patMuonCombId_->at(i) > 0 && mu.pt >= 15) muons.push_back(mu);
+                    if (!doTT && muPassesEtaLooseCut && patMuonCombId_->at(i) > 0 && mu.pt >= 15) muons.push_back(mu);
+                    
                     if (doW && fabs(mu.eta) > 2.1) muPassesEtaCut = false;
                     if (doTT && fabs(mu.eta) > 2.4) muPassesEtaCut = false;
+                    
                     if (muPassesPtCut && muPassesEtaCut && muPassesIdCut && muPassesDxyCut && (!useTriggerCorrection || muPassesAnyTrig || eventTrigger)){
                         // fill isolation histograms for control    
                         MuDetIsoRhoCorr->Fill(patMuonPfIsoDbeta_->at(i), weight);
@@ -433,19 +441,23 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                 nTotLeptons = 0;
                 nTotLeptons = patElecEta_->size();
                 // if we don't reall care to match both leptons to trigger
+                if (doW) eventTrigger = false;
                 for (unsigned short i(0); i < nTotLeptons; i++){
                     int whichTrigger(patElecTrig_->at(i));
-                    //    if (doZ && whichTrigger > 0) eventTrigger = true;
-                    //if (!doW && whichTrigger % 2 == 0) eventTrigger = true;
-                    if (doTT && whichTrigger >= 16) eventTrigger = true;
+                    if (energy == "7TeV" && whichTrigger > 0) eventTrigger = true; ///
+                    if (energy == "8TeV" && (whichTrigger & 0x1) && doW) eventTrigger = true; ///
+                    if (energy == "8TeV" && doTT && whichTrigger >= 16) eventTrigger = true; // for TT background ///
                 }
+                
                 for (unsigned short i(0); i < nTotLeptons; i++){
                     leptonStruct ele = {patElecPt_->at(i), patElecEta_->at(i), patElecPhi_->at(i), patElecEn_->at(i),  patElecCharge_->at(i), 0., patElecScEta_->at(i)};
                     int whichTrigger(patElecTrig_->at(i));
                     bool elePassesPtCut( ( !doW && ele.pt >= 20.)  || ( doW && ele.pt >= 30.));
-
-                    bool elePassesEtaCut(fabs(patElecScEta_->at(i)) <= 1.442 || (fabs(patElecScEta_->at(i)) >= 1.566 && fabs(patElecScEta_->at(i)) <= 2.4));
-                    if (doW && fabs(patElecScEta_->at(i)) > 2.1) elePassesEtaCut = false ;
+                    
+                    bool elePassesEtaLooseCut(fabs(patElecScEta_->at(i)) <= 1.4442 || (fabs(patElecScEta_->at(i)) >= 1.566 && fabs(patElecScEta_->at(i)) <= 2.4));
+                    bool elePassesEtaCut( ((doZ || doTT) && elePassesEtaLooseCut) || (doW && elePassesEtaLooseCut && fabs(patElecScEta_->at(i)) <= 2.1) );
+                    //bool elePassesEtaCut(fabs(patElecScEta_->at(i)) <= 1.4442 || (fabs(patElecScEta_->at(i)) >= 1.566 && fabs(patElecScEta_->at(i)) <= 2.4));
+                    
                     // We use medium electron id
                     bool elePassesIdCut(int(patElecID_->at(i)) >= 4); /// 4 is medium ID; 2 is Loose ID
                     //bool elePassesIdCut(int(patElecID_->at(i)) >= 2); /// 4 is medium ID
@@ -456,12 +468,10 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                     if ( DEBUG ) cout << EvtInfo_EventNum << "  lepton loop: "<<elePassesAnyTrig <<"   " << ele.pt <<"   " << ele.eta <<"  " <<"  " << patElecEn_->at(i) <<"  " <<elePassesIdCut<<"  SIZE  " << nTotLeptons <<  endl;
                     //                    elePassesAnyTrig = true ; 
 
-                    // select the good muons only
-                    if (!doTT && elePassesEtaCut && int(patElecID_->at(i)) >= 2 && ele.pt >= 15. && patElecPfIsoRho_->at(i) < 0.2 )  electrons.push_back(ele); /// DO I WANT THIS !!!!!!
+                    // select the good electrons only
+                    if (!doTT && elePassesEtaLooseCut && int(patElecID_->at(i)) >= 2 && ele.pt >= 15. && patElecPfIsoRho_->at(i) < 0.2 )  electrons.push_back(ele); /// DO I WANT THIS !!!!!!
                     
-                    // we want to veto all loose electrons therefore this goes after the line above
                     if (doW && fabs(patElecScEta_->at(i)) > 2.1) elePassesEtaCut = false ;
-                    //(we use the same eta cut for both loose and tight electron, this line is not needed)
                     
                     if (elePassesPtCut && elePassesEtaCut && elePassesIdCut && (!useTriggerCorrection || elePassesAnyTrig || eventTrigger)){
                         //-- isolation Cut
@@ -902,7 +912,7 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                 if (isData == false){
                     
                     int jetflavour= patJetPfAk05PartonFlavour_->at(i);
-                    if (abs(jetflavour)==5){                        
+                    if (abs(jetflavour)==5){
                         float effb = -1.73338329789*x*x*x*x +  1.26161794785*x*x*x +  0.784721653518*x*x +  -1.03328577451*x +  1.04305075822;
                         float SFb = (0.938887+(0.00017124*pt))+(-2.76366e-07*(pt*pt));
                         
@@ -1063,7 +1073,7 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                         if ((passBJets==false) && (SFlight>1.0) && (this_rand < f)) passBJets = true; // for central value
                         if ((passBJets_SFB_sys_up==false)   && (SFlight>1.0) && (this_rand < f_up))   passBJets_SFB_sys_up = true; // for systematic_up
                         if ((passBJets_SFB_sys_down==false) && (SFlight>1.0) && (this_rand < f_down)) passBJets_SFB_sys_down = true; // for sytematic_down
-                    }   ////////flavour lop                     
+                    }   ////////flavour lop
                     
                 }
                 // --------- End MC-only
@@ -1553,17 +1563,21 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                 genZRapidity_Zinc0jet->Fill(genZ.Rapidity(), genWeight);
                 genZEta_Zinc0jet->Fill(genZ.Eta(), genWeight);
                 genlepPt_Zinc0jet->Fill(genLep1.Pt(), genWeight);
-                genlepPt_Zinc0jet->Fill(genLep2.Pt(), genWeight);
                 genlepEta_Zinc0jet->Fill(genLep1.Eta(), genWeight);
-                genlepEta_Zinc0jet->Fill(genLep2.Eta(), genWeight);
+                if (doZ || doTT){
+                    genlepPt_Zinc0jet->Fill(genLep2.Pt(), genWeight);
+                    genlepEta_Zinc0jet->Fill(genLep2.Eta(), genWeight);
+                }
                 if (nGoodGenJets >= 1){
                     GENnEventsIncl1Jets++;
                     genZNGoodJets_Zinc->Fill(1., genWeight);
                     genZMass_Zinc1jet->Fill(genZ.M(), genWeight);
                     genlepPt_Zinc1jet->Fill(genLep1.Pt(), genWeight);
-                    genlepPt_Zinc1jet->Fill(genLep2.Pt(), genWeight);
                     genlepEta_Zinc1jet->Fill(genLep1.Eta(), genWeight);
-                    genlepEta_Zinc1jet->Fill(genLep2.Eta(), genWeight);
+                    if (doZ || doTT){
+                        genlepPt_Zinc1jet->Fill(genLep2.Pt(), genWeight);
+                        genlepEta_Zinc1jet->Fill(genLep2.Eta(), genWeight);
+                    }
                     genZPt_Zinc1jet->Fill(genZ.Pt(), genWeight);
                     genZRapidity_Zinc1jet->Fill(genZ.Rapidity(), genWeight);
                     genZEta_Zinc1jet->Fill(genZ.Eta(), genWeight);
@@ -1604,9 +1618,11 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                     genBestTwoJetsPtDiff_Zinc2jet->Fill(genBestJet1Minus2.Pt(), genWeight);
                     genJetsMass_Zinc2jet->Fill(genJet1Plus2.M(), genWeight);
                     genlepPt_Zinc2jet->Fill(genLep1.Pt(), genWeight);
-                    genlepPt_Zinc2jet->Fill(genLep2.Pt(), genWeight);
                     genlepEta_Zinc2jet->Fill(genLep1.Eta(), genWeight);
-                    genlepEta_Zinc2jet->Fill(genLep2.Eta(), genWeight);
+                    if (doZ || doTT){
+                        genlepPt_Zinc2jet->Fill(genLep2.Pt(), genWeight);
+                        genlepEta_Zinc2jet->Fill(genLep2.Eta(), genWeight);
+                    }
                     genZPt_Zinc2jet->Fill(genZ.Pt(), genWeight);
                     genZRapidity_Zinc2jet->Fill(genZ.Rapidity(), genWeight);
                     genZEta_Zinc2jet->Fill(genZ.Eta(), genWeight);
@@ -2648,15 +2664,19 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
 
         if (lepton1.charge > 0){
             MuPlusPt->Fill(lepton1.pt, weight);
-           // MuMinusPt->Fill(lepton2.pt, weight);
             MuPlusEta->Fill(lepton1.eta, weight);
-           // MuMinusEta->Fill(lepton2.eta, weight);
+            if (doZ || doTT){
+                MuMinusPt->Fill(lepton2.pt, weight);
+                MuMinusEta->Fill(lepton2.eta, weight);
+            }
         }
         else {
             MuMinusPt->Fill(lepton1.pt, weight);
-           // MuPlusPt->Fill(lepton2.pt, weight);
             MuMinusEta->Fill(lepton1.eta, weight);
-           // MuPlusEta->Fill(lepton2.eta, weight);
+            if (doZ || doTT){
+                MuPlusPt->Fill(lepton2.pt, weight);
+                MuPlusEta->Fill(lepton2.eta, weight);
+            }
         }
 
         nEventsIncl0Jets++;
@@ -3284,10 +3304,10 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
             ZRapidity_Zinc4jet->Fill(Z.Rapidity(), weight);
             ZEta_Zinc4jet->Fill(Z.Eta(), weight);
             lepPt_Zinc4jet->Fill(lepton1.pt, weight);
-            lepPt_Zinc4jet->Fill(lepton2.pt, weight);
             lepEta_Zinc4jet->Fill(lepton1.eta, weight);
             if (doZ || doTT){
                 lepEta_Zinc4jet->Fill(lepton2.eta, weight);
+                lepPt_Zinc4jet->Fill(lepton2.pt, weight);
             }
             dPhiLeptons_Zinc4jet->Fill(deltaPhi(lep1, lep2), weight);
             dEtaLeptons_Zinc4jet->Fill(lepton1.eta - lepton2.eta, weight);

@@ -16,26 +16,26 @@
         gROOT->ProcessLine(string(".L " + srcdir + sources[i] + ".cc++").c_str());
         //gROOT->LoadMacro(string(srcdir + sources[i] + ".cc++").c_str());
     }
-    
+        
         myFastPlots("SMu", "ZNGoodJets_Zexc", false);
-        //myFastPlots("SMu", "ZNGoodJets_Zexc", true);
-        //myFastPlots("SMu", "FirstJetPt_2_Zinc1jet", false);
-        //myFastPlots("SMu", "FirstJetPt_2_Zinc1jet", true);
+        /*
+        myFastPlots("SMu", "ZNGoodJets_Zexc", true);
+        myFastPlots("SMu", "FirstJetPt_Zinc1jet", false);
+        myFastPlots("SMu", "FirstJetPt_Zinc1jet", true);
+        */
         
         /*
-        myFastPlots("SMu", "ZNGoodJets_Zexc", false);
+        myFastPlots("SMu", "FirstJetPt_1_Zinc1jet", false);
+        myFastPlots("SMu", "SecondJetPt_1_Zinc2jet", false);
+        myFastPlots("SMu", "ThirdJetPt_1_Zinc3jet", false);
+        myFastPlots("SMu", "FourthJetPt_1_Zinc4jet", false);
+        myFastPlots("SMu", "FifthJetPt_1_Zinc5jet", false);
         
-        myFastPlots("SMu", "FirstJetPt_2_Zinc1jet", false);  // I add this : without study the optimum kterm
-        myFastPlots("SMu", "SecondJetPt_1_Zinc2jet", false); // I add this : without study the optimum kterm
-        myFastPlots("SMu", "ThirdJetPt_Zinc3jet", false);
-        myFastPlots("SMu", "FourthJetPt_Zinc4jet", false);
-        myFastPlots("SMu", "FifthJetPt_Zinc5jet", false);
-        
-        myFastPlots("SMu", "JetsHT_1_Zinc1jet", false);  // I add this : without study the optimum kterm
-        myFastPlots("SMu", "JetsHT_2_Zinc2jet", false);  // I add this : without study the optimum kterm
-        myFastPlots("SMu", "JetsHT_2_Zinc3jet", false);  // I add this : without study the optimum kterm
-        myFastPlots("SMu", "JetsHT_Zinc4jet", false);
-        myFastPlots("SMu", "JetsHT_Zinc5jet", false);
+        myFastPlots("SMu", "JetsHT_1_Zinc1jet", false);
+        myFastPlots("SMu", "JetsHT_1_Zinc2jet", false);
+        myFastPlots("SMu", "JetsHT_1_Zinc3jet", false);
+        myFastPlots("SMu", "JetsHT_1_Zinc4jet", false);
+        myFastPlots("SMu", "JetsHT_1_Zinc5jet", false);
         
         myFastPlots("SMu", "FirstJetEta_Zinc1jet", false);
         myFastPlots("SMu", "SecondJetEta_Zinc2jet", false);

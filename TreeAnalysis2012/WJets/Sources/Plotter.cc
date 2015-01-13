@@ -233,7 +233,7 @@ void Plotter(string leptonFlavor = "Muons", int JetPtMin = 30,
         pad1[i] = new TPad("pad1", "pad1", 0, 0.3, 1, 1);
         pad1[i]->SetTopMargin(0.055);
         pad1[i]->SetBottomMargin(0.);
-        pad1[i]->SetRightMargin(0.032);
+        pad1[i]->SetRightMargin(0.04);
         pad1[i]->SetLeftMargin(0.12);
         pad1[i]->SetTicks();
         pad1[i]->SetLogy();
@@ -284,7 +284,7 @@ void Plotter(string leptonFlavor = "Muons", int JetPtMin = 30,
         pad2[i] = new TPad("pad2", "pad2", 0, 0, 1, 0.3);
         pad2[i]->SetTopMargin(0.);
         pad2[i]->SetBottomMargin(0.26);
-        pad2[i]->SetRightMargin(0.032);
+        pad2[i]->SetRightMargin(0.04);
         pad2[i]->SetLeftMargin(0.12);
         pad2[i]->SetGridy();
         pad2[i]->SetTicks();
@@ -298,7 +298,7 @@ void Plotter(string leptonFlavor = "Muons", int JetPtMin = 30,
         hist[0][i]->GetXaxis()->SetTitleSize(0.11);
         hist[0][i]->GetXaxis()->SetTitleOffset(1.05);
         hist[0][i]->GetXaxis()->SetTitleFont(42); 
-        hist[0][i]->GetXaxis()->SetLabelSize(0.11);
+        hist[0][i]->GetXaxis()->SetLabelSize(0.09);
         hist[0][i]->GetXaxis()->SetLabelOffset(0.018);
         hist[0][i]->GetXaxis()->SetLabelFont(42); 
 

@@ -252,7 +252,8 @@ void getStatistics(string leptonFlavor, int JetPtMin, int JetPtMax, bool doFlat,
 
     std::cout <<" let us get jet multiplicity statistics " << std::endl;
     // jet counter
-    int NBins = 11 ;
+    //int NBins = 11
+    int NBins = 8 ;
     double DataEv[20][20] = {{0}};
 
     //-- fetch the data files and histograms --------------

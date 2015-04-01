@@ -218,10 +218,23 @@ void Plotter(string leptonFlavor = "Muons", int JetPtMin = 30,
                 hist[i][j]->SetFillColor(Colors[i]);
                 hist[i][j]->SetLineColor(Colors[i]);
                 legend[j]->AddEntry(hist[i][j], legendNames[i].c_str(), "f");
-                histSumMC[j]->Add(hist[i][j]);
             }
         }
     }
+    
+    for (int i = 1; i < nFiles; i++) {
+        for (int j = 0; j < nHistNoGen ; j++) {
+            if (doBJets <= 0 ){
+                histSumMC[j]->Add(hist[i][j]);
+            }
+            else {
+                if (i == nFiles - 2) histSumMC[j]->Add(hist[nFiles - 1][j]);
+                else if (i == nFiles - 1) histSumMC[j]->Add(hist[nFiles - 2][j]);
+                else histSumMC[j]->Add(hist[i][j]);
+            }
+        }
+    }
+    
     cout << " added all histograms " << endl;
 
     for (unsigned short i(0); i < nHistNoGen; i++) {

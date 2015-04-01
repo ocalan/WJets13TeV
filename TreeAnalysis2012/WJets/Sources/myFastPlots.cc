@@ -307,10 +307,12 @@ void myplotSelectedMethod2(string method, RooUnfoldResponse *response, TH1D *gen
     }
     
     // save unfolded histo to root file
-    outputRootFile->cd();
-    hMeas->Write("DataSubBG");
-    hUnfoldedC->Write("Central");
-    genMad->Write("genMad");
+    if (method == "Bayes") {
+        outputRootFile->cd();
+        hMeas->Write("DataSubBG");
+        hUnfoldedC->Write("Central");
+        genMad->Write("genMad");
+    }
     
     TLatex *cmsColl = new TLatex();
     cmsColl->SetTextSize(0.025);

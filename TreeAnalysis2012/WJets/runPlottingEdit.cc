@@ -16,7 +16,14 @@
         }
         
         PlottingEdit(0, 1);
-        //PlottingEdit(1, 2);
+        
+        PlottingEdit(1, 6);
+        PlottingEdit(11, 16);
+        PlottingEdit(21, 26);
+        
+        PlottingEdit(26, 43);
+        
+        
         
         //--- clean the *_cc.d and *_cc.so files ---
         

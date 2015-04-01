@@ -51,9 +51,11 @@ TFile *fOut;
 //-------------------------------------------------------------------------------------------
 void DataDrivenQCD(  string leptonFlavor, int METcut , int doBJets ){
     
+    TH1::SetDefaultSumw2();
+    
     FuncOpenAllFiles(leptonFlavor, METcut, false, true, doBJets);
     vector<string> histoNameRun = getVectorOfHistoNames();
-  
+    
     for (int i(0); i < histoNameRun.size() ; i++){
         cout << endl; cout << endl;
         cout << " --- processing histogram: " << i << " : " << histoNameRun[i] << endl;
@@ -83,8 +85,8 @@ void FuncOpenAllFiles(string leptonFlavor,int METcut, bool doFlat , bool doVarWi
     for ( int i = 0 ; i < NQCD ; i++){
         fData[i] = getFile(FILESDIRECTORY,  leptonFlavor, energy, ProcessInfo[DATAFILENAME].filename, JetPtMin, JetPtMax, doFlat, doVarWidth, i, 0, 0, METcut, doBJets, "", "0");
         if ( i == 0 ) {
-              string nameQCDout = fData[i]->GetName();
-              nameQCDout.insert(nameQCDout.find("Data") + 4,"QCD");
+            string nameQCDout = fData[i]->GetName();
+            nameQCDout.insert(nameQCDout.find("Data") + 4,"QCD");
             fOut = new TFile(nameQCDout.c_str(),"recreate");
         }
     }
@@ -170,7 +172,7 @@ void FuncDataDrivenQCD(string variable){
             }
             cout << " got MC histo " << "  QCD: " << i << "   MC type: " << j << "   integral: " << hTemp->Integral() << endl;
         }
-
+        
     }
     cout << " --- got MC histos ---" << endl;
     
@@ -196,7 +198,10 @@ void FuncDataDrivenQCD(string variable){
                 hQCD[i]->Add(hBack[i],-1);
                 // set the negative bins to 0
                 for ( int k = 0 ; k < hData[i]->GetNbinsX()+1 ; k++ ){
-                    if ( hQCD[i]->GetBinContent(k) < 0 ) hQCD[i]->SetBinContent(k, 0. ) ;
+                    if ( hQCD[i]->GetBinContent(k) < 0 ) {
+                        hQCD[i]->SetBinContent(k, 0. ) ;
+                        hQCD[i]->SetBinError(k, 0. ) ;
+                    }
                 }
                 double NormTemp =  hData[i]->Integral() / (scaledMC[i] ->Integral() + hBack[i]->Integral()) ;
                 cout << " data vs MC : " << i << "  " << NormTemp << "   " << hData[i]->Integral() << "   " << scaledMC[i] ->Integral() + hBack[i]->Integral() <<  endl;
@@ -237,9 +242,16 @@ void FuncDataDrivenQCD(string variable){
                 // step 1:
                 for ( int i = 0  ; i < NQCD ; i++){
                     scaledMC[i]->SetBinContent(m, NormFactor * hSignal[i]->GetBinContent(m));
+                    scaledMC[i]->SetBinError(m, NormFactor * hSignal[i]->GetBinError(m));
+                    
                     hQCD[i]->SetBinContent(m, hData[i]->GetBinContent(m) - (scaledMC[i]->GetBinContent(m) + hBack[i]->GetBinContent(m)) );
+                    hQCD[i]->SetBinError(m,  sqrt(pow(hData[i]->GetBinError(m), 2) + pow(scaledMC[i]->GetBinError(m), 2) + pow(hBack[i]->GetBinError(m), 2)) );
+                    
                     // set the negative bins to 0
-                    if ( hQCD[i]->GetBinContent(m) < 0 ) hQCD[i]->SetBinContent(m, 0. ) ;
+                    if ( hQCD[i]->GetBinContent(m) < 0 ) {
+                        hQCD[i]->SetBinContent(m, 0. ) ;
+                        hQCD[i]->SetBinError(m, 0. ) ;
+                    }
                 }
                 cout << " QCD intgral A B C and D   " << hQCD[0]->GetBinContent(m) << "   " << hQCD[1]->GetBinContent(m) << "   " << hQCD[2]->GetBinContent(m) << "  " << hQCD[3]->GetBinContent(m) <<  endl;
                 
@@ -252,6 +264,8 @@ void FuncDataDrivenQCD(string variable){
                 // step 3 : isolation fake-rate from step 2 is aplied to QCD[2] to get QCD[0]
                 hQCD[0]->SetBinContent(m, NormFactorISO * hQCD[2]->GetBinContent(m));
                 hQCD[0]->SetBinError(m, NormFactorISO * hQCD[2]->GetBinError(m));
+                
+                // Note: the only quantity that keeps updating is NormFactor and we treat it as constant without uncertainty. So, the uncertainty in QCD[i] is determined by the operation in the last loop, although we do calculate it in every loop. For QCD[0], the uncertainty is further scaled by NormFactorISO.
             }
             
         }
@@ -261,7 +275,7 @@ void FuncDataDrivenQCD(string variable){
     cout << " --- now save results to file of: " << variable << endl;
     fOut ->cd();
     hQCD[0] ->Write();
-
+    
 }
 
 

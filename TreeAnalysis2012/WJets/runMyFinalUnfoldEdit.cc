@@ -18,6 +18,7 @@
         gROOT->ProcessLine(string(".L " + srcdir + sources[i] + ".cc+").c_str());
     }
         
-    myFinalUnfoldEdit(0, 2, "SMu", "Bayes");
+    //myFinalUnfoldEdit(0, 2, "SMu", "Bayes");
+    myFinalUnfoldEdit(0, 43, "SMu", "Bayes");
         
 }

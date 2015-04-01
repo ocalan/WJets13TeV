@@ -14,8 +14,9 @@
         gROOT->ProcessLine(string(".L " + srcdir + sources[i] + ".cc++").c_str());
         }
         
-        PlotUnfoSyst(0, 1);
-        PlotUnfoSyst(1, 2);
+        //PlotUnfoSyst(0, 1);
+        //PlotUnfoSyst(1, 2);
+        PlotUnfoSyst(0, 43);
         
         //--- clean the *_cc.d and *_cc.so files ---
         

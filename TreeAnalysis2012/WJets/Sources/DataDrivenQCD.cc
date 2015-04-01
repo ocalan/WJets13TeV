@@ -198,7 +198,7 @@ void FuncDataDrivenQCD(string variable){
                 hQCD[i]->Add(hBack[i],-1);
                 // set the negative bins to 0
                 for ( int k = 0 ; k < hData[i]->GetNbinsX()+1 ; k++ ){
-                    if ( hQCD[i]->GetBinContent(k) < 0 ) {
+                    if ( hQCD[i]->GetBinContent(k) <= 0 ) {
                         hQCD[i]->SetBinContent(k, 0. ) ;
                         hQCD[i]->SetBinError(k, 0. ) ;
                     }
@@ -248,7 +248,7 @@ void FuncDataDrivenQCD(string variable){
                     hQCD[i]->SetBinError(m,  sqrt(pow(hData[i]->GetBinError(m), 2) + pow(scaledMC[i]->GetBinError(m), 2) + pow(hBack[i]->GetBinError(m), 2)) );
                     
                     // set the negative bins to 0
-                    if ( hQCD[i]->GetBinContent(m) < 0 ) {
+                    if ( hQCD[i]->GetBinContent(m) <= 0 ) {
                         hQCD[i]->SetBinContent(m, 0. ) ;
                         hQCD[i]->SetBinError(m, 0. ) ;
                     }

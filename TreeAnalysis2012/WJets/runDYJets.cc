@@ -22,7 +22,7 @@
 
     int doRoch   = 0;
     int doFlat   = 0;
-    int doBJets  = -1; // 0 - no infor on B-jets will be used ; 1, 2 .. require at least 1, 2, .. ;  -1, -2, .... veto the event if you have 1, 2 ... number off b-jets
+    int doBJets  = -1; // 0 - no infor on B-jets will be used ; 1, 2 .. require at least 1, 2, .. ;  -1, -2, .... veto the event if you have 1 or more, 2 or more ... b-jets ; 101 - require exactly 1 b-jet
     int doMETcut = 0 ; // if you want to apply MET cut
     int doQCD    = 0; // 1-4 : 4 combination between isolation/anti-isolation and MT cuts
     int doPUStudy = -10 ; // default int the ZJets
@@ -214,17 +214,17 @@
         int doGen = 0 ;
         if ( (lepSelection.find("SE") == 0 || lepSelection.find("SMu") == 0 ) && lepSelection.find("SMuE") == -1 )  doGen = 1 ;
 
-        ZJetsAndDPS DMuWJ(lepSelection+"_8TeV_WJetsALL_UNFOLDING_dR_5311",  muLumi*36703.         *1000/76102995., 1., 1, !doDataEff, 0, 0, 1, jetPtMin, jetPtMax, ZPtMin , ZEtaMin,    ZEtaMax);
-        DMuWJ.Loop(1, doGen,  doQCD,  doSSign, doInvMassCut, doBJets, doPUStudy );
+        //ZJetsAndDPS DMuWJ(lepSelection+"_8TeV_WJetsALL_UNFOLDING_dR_5311",  muLumi*36703.         *1000/76102995., 1., 1, !doDataEff, 0, 0, 1, jetPtMin, jetPtMax, ZPtMin , ZEtaMin,    ZEtaMax);
+        //DMuWJ.Loop(1, doGen,  doQCD,  doSSign, doInvMassCut, doBJets, doPUStudy );
         ZJetsAndDPS DMuWJMix(lepSelection+"_8TeV_WJetsALL_MIX_UNFOLDING_dR_5311", muLumi*36703.         *1000/76102995., 1., 1, !doDataEff, 0, 0, 1, jetPtMin, jetPtMax, ZPtMin , ZEtaMin,    ZEtaMax, 0);
         DMuWJMix.Loop(1, doGen,  doQCD,  doSSign, doInvMassCut, doBJets, doPUStudy );
 
         if ( doSysRunning){
             //PU
-            ZJetsAndDPS DMuWJMix(lepSelection+"_8TeV_WJetsALL_UNFOLDING_dR_5311", muLumi*36703*1000/76102995., 1., 1, !doDataEff, 1, 1, 1, jetPtMin, jetPtMax, ZPtMin , ZEtaMin,    ZEtaMax, 0);
-            DMuWJMix.Loop(1, doGen,  doQCD,  doSSign, doInvMassCut, doBJets, doPUStudy );
-            ZJetsAndDPS DMuWJMix(lepSelection+"_8TeV_WJetsALL_UNFOLDING_dR_5311", muLumi*36703*1000/76102995., 1., 1, !doDataEff, 1,-1, 1, jetPtMin, jetPtMax, ZPtMin , ZEtaMin,    ZEtaMax, 0);
-            DMuWJMix.Loop(1, doGen,  doQCD,  doSSign, doInvMassCut, doBJets, doPUStudy );
+            //ZJetsAndDPS DMuWJMix(lepSelection+"_8TeV_WJetsALL_UNFOLDING_dR_5311", muLumi*36703*1000/76102995., 1., 1, !doDataEff, 1, 1, 1, jetPtMin, jetPtMax, ZPtMin , ZEtaMin,    ZEtaMax, 0);
+            //DMuWJMix.Loop(1, doGen,  doQCD,  doSSign, doInvMassCut, doBJets, doPUStudy );
+            //ZJetsAndDPS DMuWJMix(lepSelection+"_8TeV_WJetsALL_UNFOLDING_dR_5311", muLumi*36703*1000/76102995., 1., 1, !doDataEff, 1,-1, 1, jetPtMin, jetPtMax, ZPtMin , ZEtaMin,    ZEtaMax, 0);
+            //DMuWJMix.Loop(1, doGen,  doQCD,  doSSign, doInvMassCut, doBJets, doPUStudy );
             
             ZJetsAndDPS DMuWJMix(lepSelection+"_8TeV_WJetsALL_MIX_UNFOLDING_dR_5311", muLumi*36703*1000/76102995., 1., 1, !doDataEff, 1, 1, 1, jetPtMin, jetPtMax, ZPtMin , ZEtaMin,    ZEtaMax, 0);
             DMuWJMix.Loop(1, doGen,  doQCD,  doSSign, doInvMassCut, doBJets, doPUStudy );
@@ -233,8 +233,8 @@
 
             // jet smearing part
             if ( doGen ) {
-                ZJetsAndDPS DMuWJMix(lepSelection+"_8TeV_WJetsALL_UNFOLDING_dR_5311", muLumi*36703*1000/76102995., 1., 1, !doDataEff, 4, 1, 1, jetPtMin, jetPtMax, ZPtMin , ZEtaMin,    ZEtaMax, 0);
-                DMuWJMix.Loop(1, doGen,  doQCD,  doSSign, doInvMassCut, doBJets, doPUStudy );
+                //ZJetsAndDPS DMuWJMix(lepSelection+"_8TeV_WJetsALL_UNFOLDING_dR_5311", muLumi*36703*1000/76102995., 1., 1, !doDataEff, 4, 1, 1, jetPtMin, jetPtMax, ZPtMin , ZEtaMin,    ZEtaMax, 0);
+                //DMuWJMix.Loop(1, doGen,  doQCD,  doSSign, doInvMassCut, doBJets, doPUStudy );
                 
                 ZJetsAndDPS DMuWJMix(lepSelection+"_8TeV_WJetsALL_MIX_UNFOLDING_dR_5311", muLumi*36703*1000/76102995., 1., 1, !doDataEff, 4, 1, 1, jetPtMin, jetPtMax, ZPtMin , ZEtaMin,    ZEtaMax, 0);
                 DMuWJMix.Loop(1, doGen,  doQCD,  doSSign, doInvMassCut, doBJets, doPUStudy );

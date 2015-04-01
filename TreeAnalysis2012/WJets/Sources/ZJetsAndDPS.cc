@@ -911,12 +911,15 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                 // --------- MC-only
                 if (isData == false){
                     
+                    bool passBJets_SFB_sys_up = passBJets;     // Initialize the systematic_up as the central value
+                    bool passBJets_SFB_sys_down = passBJets; // Initialize the systematic_down as the central value
+                    
                     int jetflavour= patJetPfAk05PartonFlavour_->at(i);
                     if (abs(jetflavour)==5){
                         float effb = -1.73338329789*x*x*x*x +  1.26161794785*x*x*x +  0.784721653518*x*x +  -1.03328577451*x +  1.04305075822;
                         float SFb = (0.938887+(0.00017124*pt))+(-2.76366e-07*(pt*pt));
                         
-                        float SFb_error;
+                        float SFb_error = 0.0;
                         
                         if (pt >= 20. && pt < 30.)   SFb_error = 0.0415707;
                         if (pt >= 30. && pt < 40.)   SFb_error = 0.0204209;
@@ -951,19 +954,19 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                         if (SFb_up > 1.0) f_up = (1.0 - SFb_up)/(1.0 - 1.0/effb);
                         if (SFb_down > 1.0) f_down = (1.0 - SFb_down)/(1.0 - 1.0/effb);
                         
-                        bool passBJets_SFB_sys_up = passBJets;     // Initialize the systematic_up as the central value
-                        bool passBJets_SFB_sys_down = passBJets; // Initialize the systematic_down as the central value
+                        passBJets_SFB_sys_up = passBJets;     // Initialize the systematic_up as the central value
+                        passBJets_SFB_sys_down = passBJets; // Initialize the systematic_down as the central value
                         
                         // Untag a tagged jet
                         if ((passBJets==true) && (SFb<1.0) && (this_rand < f)) passBJets = false; // for central value
-                        if ((passBJets_SFB_sys_up==true)   && (SFb<1.0) && (this_rand < f_up))   passBJets_SFB_sys_up = false; // for systematic_up
-                        if ((passBJets_SFB_sys_down==true) && (SFb<1.0) && (this_rand < f_down)) passBJets_SFB_sys_down = false; // for sytematic_down
+                        if ((passBJets_SFB_sys_up==true)   && (SFb_up<1.0) && (this_rand < f_up))   passBJets_SFB_sys_up = false; // for systematic_up
+                        if ((passBJets_SFB_sys_down==true) && (SFb_down<1.0) && (this_rand < f_down)) passBJets_SFB_sys_down = false; // for sytematic_down
                         
                         
                         // Tag an untagged jet
                         if ((passBJets==false) && (SFb>1.0) && (this_rand < f)) passBJets = true; // for central value
-                        if ((passBJets_SFB_sys_up==false)   && (SFb>1.0) && (this_rand < f_up))   passBJets_SFB_sys_up = true; // for systematic_up
-                        if ((passBJets_SFB_sys_down==false) && (SFb>1.0) && (this_rand < f_down)) passBJets_SFB_sys_down = true; // for sytematic_down
+                        if ((passBJets_SFB_sys_up==false)   && (SFb_up>1.0) && (this_rand < f_up))   passBJets_SFB_sys_up = true; // for systematic_up
+                        if ((passBJets_SFB_sys_down==false) && (SFb_down>1.0) && (this_rand < f_down)) passBJets_SFB_sys_down = true; // for sytematic_down
                         
                     }
                     // ---------------- For Real C-jets--------------- //
@@ -971,7 +974,7 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                         float effc = -1.5734604211*x*x*x*x +  1.52798999269*x*x*x +  0.866697059943*x*x +  -1.66657942274*x +  0.780639301724;
                         float SFc = (0.938887+(0.00017124*pt))+(-2.76366e-07*(pt*pt));
                         
-                        float SFc_error;
+                        float SFc_error = 0.0;
                         
                         if (pt >= 20. && pt < 30.)   SFc_error = 0.0415707;
                         if (pt >= 30. && pt < 40.)   SFc_error = 0.0204209;
@@ -1006,18 +1009,18 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                         if (SFc_up > 1.0) f_up = (1.0 - SFc_up)/(1.0 - 1.0/effc);
                         if (SFc_down > 1.0) f_down = (1.0 - SFc_down)/(1.0 - 1.0/effc);
                         
-                        bool passBJets_SFB_sys_up = passBJets;     // Initialize the systematic_up as the central value
-                        bool passBJets_SFB_sys_down = passBJets; // Initialize the systematic_down as the central value
+                        passBJets_SFB_sys_up = passBJets;     // Initialize the systematic_up as the central value
+                        passBJets_SFB_sys_down = passBJets; // Initialize the systematic_down as the central value
                         
                         // Untag a tagged jet
                         if ((passBJets==true) && (SFc<1.0) && (this_rand < f)) passBJets = false; // for central value
-                        if ((passBJets_SFB_sys_up==true)   && (SFc<1.0) && (this_rand < f_up))   passBJets_SFB_sys_up = false; // for systematic_up
-                        if ((passBJets_SFB_sys_down==true) && (SFc<1.0) && (this_rand < f_down)) passBJets_SFB_sys_down = false; // for sytematic_down
+                        if ((passBJets_SFB_sys_up==true)   && (SFc_up<1.0) && (this_rand < f_up))   passBJets_SFB_sys_up = false; // for systematic_up
+                        if ((passBJets_SFB_sys_down==true) && (SFc_down<1.0) && (this_rand < f_down)) passBJets_SFB_sys_down = false; // for sytematic_down
                         
                         // Tag an untagged jet
                         if ((passBJets==false) && (SFc>1.0) && (this_rand < f)) passBJets = true; // for central value
-                        if ((passBJets_SFB_sys_up==false)   && (SFc>1.0) && (this_rand < f_up))   passBJets_SFB_sys_up = true; // for systematic_up
-                        if ((passBJets_SFB_sys_down==false) && (SFc>1.0) && (this_rand < f_down)) passBJets_SFB_sys_down = true; // for sytematic_down
+                        if ((passBJets_SFB_sys_up==false)   && (SFc_up>1.0) && (this_rand < f_up))   passBJets_SFB_sys_up = true; // for systematic_up
+                        if ((passBJets_SFB_sys_down==false) && (SFc_down>1.0) && (this_rand < f_down)) passBJets_SFB_sys_down = true; // for sytematic_down
                         
                     }
                     // ---------------- For REAL Light-jets --------------- //
@@ -1029,23 +1032,39 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                         
                         if ((fabs(eta)>=0.0) && (fabs(eta)<=0.8)){
                             SFlight = (((1.07541+(0.00231827*pt))+(-4.74249e-06*(pt*pt)))+(2.70862e-09*(pt*(pt*pt))));
-                            SFlight_up = (((1.18638+(0.00314148*pt))+(-6.68993e-06*(pt*pt)))+(3.89288e-09*(pt*(pt*pt))));
-                            SFlight_down = (((0.964527+(0.00149055*pt))+(-2.78338e-06*(pt*pt)))+(1.51771e-09*(pt*(pt*pt))));
                             eff_l = ((0.00967751+(2.54564e-05*pt))+(-6.92256e-10*(pt*pt)));
+                            if (pt >= 20. && pt <= 1000.){
+                                SFlight_up = (((1.18638+(0.00314148*pt))+(-6.68993e-06*(pt*pt)))+(3.89288e-09*(pt*(pt*pt))));
+                                SFlight_down = (((0.964527+(0.00149055*pt))+(-2.78338e-06*(pt*pt)))+(1.51771e-09*(pt*(pt*pt))));
+                            }
+                            else{
+                                SFlight_up = SFlight;
+                                SFlight_down = SFlight;
+                            }
                         }
-                        
                         if ((fabs(eta)>=0.8) && (fabs(eta)<=1.6)){
                             SFlight = (((1.05613+(0.00114031*pt))+(-2.56066e-06*(pt*pt)))+(1.67792e-09*(pt*(pt*pt))));
-                            SFlight_up = (((1.16624+(0.00151884*pt))+(-3.59041e-06*(pt*pt)))+(2.38681e-09*(pt*(pt*pt))));
-                            SFlight_down = (((0.946051+(0.000759584*pt))+(-1.52491e-06*(pt*pt)))+(9.65822e-10*(pt*(pt*pt))));
                             eff_l = ((0.00974141+(5.09503e-05*pt))+(2.0641e-08*(pt*pt)));
+                            if (pt >= 20. && pt <= 1000.){
+                                SFlight_up = (((1.16624+(0.00151884*pt))+(-3.59041e-06*(pt*pt)))+(2.38681e-09*(pt*(pt*pt))));
+                                SFlight_down = (((0.946051+(0.000759584*pt))+(-1.52491e-06*(pt*pt)))+(9.65822e-10*(pt*(pt*pt))));
+                            }
+                            else{
+                                SFlight_up = SFlight;
+                                SFlight_down = SFlight;
+                            }
                         }
-                        
                         if ((fabs(eta)>=1.6) && (fabs(eta)<=2.4)){
                             SFlight = (((1.05625+(0.000487231*pt))+(-2.22792e-06*(pt*pt)))+(1.70262e-09*(pt*(pt*pt))));
-                            SFlight_up = (((1.15575+(0.000693344*pt))+(-3.02661e-06*(pt*pt)))+(2.39752e-09*(pt*(pt*pt))));
-                            SFlight_down = (((0.956736+(0.000280197*pt))+(-1.42739e-06*(pt*pt)))+(1.0085e-09*(pt*(pt*pt))));
                             eff_l = ((0.013595+(0.000104538*pt))+(-1.36087e-08*(pt*pt)));
+                            if (pt >= 20. && pt <= 850.){
+                                SFlight_up = (((1.15575+(0.000693344*pt))+(-3.02661e-06*(pt*pt)))+(2.39752e-09*(pt*(pt*pt))));
+                                SFlight_down = (((0.956736+(0.000280197*pt))+(-1.42739e-06*(pt*pt)))+(1.0085e-09*(pt*(pt*pt))));
+                            }
+                            else{
+                                SFlight_up = SFlight;
+                                SFlight_down = SFlight;
+                            }
                         }
                         
                         // F values for rand comparison
@@ -1061,19 +1080,22 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                         if (SFlight_up > 1.0) f_up = (1.0 - SFlight_up)/(1.0 - 1.0/eff_l);
                         if (SFlight_down > 1.0) f_down = (1.0 - SFlight_down)/(1.0 - 1.0/eff_l);
                         
-                        bool passBJets_SFB_sys_up = passBJets;     // Initialize the systematic_up as the central value
-                        bool passBJets_SFB_sys_down = passBJets; // Initialize the systematic_down as the central value
+                        passBJets_SFB_sys_up = passBJets;     // Initialize the systematic_up as the central value
+                        passBJets_SFB_sys_down = passBJets; // Initialize the systematic_down as the central value
                         
                         // Untag a tagged jet
                         if ((passBJets==true) && (SFlight<1.0) && (this_rand < f)) passBJets = false; // for central value
-                        if ((passBJets_SFB_sys_up==true)   && (SFlight<1.0) && (this_rand < f_up))   passBJets_SFB_sys_up = false; // for systematic_up
-                        if ((passBJets_SFB_sys_down==true) && (SFlight<1.0) && (this_rand < f_down)) passBJets_SFB_sys_down = false; // for sytematic_down
+                        if ((passBJets_SFB_sys_up==true)   && (SFlight_up<1.0) && (this_rand < f_up))   passBJets_SFB_sys_up = false; // for systematic_up
+                        if ((passBJets_SFB_sys_down==true) && (SFlight_down<1.0) && (this_rand < f_down)) passBJets_SFB_sys_down = false; // for sytematic_down
                         
                         // Tag an untagged jet
                         if ((passBJets==false) && (SFlight>1.0) && (this_rand < f)) passBJets = true; // for central value
-                        if ((passBJets_SFB_sys_up==false)   && (SFlight>1.0) && (this_rand < f_up))   passBJets_SFB_sys_up = true; // for systematic_up
-                        if ((passBJets_SFB_sys_down==false) && (SFlight>1.0) && (this_rand < f_down)) passBJets_SFB_sys_down = true; // for sytematic_down
+                        if ((passBJets_SFB_sys_up==false)   && (SFlight_up>1.0) && (this_rand < f_up))   passBJets_SFB_sys_up = true; // for systematic_up
+                        if ((passBJets_SFB_sys_down==false) && (SFlight_down>1.0) && (this_rand < f_down)) passBJets_SFB_sys_down = true; // for sytematic_down
                     }   ////////flavour lop
+                    
+                    //passBJets = passBJets_SFB_sys_up; // for systematic running
+                    //passBJets = passBJets_SFB_sys_down; // for systematic running
                     
                 }
                 // --------- End MC-only
@@ -1250,10 +1272,13 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
             if (fileName.find("Tau") != string::npos && countTauS3 == 0 && hasGenInfo ){
                 passesLeptonCut = 0;
             }
+            
             if (doBJets < 0 && countBJets >= fabs(doBJets) )  { nEventsIncBJets++; 
                 passesLeptonCut = 0  ; }
 
-            if (doBJets > 0 && countBJets < fabs(doBJets) ) passesLeptonCut = 0  ;   
+            if (doBJets > 0 && doBJets < 99 && countBJets < fabs(doBJets) ) passesLeptonCut = 0  ;
+            if (doBJets == 101 && countBJets != 1) passesLeptonCut = 0  ;
+            
         }  // END IF HAS RECO
         //=======================================================================================================//
 
@@ -1586,6 +1611,7 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                     genFirstJetPt_2_Zinc1jet->Fill(genLeadJ.Pt(), genWeight);
                     
                     genFirstJetEta_Zinc1jet->Fill(fabs(genLeadJ.Eta()), genWeight);
+                    genFirstJetEta_2_Zinc1jet->Fill(fabs(genLeadJ.Eta()), genWeight);
                     //*************************************** begin edit *************************************************************//
                     genFirstJetRapidity_Zinc1jet->Fill(fabs(genNewLeadJ.Rapidity()), genWeight);
                     genFirstJetRapidityFull_Zinc1jet->Fill(genNewLeadJ.Rapidity(), genWeight);
@@ -1595,6 +1621,7 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                     genFirstHighestJetPt_Zinc1jet->Fill(genLeadJ.Pt(), genWeight);
                     genJetsHT_Zinc1jet->Fill(genJetsHT, genWeight);
                     genJetsHT_1_Zinc1jet->Fill(genJetsHT, genWeight);
+                    genJetsHT_2_Zinc1jet->Fill(genJetsHT, genWeight);
                     
                     for ( int i =0 ; i < NbinsEta2D - 1 ; i++){
                         if ( fabs(genLeadJ.Eta()) >= j_Y_range[i] &&  fabs(genLeadJ.Eta()) < j_Y_range[i+1] )                                genFirstJetPt_Zinc1jet_Eta[i]->Fill(fabs(genLeadJ.Pt()), genWeight);
@@ -1630,17 +1657,31 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                     genSecondHighestJetPt_Zinc2jet->Fill(genSecondJ.Pt(), genWeight);
                     genSecondJetPt_Zinc2jet->Fill(genSecondJ.Pt(), genWeight);
                     genSecondJetPt_1_Zinc2jet->Fill(genSecondJ.Pt(), genWeight);
+                    genSecondJetPt_2_Zinc2jet->Fill(genSecondJ.Pt(), genWeight);
                     
                     genSecondJetEta_Zinc2jet->Fill(fabs(genSecondJ.Eta()), genWeight);
+                    genSecondJetEta_2_Zinc2jet->Fill(fabs(genSecondJ.Eta()), genWeight);
                     //*************************************** begin edit *******************************************************//
                     genSecondJetRapidity_Zinc2jet->Fill(fabs(genNewSecondJ.Rapidity()), genWeight);
                     genSecondJetRapidityFull_Zinc2jet->Fill(genNewSecondJ.Rapidity(), genWeight);
                     gendRapidityJets_Zinc2jet->Fill(fabs(genNewLeadJ.Rapidity() - genNewSecondJ.Rapidity()), genWeight);
+                    gendRapidityJets_2_Zinc2jet->Fill(fabs(genNewLeadJ.Rapidity() - genNewSecondJ.Rapidity()), genWeight);
+                    
                     gendRapidityJetsFB_Zinc2jet->Fill(genForwardJetRapidity - genBackwardJetRapidity, genWeight);
+                    gendRapidityJetsFB_2_Zinc2jet->Fill(genForwardJetRapidity - genBackwardJetRapidity, genWeight);
+                    
                     gendiJetMass_Zinc2jet->Fill(genJet1Plus2.M(), genWeight);
+                    gendiJetMass_2_Zinc2jet->Fill(genJet1Plus2.M(), genWeight);
+                    
                     gendPhiJetsFB_Zinc2jet->Fill(deltaPhi(genvJetYOrdered[0], genvJetYOrdered[genvJetYOrdered.size() - 1] ), genWeight);
+                    gendPhiJetsFB_2_Zinc2jet->Fill(deltaPhi(genvJetYOrdered[0], genvJetYOrdered[genvJetYOrdered.size() - 1] ), genWeight);
+                    
                     gendRJets_Zinc2jet->Fill(deltaRYPhi(genNewLeadJ, genNewSecondJ), genWeight);
+                    gendRJets_2_Zinc2jet->Fill(deltaRYPhi(genNewLeadJ, genNewSecondJ), genWeight);
+                    
                     gendiJetPt_Zinc2jet->Fill(genJet1Plus2.Pt(), genWeight);
+                    gendiJetPt_2_Zinc2jet->Fill(genJet1Plus2.Pt(), genWeight);
+                    
                     genMeanNJetsHT_Zinc2jet->Fill(genJetsHT, nGoodGenJets, genWeight);
                     genMeanNJetsdRapidity_Zinc2jet->Fill(fabs(genNewLeadJ.Rapidity() - genNewSecondJ.Rapidity()), nGoodGenJets, genWeight);
                     genMeanNJetsdRapidityFB_Zinc2jet->Fill(genForwardJetRapidity - genBackwardJetRapidity, nGoodGenJets, genWeight);
@@ -1649,9 +1690,13 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                     genRatioJetPt21_Zinc2jet->Fill(genJets[1].pt/genJets[0].pt, genWeight);
                     genJetsHT_Zinc2jet->Fill(genJetsHT, genWeight);
                     genJetsHT_1_Zinc2jet->Fill(genJetsHT, genWeight);
+                    genJetsHT_2_Zinc2jet->Fill(genJetsHT, genWeight);
                     
                     genptBal_Zinc2jet->Fill(genJet1Plus2PlusZ.Pt(), genWeight);
+                    
                     gendPhiJets_Zinc2jet->Fill(deltaPhi(genLeadJ, genSecondJ), genWeight);
+                    gendPhiJets_2_Zinc2jet->Fill(deltaPhi(genLeadJ, genSecondJ), genWeight);
+                    
                     genBestdPhiJets_Zinc2jet->Fill(deltaPhi(genBestTwoJets.first, genBestTwoJets.second), genWeight);
                     gendEtaJets_Zinc2jet->Fill(genLeadJ.Eta() - genSecondJ.Eta(), genWeight);
                     gendEtaFirstJetZ_Zinc2jet->Fill(genLeadJ.Eta() - genZ.Eta(), genWeight);
@@ -1882,17 +1927,30 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                     genZEta_Zinc3jet->Fill(genZ.Eta(), genWeight);
                     genThirdJetPt_Zinc3jet->Fill(genJets[2].pt, genWeight);
                     genThirdJetPt_1_Zinc3jet->Fill(genJets[2].pt, genWeight);
+                    genThirdJetPt_2_Zinc3jet->Fill(genJets[2].pt, genWeight);
                     
                     genThirdJetEta_Zinc3jet->Fill(fabs(genJets[2].eta), genWeight);
+                    genThirdJetEta_2_Zinc3jet->Fill(fabs(genJets[2].eta), genWeight);
                     //*************************************** begin edit *************************************************************//
                     genThirdJetRapidity_Zinc3jet->Fill(fabs(genNewThirdJ.Rapidity()), genWeight);
                     genThirdJetRapidityFull_Zinc3jet->Fill(genNewThirdJ.Rapidity(), genWeight);
                     gendRapidityJets_Zinc3jet->Fill(fabs(genNewLeadJ.Rapidity() - genNewSecondJ.Rapidity()), genWeight);
+                    gendRapidityJets_2_Zinc3jet->Fill(fabs(genNewLeadJ.Rapidity() - genNewSecondJ.Rapidity()), genWeight);
+                    
                     gendRapidityJets_First_Third_Zinc3jet->Fill(fabs(genNewLeadJ.Rapidity() - genNewThirdJ.Rapidity()), genWeight);
+                    gendRapidityJets_2_First_Third_Zinc3jet->Fill(fabs(genNewLeadJ.Rapidity() - genNewThirdJ.Rapidity()), genWeight);
+                    
                     gendRapidityJets_Second_Third_Zinc3jet->Fill(fabs(genNewSecondJ.Rapidity() - genNewThirdJ.Rapidity()), genWeight);
+                    gendRapidityJets_2_Second_Third_Zinc3jet->Fill(fabs(genNewSecondJ.Rapidity() - genNewThirdJ.Rapidity()), genWeight);
+                    
                     gendRapidityJetsFB_Zinc3jet->Fill(genForwardJetRapidity - genBackwardJetRapidity, genWeight);
+                    gendRapidityJetsFB_2_Zinc3jet->Fill(genForwardJetRapidity - genBackwardJetRapidity, genWeight);
+                    
                     gendiJetMass_Zinc3jet->Fill(genJet1Plus2.M(), genWeight);
+                    gendiJetMass_2_Zinc3jet->Fill(genJet1Plus2.M(), genWeight);
+                    
                     gendiJetPt_Zinc3jet->Fill(genJet1Plus2.Pt(), genWeight);
+                    gendiJetPt_2_Zinc3jet->Fill(genJet1Plus2.Pt(), genWeight);
                     //*************************************** end edit ***************************************************************//
                     genThirdJetPtEta_Zinc3jet->Fill(genJets[2].pt, fabs(genJets[2].eta), genWeight);
                     genRatioJetPt32_Zinc3jet->Fill(genJets[2].pt/genJets[1].pt, genWeight);
@@ -1901,6 +1959,7 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                     genThirdHighestJetPt_Zinc3jet->Fill(genJets[2].pt, genWeight);
                     genJetsHT_Zinc3jet->Fill(genJetsHT, genWeight);
                     genJetsHT_1_Zinc3jet->Fill(genJetsHT, genWeight);
+                    genJetsHT_2_Zinc3jet->Fill(genJetsHT, genWeight);
                     
                 }
                 if (nGoodGenJets >= 4){
@@ -1911,14 +1970,23 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                     genZEta_Zinc4jet->Fill(genZ.Eta(), genWeight);
                     genFourthJetPt_Zinc4jet->Fill(genJets[3].pt, genWeight);
                     genFourthJetPt_1_Zinc4jet->Fill(genJets[3].pt, genWeight);
+                    genFourthJetPt_2_Zinc4jet->Fill(genJets[3].pt, genWeight);
                     genFourthJetEta_Zinc4jet->Fill(fabs(genJets[3].eta), genWeight);
+                    genFourthJetEta_2_Zinc4jet->Fill(fabs(genJets[3].eta), genWeight);
                     //*************************************** begin edit *************************************************************//
                     genFourthJetRapidity_Zinc4jet->Fill(fabs(genNewFourthJ.Rapidity()), genWeight);
                     genFourthJetRapidityFull_Zinc4jet->Fill(genNewFourthJ.Rapidity(), genWeight);
                     gendRapidityJets_Zinc4jet->Fill(fabs(genNewLeadJ.Rapidity() - genNewSecondJ.Rapidity()), genWeight);
+                    gendRapidityJets_2_Zinc4jet->Fill(fabs(genNewLeadJ.Rapidity() - genNewSecondJ.Rapidity()), genWeight);
+                    
                     gendRapidityJetsFB_Zinc4jet->Fill(genForwardJetRapidity - genBackwardJetRapidity, genWeight);
+                    gendRapidityJetsFB_2_Zinc4jet->Fill(genForwardJetRapidity - genBackwardJetRapidity, genWeight);
+                    
                     gendiJetMass_Zinc4jet->Fill(genJet1Plus2.M(), genWeight);
+                    gendiJetMass_2_Zinc4jet->Fill(genJet1Plus2.M(), genWeight);
+                    
                     gendiJetPt_Zinc4jet->Fill(genJet1Plus2.Pt(), genWeight);
+                    gendiJetPt_2_Zinc4jet->Fill(genJet1Plus2.Pt(), genWeight);
                     //*************************************** end edit ***************************************************************//
                     genFourthJetPtEta_Zinc4jet->Fill(genJets[3].pt, fabs(genJets[3].eta), genWeight);
                     genFirstHighestJetPt_Zinc4jet->Fill(genJets[0].pt, genWeight);
@@ -1926,6 +1994,7 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                     genThirdHighestJetPt_Zinc4jet->Fill(genJets[2].pt, genWeight);
                     genJetsHT_Zinc4jet->Fill(genJetsHT, genWeight);
                     genJetsHT_1_Zinc4jet->Fill(genJetsHT, genWeight);
+                    genJetsHT_2_Zinc4jet->Fill(genJetsHT, genWeight);
                 }
                 if (nGoodGenJets >= 5){
                     genZNGoodJets_Zinc->Fill(5., genWeight);
@@ -1935,13 +2004,16 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                     genZEta_Zinc5jet->Fill(genZ.Eta(), genWeight);
                     genFifthJetPt_Zinc5jet->Fill(genJets[4].pt, genWeight);
                     genFifthJetPt_1_Zinc5jet->Fill(genJets[4].pt, genWeight);
+                    genFifthJetPt_2_Zinc5jet->Fill(genJets[4].pt, genWeight);
                     genFifthJetEta_Zinc5jet->Fill(fabs(genJets[4].eta), genWeight);
+                    genFifthJetEta_2_Zinc5jet->Fill(fabs(genJets[4].eta), genWeight);
                     genFifthJetPtEta_Zinc5jet->Fill(genJets[4].pt, fabs(genJets[4].eta), genWeight);
                     genFirstHighestJetPt_Zinc5jet->Fill(genJets[0].pt, genWeight);
                     genSecondHighestJetPt_Zinc5jet->Fill(genJets[1].pt, genWeight);
                     genThirdHighestJetPt_Zinc5jet->Fill(genJets[2].pt, genWeight);
                     genJetsHT_Zinc5jet->Fill(genJetsHT, genWeight);
                     genJetsHT_1_Zinc5jet->Fill(genJetsHT, genWeight);
+                    genJetsHT_2_Zinc5jet->Fill(genJetsHT, genWeight);
                 }
                 if (nGoodGenJets >= 6){
                     genZNGoodJets_Zinc->Fill(6., genWeight);
@@ -2019,6 +2091,7 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                         responseFirstJetPt_2->Fill(jets[0].pt, genJets[0].pt, weight);      
                         
                         responseFirstJetEta->Fill(fabs(jets[0].eta), fabs(genJets[0].eta), weight);
+                        responseFirstJetEta_2->Fill(fabs(jets[0].eta), fabs(genJets[0].eta), weight);
                         //*************************************** begin edit *************************************************************//
                         responseFirstJetRapidity_Zinc1jet->Fill(fabs(newLeadJ.Rapidity()), fabs(genNewLeadJ.Rapidity()), weight);
                         responseFirstJetRapidityFull_Zinc1jet->Fill(newLeadJ.Rapidity(), genNewLeadJ.Rapidity(), weight);
@@ -2028,6 +2101,7 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                         responseFirstHighestJetPt_Zinc1jet->Fill(jets[0].pt, genJets[0].pt, weight);
                         responseJetsHt1Jet->Fill(jetsHT, genJetsHT, weight);
                         responseJetsHt1Jet_1->Fill(jetsHT, genJetsHT, weight);
+                        responseJetsHt1Jet_2->Fill(jetsHT, genJetsHT, weight);
                         
                         FirstJetdEtaGenReco_Zinc1->Fill(fabs(jets[0].eta - genJets[0].eta));
                         if ( doW ) responsedEtaBosonJet_Zinc1->Fill(fabs(jets[0].eta-lepton1.eta), fabs(genJets[0].eta - genLep1.Eta()), weight);
@@ -2040,6 +2114,7 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                         responseFirstJetPt_2->Miss(genJets[0].pt, genWeight);
                         
                         responseFirstJetEta->Miss(fabs(genJets[0].eta), genWeight);
+                        responseFirstJetEta_2->Miss(fabs(genJets[0].eta), genWeight);
                         //*************************************** begin edit *************************************************************//
                         responseFirstJetRapidity_Zinc1jet->Miss(fabs(genNewLeadJ.Rapidity()), genWeight);
                         responseFirstJetRapidityFull_Zinc1jet->Miss(genNewLeadJ.Rapidity(), genWeight);
@@ -2049,6 +2124,7 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                         responseFirstHighestJetPt_Zinc1jet->Miss(genJets[0].pt, genWeight);
                         responseJetsHt1Jet->Miss(genJetsHT, genWeight);
                         responseJetsHt1Jet_1->Miss(genJetsHT, genWeight);
+                        responseJetsHt1Jet_2->Miss(genJetsHT, genWeight);
                         
                         if ( doW ) responsedEtaBosonJet_Zinc1->Miss( fabs(genJets[0].eta - genLep1.Eta()), genWeight);
                         else responsedEtaBosonJet_Zinc1->Miss(fabs(genJets[0].eta - genZ.Eta()), genWeight);
@@ -2077,6 +2153,7 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                         responseFirstJetPt_2->Fake(jets[0].pt, weight);
                         
                         responseFirstJetEta->Fake(fabs(jets[0].eta), weight);
+                        responseFirstJetEta_2->Fake(fabs(jets[0].eta), weight);
                         //*************************************** begin edit *************************************************************//
                         responseFirstJetRapidity_Zinc1jet->Fake(fabs(newLeadJ.Rapidity()), weight);
                         responseFirstJetRapidityFull_Zinc1jet->Fake(newLeadJ.Rapidity(), weight);
@@ -2086,6 +2163,7 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                         responseFirstHighestJetPt_Zinc1jet->Fake(jets[0].pt, weight);
                         responseJetsHt1Jet->Fake(jetsHT, weight);
                         responseJetsHt1Jet_1->Fake(jetsHT, weight);
+                        responseJetsHt1Jet_2->Fake(jetsHT, weight);
                         
                         if ( doW ) responsedEtaBosonJet_Zinc1->Fake( fabs(jets[0].eta-lepton1.eta) , weight);
                         else responsedEtaBosonJet_Zinc1->Fake(fabs(jets[0].eta-Z.Eta()), weight);
@@ -2126,17 +2204,29 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                         responseSecondHighestJetPt_Zinc2jet->Fill(jets[1].pt, genJets[1].pt, weight);
                         responseSecondJetPt->Fill(jets[1].pt, genJets[1].pt, weight);      
                         responseSecondJetPt_1->Fill(jets[1].pt, genJets[1].pt, weight);      
-                        
+                        responseSecondJetPt_2->Fill(jets[1].pt, genJets[1].pt, weight);
                         responseSecondJetEta->Fill(fabs(jets[1].eta), fabs(genJets[1].eta), weight);
+                        responseSecondJetEta_2->Fill(fabs(jets[1].eta), fabs(genJets[1].eta), weight);
                         //*************************************** begin edit *************************************************************//
                         responseSecondJetRapidity_Zinc2jet->Fill(fabs(newSecondJ.Rapidity()), fabs(genNewSecondJ.Rapidity()), weight);
                         responseSecondJetRapidityFull_Zinc2jet->Fill(newSecondJ.Rapidity(), genNewSecondJ.Rapidity(), weight);
                         responsedRapidityJets_Zinc2jet->Fill(fabs(newLeadJ.Rapidity() - newSecondJ.Rapidity()), fabs(genNewLeadJ.Rapidity() - genNewSecondJ.Rapidity()), weight);
+                        responsedRapidityJets_Zinc2jet_2->Fill(fabs(newLeadJ.Rapidity() - newSecondJ.Rapidity()), fabs(genNewLeadJ.Rapidity() - genNewSecondJ.Rapidity()), weight);
+                        
                         responsedRapidityJetsFB_Zinc2jet->Fill(ForwardJetRapidity - BackwardJetRapidity, genForwardJetRapidity - genBackwardJetRapidity, weight);
+                        responsedRapidityJetsFB_Zinc2jet_2->Fill(ForwardJetRapidity - BackwardJetRapidity, genForwardJetRapidity - genBackwardJetRapidity, weight);
+                        
                         responsediJetMass_Zinc2jet->Fill(jet1Plus2.M(), genJet1Plus2.M(), weight);
+                        responsediJetMass_Zinc2jet_2->Fill(jet1Plus2.M(), genJet1Plus2.M(), weight);
+                        
                         responsedPhiJetsFB_Zinc2jet->Fill(deltaPhi(vJetYOrdered[0], vJetYOrdered[vJetYOrdered.size() - 1] ), deltaPhi(genvJetYOrdered[0], genvJetYOrdered[genvJetYOrdered.size() - 1] ), weight);
+                        responsedPhiJetsFB_Zinc2jet_2->Fill(deltaPhi(vJetYOrdered[0], vJetYOrdered[vJetYOrdered.size() - 1] ), deltaPhi(genvJetYOrdered[0], genvJetYOrdered[genvJetYOrdered.size() - 1] ), weight);
+                        
                         responsedRJets_Zinc2jet->Fill(deltaRYPhi(newLeadJ, newSecondJ), deltaRYPhi(genNewLeadJ, genNewSecondJ), weight);
+                        responsedRJets_Zinc2jet_2->Fill(deltaRYPhi(newLeadJ, newSecondJ), deltaRYPhi(genNewLeadJ, genNewSecondJ), weight);
+                        
                         responsediJetPt_Zinc2jet->Fill(jet1Plus2.Pt(), genJet1Plus2.Pt(), weight);
+                        responsediJetPt_Zinc2jet_2->Fill(jet1Plus2.Pt(), genJet1Plus2.Pt(), weight);
                         
                         responseMeanNJetsHT_Zinc2jet->Fill(jetsHT, nGoodJets, genJetsHT, nGoodGenJets, weight);
                         responseMeanNJetsdRapidity_Zinc2jet->Fill(fabs(newLeadJ.Rapidity() - newSecondJ.Rapidity()), nGoodJets, fabs(genNewLeadJ.Rapidity() - genNewSecondJ.Rapidity()), nGoodGenJets, weight);
@@ -2147,6 +2237,7 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                         responseRatioJetPt21->Fill(jets[1].pt/jets[0].pt, genJets[1].pt/genJets[0].pt, weight);
                         responseJetsHt2Jet->Fill(jetsHT, genJetsHT, weight);
                         responseJetsHt2Jet_1->Fill(jetsHT, genJetsHT, weight);
+                        responseJetsHt2Jet_2->Fill(jetsHT, genJetsHT, weight);
                         
                         responseTwoJetsPtDiffInc->Fill(jet1Minus2.Pt(), genJet1Minus2.Pt(), genWeight);
                         responseBestTwoJetsPtDiffInc->Fill(bestJet1Minus2.Pt(), genBestJet1Minus2.Pt(), weight);
@@ -2156,7 +2247,10 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                         responseBestSpTJets_Zinc2jet->Fill(SpTsub(bestTwoJets.first, bestTwoJets.second), SpTsub(genBestTwoJets.first, genBestTwoJets.second), weight);
                         responseSpT_Zinc2jet->Fill(SpT(lep1, lep2, leadJ, secondJ), SpT(genLep1, genLep2, genLeadJ, genSecondJ), weight);
                         responseBestSpT_Zinc2jet->Fill(SpT(lep1, lep2, bestTwoJets.first, bestTwoJets.second), SpT(genLep1, genLep2, genBestTwoJets.first, genBestTwoJets.second), weight);
+                        
                         responsedPhiJets_Zinc2jet->Fill(deltaPhi(leadJ, secondJ), deltaPhi(genLeadJ, genSecondJ), weight);
+                        responsedPhiJets_Zinc2jet_2->Fill(deltaPhi(leadJ, secondJ), deltaPhi(genLeadJ, genSecondJ), weight);
+                        
                         responseBestdPhiJets_Zinc2jet->Fill(deltaPhi(bestTwoJets.first, bestTwoJets.second), deltaPhi(genBestTwoJets.first, genBestTwoJets.second), weight);
                         responsePHI_Zinc2jet->Fill(PHI(lep1, lep2, leadJ, secondJ), PHI(genLep1, genLep2, genLeadJ, genSecondJ), weight);
                         responseBestPHI_Zinc2jet->Fill(PHI(lep1, lep2, bestTwoJets.first, bestTwoJets.second), PHI(genLep1, genLep2, genBestTwoJets.first, genBestTwoJets.second), weight);
@@ -2171,17 +2265,30 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                         responseSecondHighestJetPt_Zinc2jet->Miss(genJets[1].pt, genWeight);
                         responseSecondJetPt->Miss(genJets[1].pt, genWeight);
                         responseSecondJetPt_1->Miss(genJets[1].pt, genWeight);
-                        
+                        responseSecondJetPt_2->Miss(genJets[1].pt, genWeight);
                         responseSecondJetEta->Miss(fabs(genJets[1].eta), genWeight);
+                        responseSecondJetEta_2->Miss(fabs(genJets[1].eta), genWeight);
                         //*************************************** begin edit *******************************************************//
                         responseSecondJetRapidity_Zinc2jet->Miss(fabs(genNewSecondJ.Rapidity()), genWeight);
                         responseSecondJetRapidityFull_Zinc2jet->Miss(genNewSecondJ.Rapidity(), genWeight);
                         responsedRapidityJets_Zinc2jet->Miss(fabs(genNewLeadJ.Rapidity() - genNewSecondJ.Rapidity()), genWeight);
+                        responsedRapidityJets_Zinc2jet_2->Miss(fabs(genNewLeadJ.Rapidity() - genNewSecondJ.Rapidity()), genWeight);
+                        
                         responsedRapidityJetsFB_Zinc2jet->Miss(genForwardJetRapidity - genBackwardJetRapidity, genWeight);
+                        responsedRapidityJetsFB_Zinc2jet_2->Miss(genForwardJetRapidity - genBackwardJetRapidity, genWeight);
+                        
                         responsediJetMass_Zinc2jet->Miss(genJet1Plus2.M(), genWeight);
+                        responsediJetMass_Zinc2jet_2->Miss(genJet1Plus2.M(), genWeight);
+                        
                         responsedPhiJetsFB_Zinc2jet->Miss(deltaPhi(genvJetYOrdered[0], genvJetYOrdered[genvJetYOrdered.size() - 1] ), genWeight);
+                        responsedPhiJetsFB_Zinc2jet_2->Miss(deltaPhi(genvJetYOrdered[0], genvJetYOrdered[genvJetYOrdered.size() - 1] ), genWeight);
+                        
                         responsedRJets_Zinc2jet->Miss(deltaRYPhi(genNewLeadJ, genNewSecondJ), genWeight);
+                        responsedRJets_Zinc2jet_2->Miss(deltaRYPhi(genNewLeadJ, genNewSecondJ), genWeight);
+                        
                         responsediJetPt_Zinc2jet->Miss(genJet1Plus2.Pt(), genWeight);
+                        responsediJetPt_Zinc2jet_2->Miss(genJet1Plus2.Pt(), genWeight);
+                        
                         responseMeanNJetsHT_Zinc2jet->Miss(genJetsHT, nGoodGenJets, genWeight);
                         responseMeanNJetsdRapidity_Zinc2jet->Miss(fabs(genNewLeadJ.Rapidity() - genNewSecondJ.Rapidity()), nGoodGenJets, genWeight);
                         responseMeanNJetsdRapidityFB_Zinc2jet->Miss(genForwardJetRapidity - genBackwardJetRapidity, nGoodGenJets, genWeight);
@@ -2190,6 +2297,7 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                         responseRatioJetPt21->Miss(genJets[1].pt/genJets[0].pt, genWeight);
                         responseJetsHt2Jet->Miss(genJetsHT, genWeight);
                         responseJetsHt2Jet_1->Miss(genJetsHT, genWeight);
+                        responseJetsHt2Jet_2->Miss(genJetsHT, genWeight);
                         
                         responseTwoJetsPtDiffInc->Miss(genJet1Minus2.Pt(), genWeight);
                         responseBestTwoJetsPtDiffInc->Miss(genBestJet1Minus2.Pt(), genWeight);
@@ -2199,7 +2307,10 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                         responseBestSpTJets_Zinc2jet->Miss(SpTsub(genBestTwoJets.first, genBestTwoJets.second), genWeight);
                         responseSpT_Zinc2jet->Miss(SpT(genLep1, genLep2, genLeadJ, genSecondJ), genWeight);
                         responseBestSpT_Zinc2jet->Miss(SpT(genLep1, genLep2, genBestTwoJets.first, genBestTwoJets.second), genWeight);
+                        
                         responsedPhiJets_Zinc2jet->Miss(deltaPhi(genLeadJ, genSecondJ), genWeight);
+                        responsedPhiJets_Zinc2jet_2->Miss(deltaPhi(genLeadJ, genSecondJ), genWeight);
+                        
                         responseBestdPhiJets_Zinc2jet->Miss(deltaPhi(genBestTwoJets.first, genBestTwoJets.second), genWeight);
                         responsePHI_Zinc2jet->Miss(PHI(genLep1, genLep2, genLeadJ, genSecondJ), genWeight);
                         responseBestPHI_Zinc2jet->Miss(PHI(genLep1, genLep2, genBestTwoJets.first, genBestTwoJets.second), genWeight);
@@ -2272,17 +2383,30 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                         responseSecondHighestJetPt_Zinc2jet->Fake(jets[1].pt, weight);
                         responseSecondJetPt->Fake(jets[1].pt, weight);
                         responseSecondJetPt_1->Fake(jets[1].pt, weight);
-                        
+                        responseSecondJetPt_2->Fake(jets[1].pt, weight);
                         responseSecondJetEta->Fake(fabs(jets[1].eta), weight);
+                        responseSecondJetEta_2->Fake(fabs(jets[1].eta), weight);
                         //*************************************** begin edit *************************************************************//
                         responseSecondJetRapidity_Zinc2jet->Fake(fabs(newSecondJ.Rapidity()), weight);
                         responseSecondJetRapidityFull_Zinc2jet->Fake(newSecondJ.Rapidity(), weight);
                         responsedRapidityJets_Zinc2jet->Fake(fabs(newLeadJ.Rapidity() - newSecondJ.Rapidity()), weight);
+                        responsedRapidityJets_Zinc2jet_2->Fake(fabs(newLeadJ.Rapidity() - newSecondJ.Rapidity()), weight);
+                        
                         responsedRapidityJetsFB_Zinc2jet->Fake(ForwardJetRapidity - BackwardJetRapidity, weight);
+                        responsedRapidityJetsFB_Zinc2jet_2->Fake(ForwardJetRapidity - BackwardJetRapidity, weight);
+                        
                         responsediJetMass_Zinc2jet->Fake(jet1Plus2.M(), weight);
+                        responsediJetMass_Zinc2jet_2->Fake(jet1Plus2.M(), weight);
+                        
                         responsedPhiJetsFB_Zinc2jet->Fake(deltaPhi(vJetYOrdered[0], vJetYOrdered[vJetYOrdered.size() - 1] ), weight);
+                        responsedPhiJetsFB_Zinc2jet_2->Fake(deltaPhi(vJetYOrdered[0], vJetYOrdered[vJetYOrdered.size() - 1] ), weight);
+                        
                         responsedRJets_Zinc2jet->Fake(deltaRYPhi(newLeadJ, newSecondJ), weight);
+                        responsedRJets_Zinc2jet_2->Fake(deltaRYPhi(newLeadJ, newSecondJ), weight);
+                        
                         responsediJetPt_Zinc2jet->Fake(jet1Plus2.Pt(), weight);
+                        responsediJetPt_Zinc2jet_2->Fake(jet1Plus2.Pt(), weight);
+                        
                         responseMeanNJetsHT_Zinc2jet->Fake(jetsHT, nGoodJets, weight);
                         responseMeanNJetsdRapidity_Zinc2jet->Fake(fabs(newLeadJ.Rapidity() - newSecondJ.Rapidity()), nGoodJets, weight);
                         responseMeanNJetsdRapidityFB_Zinc2jet->Fake(ForwardJetRapidity - BackwardJetRapidity, nGoodJets, weight);
@@ -2291,6 +2415,7 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                         responseRatioJetPt21->Fake(jets[1].pt/jets[0].pt, weight);
                         responseJetsHt2Jet->Fake(jetsHT, weight);
                         responseJetsHt2Jet_1->Fake(jetsHT, weight);
+                        responseJetsHt2Jet_2->Fake(jetsHT, weight);
                         
                         responseTwoJetsPtDiffInc->Fake(jet1Minus2.Pt(),weight);
                         responseBestTwoJetsPtDiffInc->Fake(bestJet1Minus2.Pt(),weight);
@@ -2300,7 +2425,10 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                         responseBestSpTJets_Zinc2jet->Fake(SpTsub(bestTwoJets.first, bestTwoJets.second), weight);
                         responseSpT_Zinc2jet->Fake(SpT(lep1, lep2, leadJ, secondJ), weight);
                         responseBestSpT_Zinc2jet->Fake(SpT(lep1, lep2, bestTwoJets.first, bestTwoJets.second), weight);
+                        
                         responsedPhiJets_Zinc2jet->Fake(deltaPhi(leadJ, secondJ), weight);
+                        responsedPhiJets_Zinc2jet_2->Fake(deltaPhi(leadJ, secondJ), weight);
+                        
                         responseBestdPhiJets_Zinc2jet->Fake(deltaPhi(bestTwoJets.first, bestTwoJets.second), weight);
                         responsePHI_Zinc2jet->Fake(PHI(lep1, lep2, leadJ, secondJ), weight);
                         responseBestPHI_Zinc2jet->Fake(PHI(lep1, lep2, bestTwoJets.first, bestTwoJets.second), weight);
@@ -2418,23 +2546,37 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                         responseSecondHighestJetPt_Zinc3jet->Fill(jets[1].pt, genJets[1].pt, weight);
                         responseThirdHighestJetPt_Zinc3jet->Fill(jets[2].pt, genJets[2].pt, weight);
                         responseThirdJetPt->Fill(jets[2].pt, genJets[2].pt, weight);      
-                        responseThirdJetPt_1->Fill(jets[2].pt, genJets[2].pt, weight);      
+                        responseThirdJetPt_1->Fill(jets[2].pt, genJets[2].pt, weight);
+                        responseThirdJetPt_2->Fill(jets[2].pt, genJets[2].pt, weight);
                         
                         responseThirdJetEta->Fill(fabs(jets[2].eta), fabs(genJets[2].eta), weight);
+                        responseThirdJetEta_2->Fill(fabs(jets[2].eta), fabs(genJets[2].eta), weight);
                         //*************************************** begin edit *************************************************************//
                         responseThirdJetRapidity_Zinc3jet->Fill(fabs(newThirdJ.Rapidity()), fabs(genNewThirdJ.Rapidity()), weight);
                         responseThirdJetRapidityFull_Zinc3jet->Fill(newThirdJ.Rapidity(), genNewThirdJ.Rapidity(), weight);
                         responsedRapidityJets_Zinc3jet->Fill(fabs(newLeadJ.Rapidity() - newSecondJ.Rapidity()), fabs(genNewLeadJ.Rapidity() - genNewSecondJ.Rapidity()), weight);
+                        responsedRapidityJets_Zinc3jet_2->Fill(fabs(newLeadJ.Rapidity() - newSecondJ.Rapidity()), fabs(genNewLeadJ.Rapidity() - genNewSecondJ.Rapidity()), weight);
+                        
                         responsedRapidityJets_First_Third_Zinc3jet->Fill(fabs(newLeadJ.Rapidity() - newThirdJ.Rapidity()), fabs(genNewLeadJ.Rapidity() - genNewThirdJ.Rapidity()), weight);
+                        responsedRapidityJets_First_Third_Zinc3jet_2->Fill(fabs(newLeadJ.Rapidity() - newThirdJ.Rapidity()), fabs(genNewLeadJ.Rapidity() - genNewThirdJ.Rapidity()), weight);
+                        
                         responsedRapidityJets_Second_Third_Zinc3jet->Fill(fabs(newSecondJ.Rapidity() - newThirdJ.Rapidity()), fabs(genNewSecondJ.Rapidity() - genNewThirdJ.Rapidity()), weight);
+                        responsedRapidityJets_Second_Third_Zinc3jet_2->Fill(fabs(newSecondJ.Rapidity() - newThirdJ.Rapidity()), fabs(genNewSecondJ.Rapidity() - genNewThirdJ.Rapidity()), weight);
+                        
                         responsedRapidityJetsFB_Zinc3jet->Fill(ForwardJetRapidity - BackwardJetRapidity, genForwardJetRapidity - genBackwardJetRapidity, weight);
+                        responsedRapidityJetsFB_Zinc3jet_2->Fill(ForwardJetRapidity - BackwardJetRapidity, genForwardJetRapidity - genBackwardJetRapidity, weight);
+                        
                         responsediJetMass_Zinc3jet->Fill(jet1Plus2.M(),genJet1Plus2.M(), weight);
+                        responsediJetMass_Zinc3jet_2->Fill(jet1Plus2.M(),genJet1Plus2.M(), weight);
+                        
                         responsediJetPt_Zinc3jet->Fill(jet1Plus2.Pt(), genJet1Plus2.Pt(), weight);
+                        responsediJetPt_Zinc3jet_2->Fill(jet1Plus2.Pt(), genJet1Plus2.Pt(), weight);
                         //*************************************** end edit ***************************************************************//
                         responseThirdJetPtEta->Fill(jets[2].pt, jets[2].eta, genJets[2].pt, genJets[2].eta, weight);      
                         responseRatioJetPt32->Fill(jets[2].pt/jets[1].pt, genJets[2].pt/genJets[1].pt, weight);
                         responseJetsHt3Jet->Fill(jetsHT, genJetsHT, weight);
                         responseJetsHt3Jet_1->Fill(jetsHT, genJetsHT, weight);
+                        responseJetsHt3Jet_2->Fill(jetsHT, genJetsHT, weight);
                         
                     }
                     else {
@@ -2443,22 +2585,36 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                         responseThirdHighestJetPt_Zinc3jet->Miss(genJets[2].pt, genWeight);
                         responseThirdJetPt->Miss(genJets[2].pt, genWeight);
                         responseThirdJetPt_1->Miss(genJets[2].pt, genWeight);
+                        responseThirdJetPt_2->Miss(genJets[2].pt, genWeight);
                         
                         responseThirdJetEta->Miss(fabs(genJets[2].eta), genWeight);
+                        responseThirdJetEta_2->Miss(fabs(genJets[2].eta), genWeight);
                         //*************************************** begin edit *************************************************************//
                         responseThirdJetRapidity_Zinc3jet->Miss(fabs(genNewThirdJ.Rapidity()), genWeight);
                         responseThirdJetRapidityFull_Zinc3jet->Miss(genNewThirdJ.Rapidity(), genWeight);
                         responsedRapidityJets_Zinc3jet->Miss(fabs(genNewLeadJ.Rapidity() - genNewSecondJ.Rapidity()), genWeight);
+                        responsedRapidityJets_Zinc3jet_2->Miss(fabs(genNewLeadJ.Rapidity() - genNewSecondJ.Rapidity()), genWeight);
+                        
                         responsedRapidityJets_First_Third_Zinc3jet->Miss(fabs(genNewLeadJ.Rapidity() - genNewThirdJ.Rapidity()), genWeight);
+                        responsedRapidityJets_First_Third_Zinc3jet_2->Miss(fabs(genNewLeadJ.Rapidity() - genNewThirdJ.Rapidity()), genWeight);
+                        
                         responsedRapidityJets_Second_Third_Zinc3jet->Miss(fabs(genNewSecondJ.Rapidity() - genNewThirdJ.Rapidity()), genWeight);
+                        responsedRapidityJets_Second_Third_Zinc3jet_2->Miss(fabs(genNewSecondJ.Rapidity() - genNewThirdJ.Rapidity()), genWeight);
+                        
                         responsedRapidityJetsFB_Zinc3jet->Miss(genForwardJetRapidity - genBackwardJetRapidity, genWeight);
+                        responsedRapidityJetsFB_Zinc3jet_2->Miss(genForwardJetRapidity - genBackwardJetRapidity, genWeight);
+                        
                         responsediJetMass_Zinc3jet->Miss(genJet1Plus2.M(), genWeight);
+                        responsediJetMass_Zinc3jet_2->Miss(genJet1Plus2.M(), genWeight);
+                        
                         responsediJetPt_Zinc3jet->Miss(genJet1Plus2.Pt(), genWeight);
+                        responsediJetPt_Zinc3jet_2->Miss(genJet1Plus2.Pt(), genWeight);
                         //*************************************** end edit ***************************************************************//
                         responseThirdJetPtEta->Miss(genJets[2].pt, genJets[2].eta, genWeight);
                         responseRatioJetPt32->Miss(genJets[2].pt/genJets[1].pt, genWeight);
                         responseJetsHt3Jet->Miss(genJetsHT, genWeight);
                         responseJetsHt3Jet_1->Miss(genJetsHT, genWeight);
+                        responseJetsHt3Jet_2->Miss(genJetsHT, genWeight);
                         
                     }
                 } 
@@ -2469,22 +2625,36 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                         responseThirdHighestJetPt_Zinc3jet->Fake(jets[2].pt, weight);
                         responseThirdJetPt->Fake(jets[2].pt, weight);
                         responseThirdJetPt_1->Fake(jets[2].pt, weight);
+                        responseThirdJetPt_2->Fake(jets[2].pt, weight);
                         
                         responseThirdJetEta->Fake(fabs(jets[2].eta), weight);
+                        responseThirdJetEta_2->Fake(fabs(jets[2].eta), weight);
                         //*************************************** begin edit *************************************************************//
                         responseThirdJetRapidity_Zinc3jet->Fake(fabs(newThirdJ.Rapidity()), weight);
                         responseThirdJetRapidityFull_Zinc3jet->Fake(newThirdJ.Rapidity(), weight);
                         responsedRapidityJets_Zinc3jet->Fake(fabs(newLeadJ.Rapidity() - newSecondJ.Rapidity()), weight);
+                        responsedRapidityJets_Zinc3jet_2->Fake(fabs(newLeadJ.Rapidity() - newSecondJ.Rapidity()), weight);
+                        
                         responsedRapidityJets_First_Third_Zinc3jet->Fake(fabs(newLeadJ.Rapidity() - newThirdJ.Rapidity()), weight);
+                        responsedRapidityJets_First_Third_Zinc3jet_2->Fake(fabs(newLeadJ.Rapidity() - newThirdJ.Rapidity()), weight);
+                        
                         responsedRapidityJets_Second_Third_Zinc3jet->Fake(fabs(newSecondJ.Rapidity() - newThirdJ.Rapidity()), weight);
+                        responsedRapidityJets_Second_Third_Zinc3jet_2->Fake(fabs(newSecondJ.Rapidity() - newThirdJ.Rapidity()), weight);
+                        
                         responsedRapidityJetsFB_Zinc3jet->Fake(ForwardJetRapidity - BackwardJetRapidity, weight);
+                        responsedRapidityJetsFB_Zinc3jet_2->Fake(ForwardJetRapidity - BackwardJetRapidity, weight);
+                        
                         responsediJetMass_Zinc3jet->Fake(jet1Plus2.M(), weight);
+                        responsediJetMass_Zinc3jet_2->Fake(jet1Plus2.M(), weight);
+
                         responsediJetPt_Zinc3jet->Fake(jet1Plus2.Pt(), weight);
+                        responsediJetPt_Zinc3jet_2->Fake(jet1Plus2.Pt(), weight);
                         //*************************************** end edit ***************************************************************//
                         responseThirdJetPtEta->Fake(jets[2].pt, jets[2].eta, weight);
                         responseRatioJetPt32->Fake(jets[2].pt/jets[1].pt, weight);
                         responseJetsHt3Jet->Fake(jetsHT, weight);
                         responseJetsHt3Jet_1->Fake(jetsHT, weight);
+                        responseJetsHt3Jet_2->Fake(jetsHT, weight);
                         
                     }
                 }
@@ -2496,18 +2666,28 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                         responseThirdHighestJetPt_Zinc4jet->Fill(jets[2].pt, genJets[2].pt, weight);
                         responseFourthJetPt->Fill(jets[3].pt, genJets[3].pt, weight);
                         responseFourthJetPt_1->Fill(jets[3].pt, genJets[3].pt, weight);
+                        responseFourthJetPt_2->Fill(jets[3].pt, genJets[3].pt, weight);
                         responseFourthJetEta->Fill(fabs(jets[3].eta), fabs(genJets[3].eta), weight);
+                        responseFourthJetEta_2->Fill(fabs(jets[3].eta), fabs(genJets[3].eta), weight);
                         //*************************************** begin edit *************************************************************//
                         responseFourthJetRapidity_Zinc4jet->Fill(fabs(newFourthJ.Rapidity()), fabs(genNewFourthJ.Rapidity()), weight);
                         responseFourthJetRapidityFull_Zinc4jet->Fill(newFourthJ.Rapidity(), genNewFourthJ.Rapidity(), weight);
                         responsedRapidityJets_Zinc4jet->Fill(fabs(newLeadJ.Rapidity() - newSecondJ.Rapidity()), fabs(genNewLeadJ.Rapidity() - genNewSecondJ.Rapidity()), weight);
+                        responsedRapidityJets_Zinc4jet_2->Fill(fabs(newLeadJ.Rapidity() - newSecondJ.Rapidity()), fabs(genNewLeadJ.Rapidity() - genNewSecondJ.Rapidity()), weight);
+                        
                         responsedRapidityJetsFB_Zinc4jet->Fill(ForwardJetRapidity - BackwardJetRapidity, genForwardJetRapidity - genBackwardJetRapidity, weight);
+                        responsedRapidityJetsFB_Zinc4jet_2->Fill(ForwardJetRapidity - BackwardJetRapidity, genForwardJetRapidity - genBackwardJetRapidity, weight);
+                        
                         responsediJetMass_Zinc4jet->Fill(jet1Plus2.M(), genJet1Plus2.M(), weight);
+                        responsediJetMass_Zinc4jet_2->Fill(jet1Plus2.M(), genJet1Plus2.M(), weight);
+                        
                         responsediJetPt_Zinc4jet->Fill(jet1Plus2.Pt(), genJet1Plus2.Pt(), weight);
+                        responsediJetPt_Zinc4jet_2->Fill(jet1Plus2.Pt(), genJet1Plus2.Pt(), weight);
                         //*************************************** end edit ***************************************************************//
                         responseFourthJetPtEta->Fill(jets[3].pt, jets[3].eta, genJets[3].pt, genJets[3].eta, weight);      
                         responseJetsHt4Jet->Fill(jetsHT, genJetsHT, weight);
                         responseJetsHt4Jet_1->Fill(jetsHT, genJetsHT, weight);
+                        responseJetsHt4Jet_2->Fill(jetsHT, genJetsHT, weight);
                         FourthJetdEtaGenReco_Zinc4->Fill(fabs(jets[3].eta - genJets[3].eta));
                     }
                     else {
@@ -2516,18 +2696,28 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                         responseThirdHighestJetPt_Zinc4jet->Miss(genJets[2].pt, genWeight);
                         responseFourthJetPt->Miss(genJets[3].pt, genWeight);
                         responseFourthJetPt_1->Miss(genJets[3].pt, genWeight);
+                        responseFourthJetPt_2->Miss(genJets[3].pt, genWeight);
                         responseFourthJetEta->Miss(fabs(genJets[3].eta), genWeight);
+                        responseFourthJetEta_2->Miss(fabs(genJets[3].eta), genWeight);
                         //*************************************** begin edit *************************************************************//
                         responseFourthJetRapidity_Zinc4jet->Miss(fabs(genNewFourthJ.Rapidity()), genWeight);
                         responseFourthJetRapidityFull_Zinc4jet->Miss(genNewFourthJ.Rapidity(), genWeight);
                         responsedRapidityJets_Zinc4jet->Miss(fabs(genNewLeadJ.Rapidity() - genNewSecondJ.Rapidity()), genWeight);
+                        responsedRapidityJets_Zinc4jet_2->Miss(fabs(genNewLeadJ.Rapidity() - genNewSecondJ.Rapidity()), genWeight);
+                        
                         responsedRapidityJetsFB_Zinc4jet->Miss(genForwardJetRapidity - genBackwardJetRapidity, genWeight);
+                        responsedRapidityJetsFB_Zinc4jet_2->Miss(genForwardJetRapidity - genBackwardJetRapidity, genWeight);
+                        
                         responsediJetMass_Zinc4jet->Miss(genJet1Plus2.M(), genWeight);
+                        responsediJetMass_Zinc4jet_2->Miss(genJet1Plus2.M(), genWeight);
+                        
                         responsediJetPt_Zinc4jet->Miss(genJet1Plus2.Pt(), genWeight);
+                        responsediJetPt_Zinc4jet_2->Miss(genJet1Plus2.Pt(), genWeight);
                         //*************************************** end edit ***************************************************************//
                         responseFourthJetPtEta->Miss(genJets[3].pt, genJets[3].eta, genWeight);
                         responseJetsHt4Jet->Miss(genJetsHT, genWeight);
                         responseJetsHt4Jet_1->Miss(genJetsHT, genWeight);
+                        responseJetsHt4Jet_2->Miss(genJetsHT, genWeight);
                     } 
                 }
                 if (nGoodJets >= 4 && passesLeptonCut){
@@ -2537,18 +2727,28 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                         responseThirdHighestJetPt_Zinc4jet->Fake(jets[2].pt, weight);
                         responseFourthJetPt->Fake(jets[3].pt, weight);
                         responseFourthJetPt_1->Fake(jets[3].pt, weight);
+                        responseFourthJetPt_2->Fake(jets[3].pt, weight);
                         responseFourthJetEta->Fake(fabs(jets[3].eta), weight);
+                        responseFourthJetEta_2->Fake(fabs(jets[3].eta), weight);
                         //*************************************** begin edit *************************************************************//
                         responseFourthJetRapidity_Zinc4jet->Fake(fabs(newFourthJ.Rapidity()), weight);
                         responseFourthJetRapidityFull_Zinc4jet->Fake(newFourthJ.Rapidity(), weight);
                         responsedRapidityJets_Zinc4jet->Fake(fabs(newLeadJ.Rapidity() - newSecondJ.Rapidity()), weight);
+                        responsedRapidityJets_Zinc4jet_2->Fake(fabs(newLeadJ.Rapidity() - newSecondJ.Rapidity()), weight);
+                        
                         responsedRapidityJetsFB_Zinc4jet->Fake(ForwardJetRapidity - BackwardJetRapidity, weight);
+                        responsedRapidityJetsFB_Zinc4jet_2->Fake(ForwardJetRapidity - BackwardJetRapidity, weight);
+                        
                         responsediJetMass_Zinc4jet->Fake(jet1Plus2.M(), weight);
+                        responsediJetMass_Zinc4jet_2->Fake(jet1Plus2.M(), weight);
+                        
                         responsediJetPt_Zinc4jet->Fake(jet1Plus2.Pt(), weight);
+                        responsediJetPt_Zinc4jet_2->Fake(jet1Plus2.Pt(), weight);
                         //*************************************** end edit ***************************************************************//
                         responseFourthJetPtEta->Fake(jets[3].pt, jets[3].eta, weight);
                         responseJetsHt4Jet->Fake(jetsHT, weight);
                         responseJetsHt4Jet_1->Fake(jetsHT, weight);
+                        responseJetsHt4Jet_2->Fake(jetsHT, weight);
                     }
                 }
                 //-- Fifth Jet Pt  
@@ -2559,10 +2759,13 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                         responseThirdHighestJetPt_Zinc5jet->Fill(jets[2].pt, genJets[2].pt, weight);
                         responseFifthJetPt->Fill(jets[4].pt, genJets[4].pt, weight);
                         responseFifthJetPt_1->Fill(jets[4].pt, genJets[4].pt, weight);
-                        responseFifthJetEta->Fill(fabs(jets[4].eta), fabs(genJets[4].eta), weight);      
+                        responseFifthJetPt_2->Fill(jets[4].pt, genJets[4].pt, weight);
+                        responseFifthJetEta->Fill(fabs(jets[4].eta), fabs(genJets[4].eta), weight);
+                        responseFifthJetEta_2->Fill(fabs(jets[4].eta), fabs(genJets[4].eta), weight);
                         responseFifthJetPtEta->Fill(jets[4].pt, jets[4].eta, genJets[4].pt, genJets[4].eta, weight);      
                         responseJetsHt5Jet->Fill(jetsHT, genJetsHT, weight);
                         responseJetsHt5Jet_1->Fill(jetsHT, genJetsHT, weight);
+                        responseJetsHt5Jet_2->Fill(jetsHT, genJetsHT, weight);
                     }
                     else {
                         responseFirstHighestJetPt_Zinc5jet->Miss(genJets[0].pt, genWeight);
@@ -2570,10 +2773,13 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                         responseThirdHighestJetPt_Zinc5jet->Miss(genJets[2].pt, genWeight);
                         responseFifthJetPt->Miss(genJets[4].pt, genWeight);
                         responseFifthJetPt_1->Miss(genJets[4].pt, genWeight);
+                        responseFifthJetPt_2->Miss(genJets[4].pt, genWeight);
                         responseFifthJetEta->Miss(fabs(genJets[4].eta), genWeight);
+                        responseFifthJetEta_2->Miss(fabs(genJets[4].eta), genWeight);
                         responseFifthJetPtEta->Miss(genJets[4].pt, genJets[4].eta, genWeight);
                         responseJetsHt5Jet->Miss(genJetsHT, genWeight);
                         responseJetsHt5Jet_1->Miss(genJetsHT, genWeight);
+                        responseJetsHt5Jet_2->Miss(genJetsHT, genWeight);
                     }
                 } 
                 if (nGoodJets >= 5 && passesLeptonCut){
@@ -2583,10 +2789,13 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                         responseThirdHighestJetPt_Zinc5jet->Fake(jets[2].pt, weight);
                         responseFifthJetPt->Fake(jets[4].pt, weight);
                         responseFifthJetPt_1->Fake(jets[4].pt, weight);
+                        responseFifthJetPt_2->Fake(jets[4].pt, weight);
                         responseFifthJetEta->Fake(fabs(jets[4].eta), weight);
+                        responseFifthJetEta_2->Fake(fabs(jets[4].eta), weight);
                         responseFifthJetPtEta->Fake(jets[4].pt, jets[4].eta, weight);
                         responseJetsHt5Jet->Fake(jetsHT, weight);
                         responseJetsHt5Jet_1->Fake(jetsHT, weight);
+                        responseJetsHt5Jet_2->Fake(jetsHT, weight);
 
                     }
                 }
@@ -2750,6 +2959,7 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
             
             FirstHighestJetPt_Zinc1jet->Fill(jets[0].pt, weight);
             FirstJetEta_Zinc1jet->Fill(fabs(jets[0].eta), weight);
+            FirstJetEta_2_Zinc1jet->Fill(fabs(jets[0].eta), weight);
             FirstJetEtaFull_Zinc1jet->Fill(jets[0].eta, weight);
             //*************************************** begin edit *************************************************************//
             FirstJetRapidity_Zinc1jet->Fill(fabs(newLeadJ.Rapidity()), weight);
@@ -2763,6 +2973,7 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
             FirstJetPhi_Zinc1jet->Fill(jets[0].phi, weight);
             JetsHT_Zinc1jet->Fill(jetsHT, weight);
             JetsHT_1_Zinc1jet->Fill(jetsHT, weight);
+            JetsHT_2_Zinc1jet->Fill(jetsHT, weight);
             
             for (unsigned short j(0); j < nGoodJets; j++){
                 AllJetPt_Zinc1jet->Fill(jets[j].pt, weight);
@@ -2833,8 +3044,10 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
             SecondHighestJetPt_Zinc2jet->Fill(jets[1].pt, weight);
             SecondJetPt_Zinc2jet->Fill(jets[1].pt, weight);
             SecondJetPt_1_Zinc2jet->Fill(jets[1].pt, weight);
-            
+            SecondJetPt_2_Zinc2jet->Fill(jets[1].pt, weight);
             SecondJetEta_Zinc2jet->Fill(fabs(jets[1].eta), weight);
+            SecondJetEta_2_Zinc2jet->Fill(fabs(jets[1].eta), weight);
+            
             SecondJetEtaFull_Zinc2jet->Fill(jets[1].eta, weight);
             //*************************************** begin edit *************************************************************//
             SecondJetRapidity_Zinc2jet->Fill(fabs(newSecondJ.Rapidity()), weight);
@@ -2842,11 +3055,22 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
             SecondJetmass_Zinc2jet->Fill(newSecondJ.M(), weight);
             SecondJetmass_1_Zinc2jet->Fill(newSecondJ.M(), weight);
             dRapidityJets_Zinc2jet->Fill(fabs(newLeadJ.Rapidity() - newSecondJ.Rapidity()), weight);
+            dRapidityJets_2_Zinc2jet->Fill(fabs(newLeadJ.Rapidity() - newSecondJ.Rapidity()), weight);
+            
             dRapidityJetsFB_Zinc2jet->Fill(ForwardJetRapidity - BackwardJetRapidity, weight);
+            dRapidityJetsFB_2_Zinc2jet->Fill(ForwardJetRapidity - BackwardJetRapidity, weight);
+            
             diJetMass_Zinc2jet->Fill(jet1Plus2.M(), weight);
+            diJetMass_2_Zinc2jet->Fill(jet1Plus2.M(), weight);
+            
             dPhiJetsFB_Zinc2jet->Fill(deltaPhi(vJetYOrdered[0], vJetYOrdered[vJetYOrdered.size() - 1] ), weight);
+            dPhiJetsFB_2_Zinc2jet->Fill(deltaPhi(vJetYOrdered[0], vJetYOrdered[vJetYOrdered.size() - 1] ), weight);
+            
             dRJets_Zinc2jet->Fill(deltaRYPhi(newLeadJ, newSecondJ), weight);
+            dRJets_2_Zinc2jet->Fill(deltaRYPhi(newLeadJ, newSecondJ), weight);
+            
             diJetPt_Zinc2jet->Fill(jet1Plus2.Pt(), weight);
+            diJetPt_2_Zinc2jet->Fill(jet1Plus2.Pt(), weight);
             
             MeanNJetsHT_1D_Zinc2jet->Fill(jetsHT, weight*nGoodJets);
             MeanNJetsdRapidity_1D_Zinc2jet->Fill(fabs(newLeadJ.Rapidity() - newSecondJ.Rapidity()), weight*nGoodJets);
@@ -2861,9 +3085,13 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
             SecondJetPhi_Zinc2jet->Fill(jets[1].phi, weight);        
             JetsHT_Zinc2jet->Fill(jetsHT, weight);
             JetsHT_1_Zinc2jet->Fill(jetsHT, weight);
+            JetsHT_2_Zinc2jet->Fill(jetsHT, weight);
             
             ptBal_Zinc2jet->Fill(jet1Plus2PlusZ.Pt(), weight);
+            
             dPhiJets_Zinc2jet->Fill(deltaPhi(leadJ, secondJ), weight);
+            dPhiJets_2_Zinc2jet->Fill(deltaPhi(leadJ, secondJ), weight);
+            
             BestdPhiJets_Zinc2jet->Fill(deltaPhi(bestTwoJets.first, bestTwoJets.second), weight);
             dEtaJets_Zinc2jet->Fill(leadJ.Eta() - secondJ.Eta(), weight);
             dEtaFirstJetZ_Zinc2jet->Fill(leadJ.Eta() - Z.Eta(), weight);
@@ -3249,11 +3477,13 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
             SpTLeptons_Zinc3jet->Fill(SpTsub(lep1, lep2), weight);
             ThirdJetPt_Zinc3jet->Fill(jets[2].pt, weight);
             ThirdJetPt_1_Zinc3jet->Fill(jets[2].pt, weight);
+            ThirdJetPt_2_Zinc3jet->Fill(jets[2].pt, weight);
             
             FirstHighestJetPt_Zinc3jet->Fill(jets[0].pt, weight);
             SecondHighestJetPt_Zinc3jet->Fill(jets[1].pt, weight);
             ThirdHighestJetPt_Zinc3jet->Fill(jets[2].pt, weight);
             ThirdJetEta_Zinc3jet->Fill(fabs(jets[2].eta), weight);
+            ThirdJetEta_2_Zinc3jet->Fill(fabs(jets[2].eta), weight);
             ThirdJetEtaFull_Zinc3jet->Fill(jets[2].eta, weight);
             //*************************************** begin edit *************************************************************//
             ThirdJetRapidity_Zinc3jet->Fill(fabs(newThirdJ.Rapidity()), weight);
@@ -3261,17 +3491,29 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
             ThirdJetmass_Zinc3jet->Fill(newThirdJ.M(), weight);
             ThirdJetmass_1_Zinc3jet->Fill(newThirdJ.M(), weight);
             dRapidityJets_Zinc3jet->Fill(fabs(newLeadJ.Rapidity() - newSecondJ.Rapidity()), weight);
+            dRapidityJets_2_Zinc3jet->Fill(fabs(newLeadJ.Rapidity() - newSecondJ.Rapidity()), weight);
+            
             dRapidityJets_First_Third_Zinc3jet->Fill(fabs(newLeadJ.Rapidity() - newThirdJ.Rapidity()), weight);
+            dRapidityJets_2_First_Third_Zinc3jet->Fill(fabs(newLeadJ.Rapidity() - newThirdJ.Rapidity()), weight);
+            
             dRapidityJets_Second_Third_Zinc3jet->Fill(fabs(newSecondJ.Rapidity() - newThirdJ.Rapidity()), weight);
+            dRapidityJets_2_Second_Third_Zinc3jet->Fill(fabs(newSecondJ.Rapidity() - newThirdJ.Rapidity()), weight);
+            
             dRapidityJetsFB_Zinc3jet->Fill(ForwardJetRapidity - BackwardJetRapidity, weight);
+            dRapidityJetsFB_2_Zinc3jet->Fill(ForwardJetRapidity - BackwardJetRapidity, weight);
+            
             diJetMass_Zinc3jet->Fill(jet1Plus2.M(), weight);
+            diJetMass_2_Zinc3jet->Fill(jet1Plus2.M(), weight);
+            
             diJetPt_Zinc3jet->Fill(jet1Plus2.Pt(), weight);
+            diJetPt_2_Zinc3jet->Fill(jet1Plus2.Pt(), weight);
             //*************************************** end edit ***************************************************************//
             ThirdJetPtEta_Zinc3jet->Fill(jets[2].pt, fabs(jets[2].eta), weight);
             RatioJetPt32_Zinc3jet->Fill(jets[2].pt/jets[1].pt, weight);
             ThirdJetPhi_Zinc3jet->Fill(jets[2].phi, weight);        
             JetsHT_Zinc3jet->Fill(jetsHT, weight);
             JetsHT_1_Zinc3jet->Fill(jetsHT, weight);
+            JetsHT_2_Zinc3jet->Fill(jetsHT, weight);
             
             for (unsigned short j(0); j < nGoodJets; j++){
                 AllJetPt_Zinc3jet->Fill(jets[j].pt, weight);
@@ -3315,10 +3557,12 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
             SpTLeptons_Zinc4jet->Fill(SpTsub(lep1, lep2), weight);
             FourthJetPt_Zinc4jet->Fill(jets[3].pt, weight);
             FourthJetPt_1_Zinc4jet->Fill(jets[3].pt, weight);
+            FourthJetPt_2_Zinc4jet->Fill(jets[3].pt, weight);
             FirstHighestJetPt_Zinc4jet->Fill(jets[0].pt, weight);
             SecondHighestJetPt_Zinc4jet->Fill(jets[1].pt, weight);
             ThirdHighestJetPt_Zinc4jet->Fill(jets[2].pt, weight);
             FourthJetEta_Zinc4jet->Fill(fabs(jets[3].eta), weight);
+            FourthJetEta_2_Zinc4jet->Fill(fabs(jets[3].eta), weight);
             FourthJetEtaFull_Zinc4jet->Fill(jets[3].eta, weight);
             //*************************************** begin edit *************************************************************//
             FourthJetRapidity_Zinc4jet->Fill(fabs(newFourthJ.Rapidity()), weight);
@@ -3326,14 +3570,22 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
             FourthJetmass_Zinc4jet->Fill(newFourthJ.M(), weight);
             FourthJetmass_1_Zinc4jet->Fill(newFourthJ.M(), weight);
             dRapidityJets_Zinc4jet->Fill(fabs(newLeadJ.Rapidity() - newSecondJ.Rapidity()), weight);
+            dRapidityJets_2_Zinc4jet->Fill(fabs(newLeadJ.Rapidity() - newSecondJ.Rapidity()), weight);
+            
             dRapidityJetsFB_Zinc4jet->Fill(ForwardJetRapidity - BackwardJetRapidity, weight);
+            dRapidityJetsFB_2_Zinc4jet->Fill(ForwardJetRapidity - BackwardJetRapidity, weight);
+            
             diJetMass_Zinc4jet->Fill(jet1Plus2.M(), weight);
+            diJetMass_2_Zinc4jet->Fill(jet1Plus2.M(), weight);
+            
             diJetPt_Zinc4jet->Fill(jet1Plus2.Pt(), weight);
+            diJetPt_2_Zinc4jet->Fill(jet1Plus2.Pt(), weight);
             //*************************************** end edit ***************************************************************//
             FourthJetPtEta_Zinc4jet->Fill(jets[3].pt, fabs(jets[3].eta), weight);
             FourthJetPhi_Zinc4jet->Fill(jets[3].phi, weight);        
             JetsHT_Zinc4jet->Fill(jetsHT, weight);
             JetsHT_1_Zinc4jet->Fill(jetsHT, weight);
+            JetsHT_2_Zinc4jet->Fill(jetsHT, weight);
             for (unsigned short j(0); j < nGoodJets; j++){
                 AllJetPt_Zinc4jet->Fill(jets[j].pt, weight);
                 AllJetEta_Zinc4jet->Fill(jets[j].eta, weight);
@@ -3375,15 +3627,18 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
             SpTLeptons_Zinc5jet->Fill(SpTsub(lep1, lep2), weight);
             FifthJetPt_Zinc5jet->Fill(jets[4].pt, weight);
             FifthJetPt_1_Zinc5jet->Fill(jets[4].pt, weight);
+            FifthJetPt_2_Zinc5jet->Fill(jets[4].pt, weight);
             FirstHighestJetPt_Zinc5jet->Fill(jets[0].pt, weight);
             SecondHighestJetPt_Zinc5jet->Fill(jets[1].pt, weight);
             ThirdHighestJetPt_Zinc5jet->Fill(jets[2].pt, weight);
             FifthJetEta_Zinc5jet->Fill(fabs(jets[4].eta), weight);
+            FifthJetEta_2_Zinc5jet->Fill(fabs(jets[4].eta), weight);
             FifthJetEtaFull_Zinc5jet->Fill(jets[4].eta, weight);
             FifthJetPtEta_Zinc5jet->Fill(jets[4].pt, fabs(jets[4].eta), weight);
             FifthJetPhi_Zinc5jet->Fill(jets[4].phi, weight);        
             JetsHT_Zinc5jet->Fill(jetsHT, weight);
             JetsHT_1_Zinc5jet->Fill(jetsHT, weight);
+            JetsHT_2_Zinc5jet->Fill(jetsHT, weight);
             if (nGoodJets == 5){
                 ZNGoodJets_Zexc_NoWeight->Fill(5.);
                 ZMass_Zexc5jet->Fill(Z.M(), weight);

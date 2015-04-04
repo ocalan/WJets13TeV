@@ -1,6 +1,3 @@
-//********WJets@8TeV************
-
-
 #include "Rivet/Analysis.hh"
 #include "Rivet/RivetAIDA.hh"
 #include "Rivet/Tools/Logging.hh"
@@ -12,7 +9,7 @@
 #include "Rivet/AnalysisLoader.hh"
 #include <iostream>
 
-using namespace std;
+//using namespace std;
 
 namespace Rivet {
 
@@ -32,6 +29,7 @@ namespace Rivet {
 
     // Book histograms and initialise projections before the run
     void init() {
+
       FinalState fs;
       WFinder wfinder_mu(fs, -2.4, 2.4, 0*GeV, MUON, 50*GeV, 100*GeV, 0*GeV, 0.1, true, false);
       addProjection(wfinder_mu, "WFinder_mu");
@@ -46,6 +44,7 @@ namespace Rivet {
       FastJets fastjets(vfs, FastJets::ANTIKT, 0.5);
       addProjection(fastjets, "Jets");
 
+      vector<double> addjetPt_Winc1jet ;
 
       vector<double> jetPt_Winc1jet ;
       vector<double> jetPt_Winc2jet ;
@@ -59,17 +58,23 @@ namespace Rivet {
       vector<double> jetHT_Winc4jet ;
       vector<double> jetHT_Winc5jet ;
 
-      jetPt_Winc1jet += 20, 24, 30, 39, 49, 60, 72, 85, 100, 117, 136, 157, 187, 220, 258, 300, 350, 400, 450, 500, 590, 700, 1000;
-      jetPt_Winc2jet += 20, 24, 30, 39, 49, 60, 72, 85, 100, 117, 136, 157, 187, 220, 258, 300, 350, 400, 450, 500, 590, 800;
-      jetPt_Winc3jet += 20, 24, 30, 39, 49, 60, 72, 85, 100, 117, 136, 157, 187, 220, 258, 300, 350, 400, 450, 700;
-      jetPt_Winc4jet += 20, 24, 30, 39, 49, 62, 78, 96, 150;
-      jetPt_Winc5jet += 20, 24, 30, 39, 49, 62, 100;
+      jetPt_Winc1jet += 20, 24, 30, 39, 49, 60, 72, 85, 100, 117, 136, 157, 187, 220, 258, 300, 350, 400, 450, 500, 590, 700, 900, 1400;
+      jetPt_Winc2jet += 20, 24, 30, 39, 49, 60, 72, 85, 100, 117, 136, 157, 187, 220, 258, 300, 350, 400, 450, 500, 590, 700, 1000;
+      jetPt_Winc3jet += 20, 24, 30, 39, 49, 62, 78, 105, 142, 185, 235, 300, 500;
+      jetPt_Winc4jet += 20, 24, 30, 39, 49, 62, 78, 96, 120, 160, 250;
+      jetPt_Winc5jet += 20, 24, 30, 39, 49, 62, 90, 140;
 
-      jetHT_Winc1jet += 30, 40, 60, 90, 120, 160, 210, 260, 330, 410, 500, 620, 750, 900, 1200;
-      jetHT_Winc2jet += 60, 90, 120, 160, 210, 260, 330, 410, 500, 620, 750, 1000;
-      jetHT_Winc3jet += 90, 120, 160, 210, 260, 330, 410, 500, 620, 800;
-      jetHT_Winc4jet += 120, 140, 167, 203, 253, 320, 410, 530, 690, 910;
-      jetHT_Winc5jet += 150, 180, 222, 282, 365, 485, 650, 880;
+  
+      jetHT_Winc1jet += 30, 39, 49, 62, 78, 96, 118, 150, 190, 240, 300, 370, 450, 540, 650, 800, 1000, 1300, 2000;
+      jetHT_Winc2jet += 60, 78, 96, 118, 150, 190, 240, 300, 370, 450, 540, 650, 800, 1000, 1300, 2000;
+      jetHT_Winc3jet += 90, 118, 150, 190, 240, 300, 370, 450, 540, 650, 800, 1100, 1800;
+      jetHT_Winc4jet += 120, 140, 165, 200, 250, 310, 380, 480, 600, 800, 1100, 1800;
+      jetHT_Winc5jet += 150, 180, 222, 282, 365, 485, 650, 880, 1300;
+
+      addjetPt_Winc1jet += 20, 24, 30, 39, 49, 60, 72, 85, 100, 117, 136, 157, 187, 220, 258, 300, 350, 400, 450, 500, 590, 700, 1000;
+
+     _hist_addJetPt1j =bookHistogram1D("addjet_Pt1jetcase", addjetPt_Winc1jet);
+
 
      _hist_JetPt1j =bookHistogram1D("jet_Pt1jetcase", jetPt_Winc1jet);
      _hist_JetPt2j =bookHistogram1D("jet_Pt2jetcase", jetPt_Winc2jet);
@@ -82,7 +87,6 @@ namespace Rivet {
      _hist_Jeteta3j =bookHistogram1D("jet_eta3jetcase", 24, 0, 2.4);
      _hist_Jeteta4j =bookHistogram1D("jet_eta4jetcase", 12, 0, 2.4);
      _hist_Jeteta5j =bookHistogram1D("jet_eta5jetcase", 6,  0, 2.4);
-     _hist_Jeteta6j =bookHistogram1D("jet_eta6jetcase", 6,  0, 2.4);
 
      _hist_Ht_1j =bookHistogram1D("JetsHT_inc1jet", jetHT_Winc1jet);
      _hist_Ht_2j =bookHistogram1D("JetsHT_inc2jet", jetHT_Winc2jet);
@@ -95,7 +99,7 @@ namespace Rivet {
 
   }
 
-  void Fill(AIDA::IHistogram1D*& _histJetMult, const double& weight, std::vector<FourMomentum>& finaljet_list){
+ void Fill(AIDA::IHistogram1D*& _histJetMult, const double& weight, std::vector<FourMomentum>& finaljet_list){
        _histJetMult->fill(0, weight);
        for (size_t i=0 ; i<finaljet_list.size() ; ++i) {
          if (i==6) break;
@@ -103,7 +107,9 @@ namespace Rivet {
    
         }
    }
-/// Perform the per-event analysis
+
+
+    /// Perform the per-event analysis
     void analyze(const Event& event) {
    
       const double weight = event.weight();
@@ -115,36 +121,37 @@ namespace Rivet {
 
       if (wfinder_mu.bosons().size()==1) {
 
-     const FourMomentum& boson = wfinder_mu.bosons().front().momentum();
-     const FourMomentum& neutrino = wfinder_mu.constituentNeutrinos()[0].momentum();
-     const FourMomentum& lepton0 = wfinder_mu.constituentLeptons()[0].momentum();
-     const FourMomentum& lepton1 = wfinder_mu.constituentLeptons()[1].momentum();
+       const FourMomentum& boson = wfinder_mu.bosons().front().momentum();
+       const FourMomentum& neutrino = wfinder_mu.constituentNeutrinos()[0].momentum();
+       const FourMomentum& lepton0 = wfinder_mu.constituentLeptons()[0].momentum();
+       const FourMomentum& lepton1 = wfinder_mu.constituentLeptons()[1].momentum();
 
-     //double mT = sqrt(2.0 * lepton.pT() * p_miss.Et() * (1.0 - cos( lepton.phi()-p_miss.phi()) ) );
+       //double mT = sqrt(2.0 * lepton.pT() * p_miss.Et() * (1.0 - cos( lepton.phi()-p_miss.phi()) ) );
 
-     double pt0 = lepton0.pT()/GeV;
-     double pt1 = lepton1.pT()/GeV;
-     double eta0 = lepton0.eta();
-     double eta1 = lepton1.eta();
+       double pt0 = lepton0.pT()/GeV;
+       double pt1 = lepton1.pT()/GeV;
+       double eta0 = lepton0.eta();
+       double eta1 = lepton1.eta();
 
-     bool inAcceptance = fabs(eta0)<2.1 && fabs(eta1)<2.1 && pt0>25 && pt1>15;
-     if (!inAcceptance)return;
+       bool inAcceptance = fabs(eta0)<2.1 && fabs(eta1)<2.1 && pt0>25 && pt1>15;
 
-    //******************************Obtain the jets*************************************
+       if (!inAcceptance)return;
 
-      vector<FourMomentum> finaljet_list;
-      double HT = 0.0;
-      
+       //Obtain the jets::::::::::::::
+
+       vector<FourMomentum> finaljet_list;
+       double HT = 0.0;
+     
       foreach (const Jet& j, applyProjection<FastJets>(event, "Jets").jetsByPt(30.0*GeV)) {
         const double jeta = j.momentum().eta();
         const double jpt = j.momentum().pT();
-         if (fabs(jeta) < 2.4)
+
+        if (fabs(jeta) < 2.4)
         if(jpt>30){
                 finaljet_list.push_back(j.momentum());
-                HT += j.momentum().pT();
-
-           }
-     }
+                HT += j.momentum().pT();     
+      }
+ }
 
   //Multiplicity plots.     
 
@@ -152,6 +159,8 @@ namespace Rivet {
       Fill(_hist_inc_WJetMult, weight, finaljet_list);
       
       if(finaljet_list.size()>=1) {
+            _hist_addJetPt1j->fill(finaljet_list[0].pT(), weight);
+
             _hist_JetPt1j->fill(finaljet_list[0].pT(), weight);
             _hist_Jeteta1j->fill(finaljet_list[0].eta(), weight);
             _hist_Ht_1j->fill(HT, weight);
@@ -174,26 +183,29 @@ namespace Rivet {
            _hist_Jeteta4j->fill(finaljet_list[3].eta(), weight);
            _hist_Ht_4j->fill(HT, weight);
      }
-if(finaljet_list.size()>=5) {
+
+
+     if(finaljet_list.size()>=5) {
            _hist_JetPt5j->fill(finaljet_list[4].pT(), weight);
            _hist_Jeteta5j->fill(finaljet_list[4].eta(), weight);
            _hist_Ht_5j->fill(HT, weight);
      }
 
-  }
+  }// close the muon loop
 
-} 
+} //void loop
 
 
 /// Normalise histograms etc., after the run
-  
-  void finalize() {
+    void finalize() {
 
         double crossSec=36702;
 
         scale(_hist_inc_WJetMult, crossSec/sumOfWeights());
         scale(_hist_excl_WJetMult, crossSec/sumOfWeights());
-        
+ 
+        scale(_hist_addJetPt1j, crossSec/sumOfWeights());
+
         scale(_hist_JetPt1j, crossSec/sumOfWeights());
         scale(_hist_JetPt2j, crossSec/sumOfWeights());
         scale(_hist_JetPt3j, crossSec/sumOfWeights());
@@ -205,7 +217,7 @@ if(finaljet_list.size()>=5) {
         scale(_hist_Jeteta3j, crossSec/sumOfWeights());
         scale(_hist_Jeteta4j, crossSec/sumOfWeights());
         scale(_hist_Jeteta5j, crossSec/sumOfWeights());
-        scale(_hist_Jeteta6j, crossSec/sumOfWeights());
+
         scale(_hist_Ht_1j, crossSec/sumOfWeights());
         scale(_hist_Ht_2j, crossSec/sumOfWeights());
         scale(_hist_Ht_3j, crossSec/sumOfWeights());
@@ -223,6 +235,8 @@ if(finaljet_list.size()>=5) {
 
         AIDA::IHistogram1D* _hist_inc_WJetMult;
         AIDA::IHistogram1D* _hist_excl_WJetMult;
+
+        AIDA::IHistogram1D* _hist_addJetPt1j;
 
         AIDA::IHistogram1D* _hist_JetPt1j;
         AIDA::IHistogram1D* _hist_JetPt2j;
@@ -242,8 +256,9 @@ if(finaljet_list.size()>=5) {
         AIDA::IHistogram1D* _hist_Ht_3j;
         AIDA::IHistogram1D* _hist_Ht_4j;
         AIDA::IHistogram1D* _hist_Ht_5j;
-        
-          };
+
+
+  };
 
 
 
@@ -251,3 +266,6 @@ if(finaljet_list.size()>=5) {
   AnalysisBuilder<CMS_SMP_WJETS> plugin_CMS_SMP_WJETS;     
 
 }
+
+
+

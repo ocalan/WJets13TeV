@@ -740,7 +740,7 @@ void FuncPlot(string variable, bool logZ, bool decrease, string varRivetName, st
     can->Print(outputFileNamePNG.c_str());
     
     
-    //--- Generate new plot to see Contribution ---
+    //--- Generate new plot to see Contribution : all input histo are already scaled to the final unit ---
     plotSystematicBreakdown(outputDirectory, variable, dataCentral, hSyst, hErrorFromToyResponse, hErrorFromRespWeight, hSystTTbar, hSystWb, hSystBtagUp, hSystBtagDown);
 
 }

@@ -12,6 +12,12 @@ void myplotSelectedMethod2(string method, RooUnfoldResponse *response, TH2D *gen
 
 void myplotChi2OfChange(RooUnfoldResponse *response, int kterm, TH2D *hData, TH2D *hBG[], int nBG, string leptonFlavor, string variable, string energy, string outputDirectory, TFile *outputRootFile, bool closureTest = false, bool save = true);
 
+// define function for plot unfolded with varied kterm
+void myplotManyKterm(string method, RooUnfoldResponse *response, TH2D *genMad, TH2D *hData, TH2D *hBG[], int nBG, string leptonFlavor, string variable, bool logZ, bool decrease, string outputDirectory, TFile *outputRootFile, bool closureTest = false, bool save = true);
+
+
 TH2D* get2DHisto(TFile *File, string variable);
+
+TH1D* computeProject1DMeanNJets(TH2D *hUnfoldedC, string variable);
 
 #endif

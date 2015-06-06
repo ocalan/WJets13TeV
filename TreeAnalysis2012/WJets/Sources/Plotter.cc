@@ -1,3 +1,7 @@
+// History
+//---- 2015_05_17
+// Add, as a commented line, the one to use if you do not want to plot QCD contribution in the Signal region.
+
 #include <iostream>
 #include <sstream>
 #include <vector>
@@ -72,6 +76,7 @@ void Plotter(string leptonFlavor = "Muons", int JetPtMin = 30,
         string fileNameTemp =  ProcessInfo[fileSelect].filename ; 
         cout << "Is double lepton:" << isDoubleLep << "   " << leptonFlavor <<"   " << fileNameTemp << endl;
         if ((doQCD > 0 || doInvMassCut || doSSign ) && fileNameTemp.find("QCD") != string::npos) continue;
+        //if (fileNameTemp.find("QCD") != string::npos) continue; // use this line if you do not want to plot QCD
         file[countFiles] = getFile(FILESDIRECTORY, leptonFlavor, energy, fileNameTemp, JetPtMin, JetPtMax, doFlat, doVarWidth, doQCD, doSSign,    doInvMassCut, MET, doBJets);
 
         if ( i == 0 ){

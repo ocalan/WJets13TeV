@@ -1,3 +1,8 @@
+// History
+//---- 2015_05_16
+// add Iso plot (in region A) with fine binning: FIXME
+
+
 #ifndef _HistoSet_h_
 #define _HistoSet_h_
 
@@ -972,7 +977,11 @@ class HistoSet: public TObject{
 
         TH1D *MuDetIsoRhoCorr;
         TH1D *MuPFIsoDBetaCorr;
-
+    
+        TH1D *MuPFIso_Zinc0jet;
+        TH1D *MuPFIso_2ndZinc0jet;
+        TH1D *MuPFIso_3rdZinc0jet;
+    
         TH1D *deltaRjetMu;
         TH1D *deltaPtjetMu;
         TH1D *NVtx;

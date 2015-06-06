@@ -1,3 +1,6 @@
+// History
+//---- 2015_05_07
+// Add ang. dist. for rivet and BH. Add MeanNJets dist. for BH.
 
 #ifndef __xsecVariableNames__
 #define __xsecVariableNames__
@@ -41,45 +44,45 @@ const xsecVariableStruct xsecVarNames[] = {
     {"JetsHT_1_Zinc5jet",           "JetsHT_inc5jet",           "NA"},  //20
     
     //-- jet Eta distribution
-    {"FirstJetEta_Zinc1jet",        "jet_eta1jetcase",      "etajet1"},
-    {"SecondJetEta_Zinc2jet",       "jet_eta2jetcase",      "etajet2"},
-    {"ThirdJetEta_Zinc3jet",        "jet_eta3jetcase",      "etajet3"},
-    {"FourthJetEta_Zinc4jet",       "jet_eta4jetcase",      "etajet4"},
-    {"FifthJetEta_Zinc5jet",        "jet_eta5jetcase",      "NA"},      //25
+    {"FirstJetEta_Zinc1jet",        "jet_eta1jetcase",          "etajet1"},
+    {"SecondJetEta_Zinc2jet",       "jet_eta2jetcase",          "etajet2"},
+    {"ThirdJetEta_Zinc3jet",        "jet_eta3jetcase",          "etajet3"},
+    {"FourthJetEta_Zinc4jet",       "jet_eta4jetcase",          "etajet4"},
+    {"FifthJetEta_Zinc5jet",        "jet_eta5jetcase",          "NA"},      //25
     
     
-    // ZJetsAndDPSName                          RivetName        BlackHatName
+    // ZJetsAndDPSName                          RivetName                   BlackHatName
     
     //-- angular variables
-    {"dRapidityJets_Zinc2jet",                  "NA",           "NA"},
-    {"dRapidityJets_Zinc3jet",                  "NA",           "NA"},
-    {"dRapidityJets_Zinc4jet",                  "NA",           "NA"}, //28
+    {"dRapidityJets_Zinc2jet",                  "dyj1j2_inc2jet",           "dyj1j2jet2"},
+    {"dRapidityJets_Zinc3jet",                  "dyj1j2_inc3jet",           "dyj1j2jet3"},
+    {"dRapidityJets_Zinc4jet",                  "dyj1j2_inc4jet",           "dyj1j2jet4"}, //28
     
-    {"dRapidityJetsFB_Zinc2jet",                "NA",           "NA"},
-    {"dRapidityJetsFB_Zinc3jet",                "NA",           "NA"},
-    {"dRapidityJetsFB_Zinc4jet",                "NA",           "NA"}, //31
+    {"dRapidityJetsFB_Zinc2jet",                "dyjFjB_inc2jet",           "dyjFjBjet2"},
+    {"dRapidityJetsFB_Zinc3jet",                "dyjFjB_inc3jet",           "dyjFjBjet3"},
+    {"dRapidityJetsFB_Zinc4jet",                "dyjFjB_inc4jet",           "dyjFjBjet4"}, //31
 
-    {"dRapidityJets_First_Third_Zinc3jet",      "NA",           "NA"},
-    {"dRapidityJets_Second_Third_Zinc3jet",     "NA",           "NA"},
+    {"dRapidityJets_First_Third_Zinc3jet",      "dyj1j3_inc3jet",           "dyj1j3jet3"},
+    {"dRapidityJets_Second_Third_Zinc3jet",     "dyj2j3_inc3jet",           "dyj2j3jet3"},
     
-    {"dPhiJets_Zinc2jet",                       "NA",           "NA"},
-    {"dPhiJetsFB_Zinc2jet",                     "NA",           "NA"},
-    {"dRJets_Zinc2jet",                         "NA",           "NA"}, //36
+    {"dPhiJets_Zinc2jet",                       "dphij1j2_inc2jet",         "dphij1j2jet2"},
+    {"dPhiJetsFB_Zinc2jet",                     "dphijFjB_inc2jet",         "dphijFjBjet2"},
+    {"dRJets_Zinc2jet",                         "dRj1j2_inc2jet",           "dRj1j2jet2"}, //36
     
     //-- dijet properties
-    {"diJetMass_Zinc2jet",                      "NA",           "NA"},
-    {"diJetMass_Zinc3jet",                      "NA",           "NA"},
-    {"diJetMass_Zinc4jet",                      "NA",           "NA"},
+    {"diJetMass_Zinc2jet",                      "dijetM_inc2jet",           "dijetMjet2"},
+    {"diJetMass_Zinc3jet",                      "dijetM_inc3jet",           "dijetMjet3"},
+    {"diJetMass_Zinc4jet",                      "dijetM_inc4jet",           "dijetMjet4"},
     
-    {"diJetPt_Zinc2jet",                        "NA",           "NA"},
-    {"diJetPt_Zinc3jet",                        "NA",           "NA"},
-    {"diJetPt_Zinc4jet",                        "NA",           "NA"}, //42
+    {"diJetPt_Zinc2jet",                        "diJetPt_inc2jet",          "diJetPtjet2"},
+    {"diJetPt_Zinc3jet",                        "diJetPt_inc3jet",          "diJetPtjet3"},
+    {"diJetPt_Zinc4jet",                        "diJetPt_inc4jet",          "diJetPtjet4"}, //42
     
     //-- Mean number of Jets
-    {"MeanNJetsHT_Zinc1jet",                    "NA",           "NA"},
-    {"MeanNJetsHT_Zinc2jet",                    "NA",           "NA"},
-    {"MeanNJetsdRapidity_Zinc2jet",             "NA",           "NA"},
-    {"MeanNJetsdRapidityFB_Zinc2jet",           "NA",           "NA"}, //46
+    {"MeanNJetsHT_Zinc1jet",                    "NA",                       "totNJhtjet1"},
+    {"MeanNJetsHT_Zinc2jet",                    "NA",                       "totNJhtjet2"},
+    {"MeanNJetsdRapidity_Zinc2jet",             "NA",                       "totNJdyj1j2"},
+    {"MeanNJetsdRapidityFB_Zinc2jet",           "NA",                       "totNJdyjFjB"}, //46
 
 };
 

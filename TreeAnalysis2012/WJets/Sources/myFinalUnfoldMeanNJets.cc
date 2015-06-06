@@ -1,3 +1,7 @@
+// History
+//---- 2015_05_10
+// Add Blackhat, Sherpa2, MES/MER
+
 #include <iostream>
 #include <cstdlib>
 #include <iomanip>
@@ -115,8 +119,6 @@ void FuncUnfold(string leptonFlavor, bool isMuon, string unfAlg, string variable
     TH2::SetDefaultSumw2();
     string command = "mkdir -p " + outputDirectory;
     system(command.c_str());
-    //if (variable.find("JetPt")!= string::npos && variable.find("Highest") == string::npos && JetPtMin == 20) JetPtMin = 15;
-    //if (variable.find("JetPt")!= string::npos && variable.find("Highest") == string::npos && JetPtMin == 30) JetPtMin = 20;
     
     
     //--- set number of toys used in getErrorRespToy2D()
@@ -152,8 +154,8 @@ void FuncUnfold(string leptonFlavor, bool isMuon, string unfAlg, string variable
     
     //-- fetch the WJets files and histograms ----------------
     cout << " Fetch WJets files " << endl;
-    TFile *fDYMadGraph[8] = {NULL}; // WJets File : 0 = central, 1 = PU Up,  2 = PU Down,  3 = JER Up, 4 = BtagEff Up, 5 = BtagEff Down, 6 = Wb, 7 = Resp
-    TH2D *hDY[8] = {NULL}; // Reco Wjets Hist => actually these are not used
+    TFile *fDYMadGraph[11] = {NULL}; // WJets File : 0 = central, 1 = PU Up,  2 = PU Down,  3 = JER Up, 4 = BtagEff Up, 5 = BtagEff Down, 6 = Wb, 7 = Resp, 8 = MES Up, 9 = MES Down, 10 = MER
+    TH2D *hDY[11] = {NULL}; // Reco Wjets Hist => actually these are not used
     TH2D *hDYGenMadGraph = NULL; // GenMadGraph Hist
     
     getFilesNew(FILESDIRECTORY, fDYMadGraph, leptonFlavor, energy, ProcessInfo[24].filename, JetPtMin, JetPtMax, doFlat, doVarWidth, 0, 0, 0, 0, -1, false);
@@ -165,7 +167,7 @@ void FuncUnfold(string leptonFlavor, bool isMuon, string unfAlg, string variable
     
     
     //--- Get MadGraph Resp Matrix ------------------------
-    RooUnfoldResponse *resDY[8] = {NULL};
+    RooUnfoldResponse *resDY[11] = {NULL};
     getRespsNew(resDY, fDYMadGraph, "response" + variable);
     cout << "line th " << __LINE__ << endl;
     //-----------------------------------------------------
@@ -174,10 +176,10 @@ void FuncUnfold(string leptonFlavor, bool isMuon, string unfAlg, string variable
     //--- fetch the BG files and histograms ----------------
     cout << " Fetch background files " << endl;
     
-    const int NBkgSyst(7);
+    const int NBkgSyst(10); // 0 = central, 1 = PU Up,  2 = PU Down,  3 = XS Up,  4 = XS Down,  5 = BtagEff Up,  6 = BtagEff Down, 7 = MES Up, 8 = MES Down, 9 = MER
     int nFilesBkg(0);
     
-    TFile *fBG[15][NBkgSyst] = {{NULL}};  // 0 = central, 1 = PU Up,  2 = PU Down,  3 = XS Up,  4 = XS Down,  5 = BtagEff Up,  6 = BtagEff Down
+    TFile *fBG[15][NBkgSyst] = {{NULL}};
     TH2D *hBG[15][NBkgSyst] = {{NULL}}, *hSumBG[NBkgSyst] = {NULL} ;
     
     int nFiles = NFILESDYJETS; //
@@ -228,7 +230,60 @@ void FuncUnfold(string leptonFlavor, bool isMuon, string unfAlg, string variable
     }
     //--- End fetch the BG files and histograms ------------------
     
+    
+    //------ Get Sherpa ------
+    //-- for getting sherpa2
+    TFile *fShe = new TFile("PNGFiles/Sherpa2/SMu_8TeV_WToLNu_Sherpa2jNLO4jLO_v5_EffiCorr_0_TrigCorr_0_Syst_0_JetPtMin_30_VarWidth.root");
+    cout << " Opening: " << "SMu_8TeV_WToLNu_Sherpa2jNLO4jLO_v5_EffiCorr_0_TrigCorr_0_Syst_0_JetPtMin_30_VarWidth.root" << "   --->   Opened ? " << fShe->IsOpen() << endl;
+    TH2D *genShe = NULL;
+    genShe = get2DHisto(fShe, genName);
+    //--- End Get Sherpa -----
+    
+    //--- Get BlackHat ------
+    TFile *fBhat[3];
+    fBhat[0] = new TFile("PNGFiles/BlackHat/W1j_all.root", "READ");
+    fBhat[1] = new TFile("PNGFiles/BlackHat/W2j_all.root", "READ");
+    fBhat[2] = new TFile("PNGFiles/BlackHat/W3j_all.root", "READ");
+    cout << " Opening: " << "W1j_all.root" << "   --->   Opened ? " << fBhat[0]->IsOpen() << endl;
+    cout << " Opening: " << "W2j_all.root" << "   --->   Opened ? " << fBhat[1]->IsOpen() << endl;
+    cout << " Opening: " << "W3j_all.root" << "   --->   Opened ? " << fBhat[2]->IsOpen() << endl;
+    
+    //-- matching variable name
+    string varBlackHatName, varBlackHatName2;
+    int useBHFile(0);
+    if (variable == "MeanNJetsHT_Zinc1jet") {
+        varBlackHatName = "totNJhtjet1";
+        varBlackHatName2 = "htjet1";
+        useBHFile = 0;
+    }
+    else if (variable == "MeanNJetsHT_Zinc2jet") {
+        varBlackHatName = "totNJhtjet2";
+        varBlackHatName2 = "htjet2";
+        useBHFile = 1;
+    }
+    else if (variable == "MeanNJetsdRapidity_Zinc2jet") {
+        varBlackHatName = "totNJdyj1j2";
+        varBlackHatName2 = "dyj1j2jet2";
+        useBHFile = 1;
+    }
+    else if (variable == "MeanNJetsdRapidityFB_Zinc2jet") {
+        varBlackHatName = "totNJdyjFjB";
+        varBlackHatName2 = "dyjFjBjet2";
+        useBHFile = 1;
+    }
+    
+    TH1D *genBhat[3], *genBhatDeno[3];
+    genBhat[0] = (TH1D*) fBhat[0]->Get(varBlackHatName.c_str()); genBhat[0]->Scale(0.001);
+    genBhat[1] = (TH1D*) fBhat[1]->Get(varBlackHatName.c_str()); genBhat[1]->Scale(0.001);
+    genBhat[2] = (TH1D*) fBhat[2]->Get(varBlackHatName.c_str()); genBhat[2]->Scale(0.001);
+    
+    genBhatDeno[0] = (TH1D*) fBhat[0]->Get(varBlackHatName2.c_str()); genBhatDeno[0]->Scale(0.001);
+    genBhatDeno[1] = (TH1D*) fBhat[1]->Get(varBlackHatName2.c_str()); genBhatDeno[1]->Scale(0.001);
+    genBhatDeno[2] = (TH1D*) fBhat[2]->Get(varBlackHatName2.c_str()); genBhatDeno[2]->Scale(0.001);
+    //--- End Get BlackHat ------
+    
     cout << " loaded all files: 1 Data : 1 Wjets : " <<  nFilesBkg << " Background files" << endl;
+    
     
     // set the output
     string outputRootFileName = outputDirectory + leptonFlavor + "_" + energy + "_unfolded_" + variable + "_histograms_" + unfAlg;
@@ -236,34 +291,32 @@ void FuncUnfold(string leptonFlavor, bool isMuon, string unfAlg, string variable
     outputRootFileName += ".root";
     TFile* outputRootFile = new TFile(outputRootFileName.c_str(), "RECREATE");
     
-    /*
-    //-- save data reco
-    outputRootFile->cd(); hData[0]->Write("Data"); hData[1]->Write("DataJESup"); hData[2]->Write("DataJESdown");
-    //-- save SumBG reco
-    outputRootFile->cd(); hSumBG[0]->Write("RecoBg"); hSumBG[1]->Write("RecoBgPUup"); hSumBG[2]->Write("RecoBgPUdown");
-                          hSumBG[3]->Write("RecoBgXSECup"); hSumBG[4]->Write("RecoBgXSECdown");
-    //-- save WJETs reco
-    outputRootFile->cd(); hDY[0]->Write("RecoWJETs"); hDY[1]->Write("RecoWJETsPUup"); hDY[2]->Write("RecoWJETsPUdown");
-                          hDY[3]->Write("RecoWJETsJERup");
-    cout << " saved data reco and madgraph files" << endl;
-     */
-    
     //--- produce projected 1D hist for gen ----
+    //-- Madgraph
     TH1D* genMadMeanJ = NULL;
     genMadMeanJ = computeProject1DMeanNJets(hDYGenMadGraph, genName);
     outputRootFile->cd();
     genMadMeanJ->Write("genMad"); //-- save madgraph gen into the file
+    //-- Sherpa
+    TH1D* genSheMeanJ = NULL;
+    genSheMeanJ = computeProject1DMeanNJets(genShe, genName);
+    outputRootFile->cd();
+    genSheMeanJ->Write("genShe"); //-- save sherpa gen into the file
+    //-- BlackHat
+    TH1D *genBhatMeanJ = NULL;
+    genBhatMeanJ = (TH1D*) genBhat[useBHFile]->Clone();
+    genBhatMeanJ->Divide(genBhatDeno[useBHFile]);
+    outputRootFile->cd();
+    genBhatMeanJ->Write("genBhat"); //-- save BH gen into the file
     //--- End produce projected 1D hist for gen ----
     
-    
-    
-    //--- unfolding 12 different cases
+    //--- unfolding 15 different cases
     cout << "Start unfolding" << endl;
-    string hNames[12] = {"Central", "JESup", "JESdown", "PUup", "PUdown", "XSECup", "XSECdown", "JERup", "BtagEFFup", "BtagEFFdown", "WBup", "RESPup"};
-    int SelData[12] = {0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-    int SelDY[12]   = {0, 0, 0, 1, 2, 0, 0, 3, 4, 5, 6, 7};
-    int SelBG[12]   = {0, 0, 0, 1, 2, 3, 4, 0, 5, 6, 0, 0};
-    for ( int n(0); n < 12; n++){
+    string hNames[15] = {"Central", "JESup", "JESdown", "PUup", "PUdown", "XSECup", "XSECdown", "JERup", "BtagEFFup", "BtagEFFdown", "WBup", "RESPup", "MESup", "MESdown", "MER"};
+    int SelData[15] = {0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    int SelDY[15]   = {0, 0, 0, 1, 2, 0, 0, 3, 4, 5, 6, 7, 8, 9, 10};
+    int SelBG[15]   = {0, 0, 0, 1, 2, 3, 4, 0, 5, 6, 0, 0, 7, 8, 9};
+    for ( int n(0); n < 15; n++){
         //TH1D* hUnfolded = Unfold(unfAlg, resDY[SelDY[i]], hData[SelData[i]], hSumBG[SelBG[i]],  UsedKterm, hNames[i]);
         cout << "Start unfolding histograms on : " << hNames[n] <<endl;
         TH2D *hMeas = (TH2D*) hData[SelData[n]]->Clone();
@@ -643,9 +696,9 @@ void get2DHistos(TH2D *histograms2D[], TFile *Files[], string variable, bool isD
         nFiles = 3;
         if (fileName.find("DE") != string::npos) nFiles = 5;
     }
-    else if (((isDoubleLep && fileName.find("DYJets") != string::npos) || (!isDoubleLep && fileName.find("WJets") != string::npos)) && fileName.find("UNFOLDING") != string::npos) nFiles = 8;
+    else if (((isDoubleLep && fileName.find("DYJets") != string::npos) || (!isDoubleLep && fileName.find("WJets") != string::npos)) && fileName.find("UNFOLDING") != string::npos) nFiles = 11;
     // for BG
-    else nFiles = 7;
+    else nFiles = 10;
     
     for (int i(0); i < nFiles; i++){
         histograms2D[i] = (TH2D*) Files[i]->Get(variable.c_str());
@@ -660,9 +713,9 @@ void getRespsNew(RooUnfoldResponse *responses[], TFile *Files[], string variable
     int nFiles;
     //if (fileName.find("Data") != string::npos) nFiles = 3;
     if ((fileName.find("Data") != string::npos) && (fileName.find("QCD") == string::npos)) nFiles = 3;
-    else if (fileName.find("UNFOLDING") != string::npos) nFiles = 8;
+    else if (fileName.find("UNFOLDING") != string::npos) nFiles = 11;
     // for BG
-    else nFiles = 7;
+    else nFiles = 10;
     
     for (int i(0); i < nFiles; i++){
         responses[i] = (RooUnfoldResponse*) Files[i]->Get(variable.c_str());
@@ -706,6 +759,9 @@ void getFilesNew(string histoFilesDirectory, TFile *Files[], string leptonFlavor
         Syst.push_back("6_Down");    // 6 down: BtagEff down
         Syst.push_back("7_Up");      // 7 up:   Wb
         Syst.push_back("8_Up");      // 8 up:   Resp
+        Syst.push_back("9_Up");      // 9 up:   MES up
+        Syst.push_back("9_Down");    // 9 down: MES down
+        Syst.push_back("10_Up");     // 10 up:  MER
     }
     else { // for background we have
         Syst.push_back("0");         // 0:      central
@@ -715,6 +771,9 @@ void getFilesNew(string histoFilesDirectory, TFile *Files[], string leptonFlavor
         Syst.push_back("3_Down");    // 3 down: Xsec down
         Syst.push_back("6_Up");      // 6 up:   BtagEff up
         Syst.push_back("6_Down");    // 6 down: BtagEff down
+        Syst.push_back("9_Up");      // 9 up:   MES up
+        Syst.push_back("9_Down");    // 9 down: MES down
+        Syst.push_back("10_Up");     // 10 up:  MER
     };
     
     //--- determnie how many files we have and open them all ---
@@ -735,9 +794,9 @@ void closeFilesNew(TFile *Files[])
             nFiles = 3;
             if (fileName.find("DE") != string::npos) nFiles = 5;
         }
-        else if (fileName.find("UNFOLDING") != string::npos) nFiles = 8;
+        else if (fileName.find("UNFOLDING") != string::npos) nFiles = 11;
         // for BG
-        else nFiles = 7;
+        else nFiles = 10;
         
         for (int i(0); i < nFiles; i++){
             closeFile(Files[i]);

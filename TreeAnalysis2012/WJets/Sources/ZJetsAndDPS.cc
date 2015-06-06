@@ -1,3 +1,10 @@
+// History
+//---- 2015_05_16
+// Fill new Iso plot
+//
+//---- 2015_04_09
+// Fixing to be able to run Sherpa2
+
 #define PI 3.14159265359
 #define BARREDEPROGRESSION 0
 #define DEBUG 0
@@ -261,6 +268,7 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
     cout << " run on " << nentries << "events" << endl;
     
     for (Long64_t jentry(0); jentry < nentries; jentry++){
+    //for (Long64_t jentry(0); jentry < 100; jentry++){
         Long64_t ientry = LoadTree(jentry);
         if (ientry < 0) break;
 
@@ -316,8 +324,12 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
         }
         if (fileName.find("HepMC") != string::npos) {
             weight *= mcEveWeight_;
-            sumSherpaW += mcSherpaSumWeight3_ ;
-        } 
+            //sumSherpaW += mcSherpaSumWeight3_ ;
+        }
+        if (fileName.find("Sherpa2") != string::npos){
+            weight *= mcSherpaWeights_->at(0);
+            sumSherpaW += mcSherpaWeights_->at(4);
+        }
 
         //==========================================================================================================//
         // Compute the weight for PDF syst   //
@@ -764,7 +776,7 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                 // following two lines should give the same result
                 if (genLepSt_->at(i) == 3 && abs(genLepId_->at(i)) != LeptonID && (abs(genLepId_->at(i)) == 15 || abs(genLepId_->at(i)) == 13 || abs(genLepId_->at(i)) == 11)) countTauS3++;
                 if (genLepSt_->at(i) == 3 && abs(genLepId_->at(i)) == LeptonID ) countTauS3--;
-
+                
                 
                 if (!lepSelector) continue ;
                 double charge(genLepQ_->at(i)); 
@@ -866,8 +878,8 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
         if (passesGenLeptonCut) {
             TotalGenWeightPassGEN += genWeightBackup; 
             TotalGenWeightPassGENPU += weight;
-            partonsNAfterGenCut->Fill(nup_ - 5); 
-            partonsNAfterGenCutWeighted->Fill(nup_ - 5, genWeight); 
+            partonsNAfterGenCut->Fill(nup_ - 5);
+            partonsNAfterGenCutWeighted->Fill(nup_ - 5, genWeight);
         }
         //=======================================================================================================//
 
@@ -2897,6 +2909,11 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
         MET_Zinc0jet->Fill(METpt, weight);
         METphi_Zinc0jet->Fill(METphi, weight);
         MT_Zinc0jet->Fill(MT, weight);
+        
+        MuPFIso_Zinc0jet->Fill(lepton1.iso, weight);
+        MuPFIso_2ndZinc0jet->Fill(lepton1.iso, weight);
+        MuPFIso_3rdZinc0jet->Fill(lepton1.iso, weight);
+        
         ZPt_Zinc0jet->Fill(Z.Pt(), weight);
         ZRapidity_Zinc0jet->Fill(Z.Rapidity(), weight);
         ZEta_Zinc0jet->Fill(Z.Eta(), weight);
@@ -3719,11 +3736,14 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
         string hName = listOfHistograms[i]->GetName();
         if ( (!hasGenInfo && hName.find("gen") != string::npos ) || (!hasRecoInfo && hName.find("gen") == string::npos )) continue; 
         if (fileName.find("HepMC") != string::npos){
-            if (sumSherpaW > 0) listOfHistograms[i]->Scale(1/sumSherpaW);    
+            //if (sumSherpaW > 0) listOfHistograms[i]->Scale(1/sumSherpaW);
             if (doTTreweighting) listOfHistograms[i]->Scale(weightSumNoTopRew / weightSum );
         }
-
-        listOfHistograms[i]->Write();        }
+        if (fileName.find("Sherpa2") != string::npos){
+            if (sumSherpaW > 0) listOfHistograms[i]->Scale(1/sumSherpaW);
+        }
+        listOfHistograms[i]->Write();
+    }
     //--- Save all the RooUnfoldResponses ---
     if ( hasGenInfo && hasRecoInfo ){
         unsigned short numbOfResponses = listOfResponses.size();
@@ -3804,13 +3824,22 @@ ZJetsAndDPS::ZJetsAndDPS(string fileName_, float lumiScale_, float puScale_, boo
         leptonFlavor = "TTMuE";
         fullFileName =  "../DataTTbarEMu/" + fileName;
     }
-    if (fileName.find("Data") != string::npos ) isData = true; 
+    if (fileName.find("Data") != string::npos ) isData = true;
     if ( fileName.find("SMu_") == 0 || fileName.find("SE_") == 0 ) fullFileName =  "../DataW/" + fileName;
+    if (fileName.find("Sherpa2") != string::npos) fullFileName =  "../DataSherpa2/" + fileName;
     if (fileName.find("List") == string::npos){
-        fullFileName += ".root";
-        string treePath = fullFileName + "/tree/tree";
-        cout << "Loading file: " << fullFileName << endl;
-        chain->Add(treePath.c_str());
+        if (fileName.find("Sherpa2") != string::npos){
+            fullFileName += ".root";
+            string treePath = fullFileName + "/tree";
+            cout << "Loading file: " << fullFileName << endl;
+            chain->Add(treePath.c_str());
+        }
+        else{
+            fullFileName += ".root";
+            string treePath = fullFileName + "/tree/tree";
+            cout << "Loading file: " << fullFileName << endl;
+            chain->Add(treePath.c_str());
+        }
     }
     else {
         fullFileName += ".txt";
@@ -4047,6 +4076,10 @@ void ZJetsAndDPS::Init(bool hasRecoInfo, bool hasGenInfo, bool hasPartonInfo){
 
             if (fileName.find("HepMC") != string::npos){
                 fChain->SetBranchAddress("mcSherpaSumWeight3_", &mcSherpaSumWeight3_, &b_mcSherpaSumWeight3_);
+                fChain->SetBranchAddress("mcSherpaWeights_", &mcSherpaWeights_, &b_mcSherpaWeights_);
+            }
+            
+            if (fileName.find("Sherpa2") != string::npos){
                 fChain->SetBranchAddress("mcSherpaWeights_", &mcSherpaWeights_, &b_mcSherpaWeights_);
             }
 

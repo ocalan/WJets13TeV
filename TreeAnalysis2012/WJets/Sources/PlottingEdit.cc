@@ -1,3 +1,12 @@
+// History
+//---- 2015_05_16
+// Add line to expand y-scale for dRap and dR plots
+// ### FIXME : need to delete the temp fix label for ang. dist.
+//---- 2015_05_10
+// MES and MER is now included
+// Sherpa2 is used. But the lines for getting sherpa1 is still there but are commented out.
+// BH is done here and due to the structure of BH files this part of code is long. This motivates me to put all this into FinalUnfold.cc but I have not done yet. (Contrast with MeanNjets code which is already move this part to FinalUnfold.cc)
+
 #include <TH1.h>
 #include <TStyle.h>
 #include <TCanvas.h>
@@ -24,8 +33,9 @@ using namespace std;
 void PlottingEdit(int start = 0, int end = -1);
 void FuncPlot(string  variable = "ZNGoodJets_Zexc", bool log = 1, bool decrease = 1, string varRivetName = "njetWJet_excl", string varBlackHatName = "njet_WMuNu");
 
-void GetSysErrorTable (string outputTableName, TH1D* hDiffer[], TH1D* hStatError = NULL, TH1D* hTotalError = NULL);
-void plotSystematicBreakdown (string outputDirectory, string variable, TH1D* dataCentral = NULL, TH1D* hSyst[] = NULL, TH1D* hErrorFromToyResponse = NULL, TH1D* hErrorFromRespWeight = NULL, TH1D* hSystTTbar = NULL, TH1D* hSystWb = NULL, TH1D* hSystBtagUp = NULL, TH1D* hSystBtagDown = NULL);
+void GetSysErrorTable (string variable, string outputTableName, TH1D* dataCenBackUp = NULL, TH1D* hDiffer[] = {NULL}, TH1D* hStatError = NULL, TH1D* hTotalError = NULL, int nGroup = 10);
+
+void plotSystematicBreakdown (string outputDirectory, string variable, TH1D* dataCentral = NULL, TH1D* hSyst[] = NULL, TH1D* hErrorFromToyResponse = NULL, TH1D* hErrorFromRespWeight = NULL, TH1D* hSystTTbar = NULL, TH1D* hSystWb = NULL, TH1D* hSystBtagUp = NULL, TH1D* hSystBtagDown = NULL, TH1D* hSystMesUp = NULL, TH1D* hSystMesDown = NULL, TH1D* hSystMER = NULL);
 //--------------------------------
 
 
@@ -88,7 +98,6 @@ void FuncPlot(string variable, bool logZ, bool decrease, string varRivetName, st
     // get uncer from weighted Response
     TFile *f2 = NULL;
     TH1D *hErrorFromRespWeight = NULL;
-    
     if (variable != "ZNGoodJets_Zexc") {
         // the file name indicates the fine binning histo used
         string varTemp = variable;
@@ -115,6 +124,19 @@ void FuncPlot(string variable, bool logZ, bool decrease, string varRivetName, st
     TFile *fBtagSystDown = new TFile(fBtagSystDownName.c_str());
     TH1D *hSystBtagUp = (TH1D*) fBtagSystUp->Get("Central");
     TH1D *hSystBtagDown = (TH1D*) fBtagSystDown->Get("Central");
+    
+    // get syst from MES
+    string fMesSystUpName = "PNGFiles/MesMerSystematics/MES_syst_up_" + variable + ".root";
+    string fMesSystDownName = "PNGFiles/MesMerSystematics/MES_syst_down_" + variable + ".root";
+    TFile *fMesSystUp = new TFile(fMesSystUpName.c_str());
+    TFile *fMesSystDown = new TFile(fMesSystDownName.c_str());
+    TH1D *hSystMesUp = (TH1D*) fMesSystUp->Get("Central");
+    TH1D *hSystMesDown = (TH1D*) fMesSystDown->Get("Central");
+    
+    // get syst from MER
+    string fMERSystName = "PNGFiles/MesMerSystematics/MER_syst_" + variable + ".root";
+    TFile *fMERSyst = new TFile(fMERSystName.c_str());
+    TH1D *hSystMER = (TH1D*) fMERSyst->Get("Central");
     
     
     //--- Get BlackHat ------
@@ -180,7 +202,18 @@ void FuncPlot(string variable, bool logZ, bool decrease, string varRivetName, st
     }
     //------------------------
     
-    //--- Get Sherpa ------
+    //------ Get Sherpa ------
+    //-- for getting sherpa2
+        // sherpa2 results in # of events >> need to do normalization
+    
+    TFile *fShe = new TFile("PNGFiles/FinalUnfold/SMu_8TeV_WToLNu_Sherpa2jNLO4jLO_v5_EffiCorr_0_TrigCorr_0_Syst_0_JetPtMin_30_VarWidth.root");
+    cout << " Opening: " << "SMu_8TeV_WToLNu_Sherpa2jNLO4jLO_v5_EffiCorr_0_TrigCorr_0_Syst_0_JetPtMin_30_VarWidth.root" << "   --->   Opened ? " << fShe->IsOpen() << endl;
+    string genName = "gen" + variable;
+    TH1D *genShe = (TH1D*) fShe->Get(genName.c_str());
+    
+    //-- for getting sherpa1
+        // sherpa1 results in pb-1 already >> no need to do normalization
+    /*
     TFile *fShe = new TFile("PNGFiles/FinalUnfold/wjets_sherpa.root");
     cout << " Opening: " << "wjets_sherpa.root" << "   --->   Opened ? " << fShe->IsOpen() << endl;
     TH1F *histoShe;
@@ -193,12 +226,15 @@ void FuncPlot(string variable, bool logZ, bool decrease, string varRivetName, st
         histoShe = (TH1F*) fShe->Get(varRivetName.c_str());
     }
     TH1D *genShe = (TH1D*) histoShe->Clone();
-    //----------------------
+    */
+    //-------------------------
     
     
     // print out integral value for testing
     const int nBins(dataCentral->GetNbinsX());
     cout << " central integral:  " << variable << "   " << dataCentral->Integral(1, nBins) << " with under/over:  " << dataCentral->Integral(0, nBins+1) << endl;
+    cout << " sherpa integral:  " << variable << "   " << genShe->Integral(1, nBins) << " with under/over:  " << dataCentral->Integral(0, nBins+1) << endl;
+    
     for (int syst(0); syst < nSyst; syst++) {
         double tempScale = hSyst[syst]->Integral(1, nBins) ;
         cout << " original integral for " << syst << " : " << tempScale << endl;
@@ -216,10 +252,12 @@ void FuncPlot(string variable, bool logZ, bool decrease, string varRivetName, st
             data->SetBinContent(i, data->GetBinContent(i)*1./(Luminosity*binW));
             dataCentral->SetBinContent(i, dataCentral->GetBinContent(i)*1./(Luminosity*binW));
             genMad->SetBinContent(i, genMad->GetBinContent(i)*1./(Luminosity*binW));
+            genShe->SetBinContent(i, genShe->GetBinContent(i)*1./(Luminosity*binW));
             
             data->SetBinError(i, data->GetBinError(i)*1./(Luminosity*binW));
             dataCentral->SetBinError(i, dataCentral->GetBinError(i)*1./(Luminosity*binW));
             genMad->SetBinError(i, genMad->GetBinError(i)*1./(Luminosity*binW));
+            genShe->SetBinError(i, genShe->GetBinError(i)*1./(Luminosity*binW));
             
             // doXSec for ttbar & Wb
             hSystTTbar->SetBinContent(i, hSystTTbar->GetBinContent(i)*1./(Luminosity*binW));
@@ -235,19 +273,19 @@ void FuncPlot(string variable, bool logZ, bool decrease, string varRivetName, st
             hSystBtagDown->SetBinContent(i, hSystBtagDown->GetBinContent(i)*1./(Luminosity*binW));
             hSystBtagDown->SetBinError(i, hSystBtagDown->GetBinError(i)*1./(Luminosity*binW));
             
+            // doXSec for MES Up-Down
+            hSystMesUp->SetBinContent(i, hSystMesUp->GetBinContent(i)*1./(Luminosity*binW));
+            hSystMesUp->SetBinError(i, hSystMesUp->GetBinError(i)*1./(Luminosity*binW));
+            
+            hSystMesDown->SetBinContent(i, hSystMesDown->GetBinContent(i)*1./(Luminosity*binW));
+            hSystMesDown->SetBinError(i, hSystMesDown->GetBinError(i)*1./(Luminosity*binW));
+            
+            // doXSec for MER
+            hSystMER->SetBinContent(i, hSystMER->GetBinContent(i)*1./(Luminosity*binW));
+            hSystMER->SetBinError(i, hSystMER->GetBinError(i)*1./(Luminosity*binW));
+            
         }
         for (int syst(0); syst < nSyst; syst++){
-            
-            //double tempScale = hSyst[syst]->Integral(1,nBins) ;
-            //cout << " scale for syst " << syst << " : " << tempScale << endl;
-            /*
-            double sum = 0  ;
-            for (int k(1) ; k <= nBins; k++){
-                sum += hSyst[syst]->GetBinContent(k);
-            }
-            */
-            //cout << " recheck   syst " << syst << " : " << sum << endl;
-            
             for (int i(1); i <= nBins; i++){
                 double binW = data->GetBinWidth(i);
                 hSyst[syst]->SetBinContent(i, hSyst[syst]->GetBinContent(i)*1./(Luminosity*binW));
@@ -343,7 +381,6 @@ void FuncPlot(string variable, bool logZ, bool decrease, string varRivetName, st
         double BdiffFromDown(hSystBtagDown->GetBinContent(bin) - centralValue);
         double BSysDiffUPTemp(0);
         double BSysDiffDownTemp(0);
-        
         if (BdiffFromUp >= BdiffFromDown) {
             BSysDiffUPTemp = BdiffFromUp;
             BSysDiffDownTemp = BdiffFromDown;
@@ -361,7 +398,33 @@ void FuncPlot(string variable, bool logZ, bool decrease, string varRivetName, st
         }
         //--- end contribution from Btag Up & Down
         
-
+        //--- contribution from MER
+        totalSystematicsUp += pow( (hSystMER->GetBinContent(bin) - centralValue), 2 );
+        totalSystematicsDown += pow( (hSystMER->GetBinContent(bin) - centralValue), 2 );
+        
+        //--- contribution from MES Up & Down
+        double MdiffFromUp(hSystMesUp->GetBinContent(bin) - centralValue);
+        double MdiffFromDown(hSystMesDown->GetBinContent(bin) - centralValue);
+        double MSysDiffUPTemp(0);
+        double MSysDiffDownTemp(0);
+        if (MdiffFromUp >= MdiffFromDown) {
+            MSysDiffUPTemp = MdiffFromUp;
+            MSysDiffDownTemp = MdiffFromDown;
+        }
+        else {
+            MSysDiffUPTemp = MdiffFromDown;
+            MSysDiffDownTemp = MdiffFromUp;
+        }
+        
+        if (MSysDiffUPTemp >= 0) {
+            totalSystematicsUp += MSysDiffUPTemp * MSysDiffUPTemp;
+        }
+        if (MSysDiffDownTemp <= 0) {
+            totalSystematicsDown += MSysDiffDownTemp * MSysDiffDownTemp;
+        }
+        //--- end contribution from MES Up & Down
+        
+        
         //--- Set up for systematic plot on pad 1
             // set x-coordinate and error in x
         xCoor[bin-1]    = dataCentral->GetBinCenter(bin);
@@ -398,12 +461,18 @@ void FuncPlot(string variable, bool logZ, bool decrease, string varRivetName, st
     string temp;
     string xtitle = genMad->GetXaxis()->GetTitle();
     string shortVar = xtitle.substr(0, xtitle.find(" "));
+    
     string unit = "";
     if (xtitle.find("[") != string::npos) {
         size_t begin = xtitle.find("[") + 1;
         unit = xtitle.substr(begin);
         unit = unit.substr(0, unit.find("]"));
     }
+    //--- temporary fix label: FIXME
+    if (variable.find("dRapidity") != string::npos) shortVar = "#Deltay";
+    if (variable.find("dRJets") != string::npos)    shortVar = "#DeltaR";
+    if (variable.find("diJetPt") != string::npos)    shortVar = "p_{T}";
+    //---
     cout << shortVar << "   unit: " << unit << endl;
     temp = "d#sigma / d" + shortVar;
     temp += "  [pb";
@@ -424,8 +493,10 @@ void FuncPlot(string variable, bool logZ, bool decrease, string varRivetName, st
     hisUnfolded->GetYaxis()->SetTitleSize(0.04);
     hisUnfolded->GetYaxis()->SetTitleOffset(1.45);
     hisUnfolded->GetYaxis()->SetTitleFont(42);
-    //hisUnfolded->SetMaximum(MineYMax*10); // remove or modify this when appropriate
     //hisUnfolded->SetMinimum(MineYMin*0.8);
+    if ( (variable.find("dRapidity") != string::npos) || (variable.find("dRJets") != string::npos) ){
+        hisUnfolded->SetMaximum(MineYMax*10); // remove or modify this when appropriate
+    }
     
     hisUnfolded->SetFillStyle(3354);
     hisUnfolded->SetFillColor(12);
@@ -481,7 +552,7 @@ void FuncPlot(string variable, bool logZ, bool decrease, string varRivetName, st
     legend->AddEntry(hisUnfolded, "Data", "PLEF");
     legend->AddEntry(genMad, "MG+Py6 at NNLO Stat. Error", "plef");
     legend->AddEntry(genBhatALL, "BlackHat at NLO Stat. Error", "plef");
-    legend->AddEntry(genShe, "Sherpa at NNLO Stat. Error", "plef");
+    legend->AddEntry(genShe, "Sherpa2 Stat. Error", "plef");
     legend->Draw();
     //------------------
     
@@ -741,15 +812,16 @@ void FuncPlot(string variable, bool logZ, bool decrease, string varRivetName, st
     
     
     //--- Generate new plot to see Contribution : all input histo are already scaled to the final unit ---
-    plotSystematicBreakdown(outputDirectory, variable, dataCentral, hSyst, hErrorFromToyResponse, hErrorFromRespWeight, hSystTTbar, hSystWb, hSystBtagUp, hSystBtagDown);
+    plotSystematicBreakdown(outputDirectory, variable, dataCentral, hSyst, hErrorFromToyResponse, hErrorFromRespWeight, hSystTTbar, hSystWb, hSystBtagUp, hSystBtagDown, hSystMesUp, hSystMesDown, hSystMER);
 
 }
 
 
-void plotSystematicBreakdown (string outputDirectory, string variable, TH1D* dataCentral, TH1D* hSyst[], TH1D* hErrorFromToyResponse, TH1D* hErrorFromRespWeight, TH1D* hSystTTbar, TH1D* hSystWb, TH1D* hSystBtagUp, TH1D* hSystBtagDown)
+void plotSystematicBreakdown (string outputDirectory, string variable, TH1D* dataCentral, TH1D* hSyst[], TH1D* hErrorFromToyResponse, TH1D* hErrorFromRespWeight, TH1D* hSystTTbar, TH1D* hSystWb, TH1D* hSystBtagUp, TH1D* hSystBtagDown, TH1D* hSystMesUp, TH1D* hSystMesDown, TH1D* hSystMER)
 {
+    TH1D *dataCenBackUp = (TH1D*) dataCentral->Clone();
     
-    const int nGroup = 10;
+    const int nGroup = 12;
     const int nBins(dataCentral->GetNbinsX());
     
     int group = nGroup -1;
@@ -852,7 +924,6 @@ void plotSystematicBreakdown (string outputDirectory, string variable, TH1D* dat
                     double BdiffFromDown(hSystBtagDown->GetBinContent(bin) - (dataCentral->GetBinContent(bin)));
                     double BSysDiffUPTemp(0);
                     double BSysDiffDownTemp(0);
-                    
                     if (BdiffFromUp >= BdiffFromDown) {
                         BSysDiffUPTemp = BdiffFromUp;
                         BSysDiffDownTemp = BdiffFromDown;
@@ -868,6 +939,36 @@ void plotSystematicBreakdown (string outputDirectory, string variable, TH1D* dat
                     if (BSysDiffDownTemp <= 0) {
                         hDownDiffer[i]->SetBinContent( bin, (fabs(BSysDiffDownTemp)) * (100. / dataCentral->GetBinContent(bin)) ) ;
                     }
+                }
+                
+                // contribution from MES
+                if (i == 9){
+                    double MdiffFromUp(hSystMesUp->GetBinContent(bin) - (dataCentral->GetBinContent(bin)));
+                    double MdiffFromDown(hSystMesDown->GetBinContent(bin) - (dataCentral->GetBinContent(bin)));
+                    double MSysDiffUPTemp(0);
+                    double MSysDiffDownTemp(0);
+                    if (MdiffFromUp >= MdiffFromDown) {
+                        MSysDiffUPTemp = MdiffFromUp;
+                        MSysDiffDownTemp = MdiffFromDown;
+                    }
+                    else {
+                        MSysDiffUPTemp = MdiffFromDown;
+                        MSysDiffDownTemp = MdiffFromUp;
+                    }
+                    
+                    if (MSysDiffUPTemp >= 0) {
+                        hUpDiffer[i]->SetBinContent( bin, MSysDiffUPTemp * (100. / dataCentral->GetBinContent(bin)) ) ;
+                    }
+                    if (MSysDiffDownTemp <= 0) {
+                        hDownDiffer[i]->SetBinContent( bin, (fabs(MSysDiffDownTemp)) * (100. / dataCentral->GetBinContent(bin)) ) ;
+                    }
+                }
+                
+                // contribution from MER
+                if (i == 10){
+                    double difference( hSystMER->GetBinContent(bin) - (dataCentral->GetBinContent(bin)) );
+                    hUpDiffer[i]  ->SetBinContent( bin, (fabs(difference)) * (100. / dataCentral->GetBinContent(bin)) ) ;
+                    hDownDiffer[i]->SetBinContent( bin, (fabs(difference)) * (100. / dataCentral->GetBinContent(bin)) ) ;
                 }
                 
                 // contribution from Resp
@@ -913,12 +1014,14 @@ void plotSystematicBreakdown (string outputDirectory, string variable, TH1D* dat
     canvas1->SetLogy();
     canvas1->SetTicks();
     
+    string titleCan1 = "Systematic Up : " + variable;
+    
     if (variable.find("ZNGood") != string::npos){
         hUpDiffer[0]->GetXaxis()->SetRange(2, 8);
     }
     hUpDiffer[0]->SetMaximum(1000);
     hUpDiffer[0]->SetMinimum(0.1);
-    hUpDiffer[0]->SetTitle("Systematic Up");
+    hUpDiffer[0]->SetTitle(titleCan1.c_str());
     hUpDiffer[0]->GetYaxis()->SetTitle("Uncertainty (%)");
     hUpDiffer[0]->SetLineColor(kRed);
     hUpDiffer[0]->SetLineWidth(2);
@@ -965,6 +1068,16 @@ void plotSystematicBreakdown (string outputDirectory, string variable, TH1D* dat
     hUpDiffer[8]->SetLineStyle(5);
     hUpDiffer[8]->DrawCopy("HIST same");
     
+    hUpDiffer[9]->SetLineColor(kSpring+9);
+    hUpDiffer[9]->SetLineWidth(2);
+    hUpDiffer[9]->SetLineStyle(3);
+    hUpDiffer[9]->DrawCopy("HIST same");
+    
+    hUpDiffer[10]->SetLineColor(kAzure+4);
+    hUpDiffer[10]->SetLineWidth(2);
+    hUpDiffer[10]->SetLineStyle(2);
+    hUpDiffer[10]->DrawCopy("HIST same");
+    
     if (variable != "ZNGoodJets_Zexc") {
         hUpDiffer[nGroup-1]->SetLineColor(kYellow);
         hUpDiffer[nGroup-1]->SetLineWidth(3);
@@ -994,6 +1107,8 @@ void plotSystematicBreakdown (string outputDirectory, string variable, TH1D* dat
     leg->AddEntry(hUpDiffer[6]  , "Wb"    , "l");
     leg->AddEntry(hUpDiffer[7]  , "Int.Lumi"    , "l");
     leg->AddEntry(hUpDiffer[8]  , "Btag Corr"    , "l");
+    leg->AddEntry(hUpDiffer[9]  , "MES"    , "l");
+    leg->AddEntry(hUpDiffer[10] , "MER"    , "l");
     if (variable != "ZNGoodJets_Zexc") {
         leg->AddEntry(hUpDiffer[nGroup-1]  , "Resp", "l");
     }
@@ -1010,12 +1125,14 @@ void plotSystematicBreakdown (string outputDirectory, string variable, TH1D* dat
     canvas2->SetLogy();
     canvas2->SetTicks();
     
+    string titleCan2 = "Systematic Down : " + variable;
+    
     if (variable.find("ZNGood") != string::npos){
         hDownDiffer[0]->GetXaxis()->SetRange(2, 8);
     }
     hDownDiffer[0]->SetMaximum(1000);
     hDownDiffer[0]->SetMinimum(0.1);
-    hDownDiffer[0]->SetTitle("Systematic Down");
+    hDownDiffer[0]->SetTitle(titleCan2.c_str());
     hDownDiffer[0]->GetYaxis()->SetTitle("Uncertainty (%)");
     hDownDiffer[0]->SetLineColor(kRed);
     hDownDiffer[0]->SetLineWidth(2);
@@ -1062,6 +1179,16 @@ void plotSystematicBreakdown (string outputDirectory, string variable, TH1D* dat
     hDownDiffer[8]->SetLineStyle(5);
     hDownDiffer[8]->DrawCopy("HIST same");
     
+    hDownDiffer[9]->SetLineColor(kSpring+9);
+    hDownDiffer[9]->SetLineWidth(2);
+    hDownDiffer[9]->SetLineStyle(3);
+    hDownDiffer[9]->DrawCopy("HIST same");
+    
+    hDownDiffer[10]->SetLineColor(kAzure+4);
+    hDownDiffer[10]->SetLineWidth(2);
+    hDownDiffer[10]->SetLineStyle(2);
+    hDownDiffer[10]->DrawCopy("HIST same");
+    
     if (variable != "ZNGoodJets_Zexc") {
         hDownDiffer[nGroup-1]->SetLineColor(kYellow);
         hDownDiffer[nGroup-1]->SetLineWidth(3);
@@ -1091,6 +1218,8 @@ void plotSystematicBreakdown (string outputDirectory, string variable, TH1D* dat
     leg2->AddEntry(hDownDiffer[6]  , "Wb"    , "l");
     leg2->AddEntry(hDownDiffer[7]  , "Int.Lumi"    , "l");
     leg2->AddEntry(hDownDiffer[8]  , "Btag Corr"    , "l");
+    leg2->AddEntry(hDownDiffer[9]  , "MES"    , "l");
+    leg2->AddEntry(hDownDiffer[10] , "MER"    , "l");
     
     if (variable != "ZNGoodJets_Zexc") {
         leg2->AddEntry(hDownDiffer[nGroup-1]   , "Resp", "l");
@@ -1105,38 +1234,133 @@ void plotSystematicBreakdown (string outputDirectory, string variable, TH1D* dat
     string outputTableErrorDown = outputDirectory + variable + "TableErrorDown.tex";
     string outputTableErrorUp   = outputDirectory + variable + "TableErrorUp.tex";
     
-    GetSysErrorTable(outputTableErrorDown, hDownDiffer, hStatError, hTotalErrorDown);
-    GetSysErrorTable(outputTableErrorUp,   hUpDiffer,   hStatError, hTotalErrorUp);
+    GetSysErrorTable(variable, outputTableErrorDown, dataCenBackUp, hDownDiffer, hStatError, hTotalErrorDown, nGroup);
+    GetSysErrorTable(variable, outputTableErrorUp,   dataCenBackUp, hUpDiffer,   hStatError, hTotalErrorUp, nGroup);
 }
 
 
-void GetSysErrorTable (string outputTableName, TH1D* hDiffer[], TH1D* hStatError, TH1D* hTotalError)
+void GetSysErrorTable (string variable, string outputTableName, TH1D* dataCenBackUp, TH1D* hDiffer[], TH1D* hStatError, TH1D* hTotalError, const int nGroup)
 {
-    cout << "Now producing table of" << outputTableName << endl;
+    cout << "Now producing table of " << outputTableName << endl;
+    
+    string tableTitle;
+    if (outputTableName.find("TableErrorDown") != string::npos){
+        tableTitle = variable + "TableErrorDown";
+    }
+    if (outputTableName.find("TableErrorUp") != string::npos){
+        tableTitle = variable + "TableErrorUp";
+    }
+    
+    int nXbin = hStatError->GetNbinsX();
+    int nbinStart = 1;
+    int group = nGroup;
+    if (variable.find("ZNGood") != string::npos){
+        nbinStart = 2;
+        group = group -1;
+        nXbin = 8;
+    }
+    
+    //------------ set column headers
+    string temp;
+    string xtitle = dataCenBackUp->GetXaxis()->GetTitle();
+    string shortVar = xtitle.substr(0, xtitle.find(" "));
+    string unit = "";
+    if (xtitle.find("[") != string::npos) {
+        size_t begin = xtitle.find("[") + 1;
+        unit = xtitle.substr(begin);
+        unit = unit.substr(0, unit.find("]"));
+    }
+    
+    //--- temporary fix label
+    if (variable.find("dRapidity") != string::npos) shortVar = "#Deltay";
+    if (variable.find("dRJets") != string::npos)    shortVar = "#DeltaR";
+    if (variable.find("diJetPt") != string::npos)    shortVar = "p_{T}";
+    //---
+    
+    cout << shortVar << "   unit: " << unit << endl;
+    temp = "\\frac{d\\sigma}{d" + shortVar + "}";
+    if (unit == "" ) {
+        temp += "  [pb";
+    }
+    else {
+        temp += " [\\frac{pb}{";
+        temp += unit;
+        temp += "}";
+    }
+    temp += "]";
+    
+    // formating text to match latex style
+    size_t pos_m;
+    if (xtitle.find("#") != string::npos) {
+        pos_m = xtitle.find("#");
+        xtitle.replace(pos_m, 1, "\\");
+    }
+    if (temp.find("#") != string::npos) {
+        pos_m = temp.find("#");
+        temp.replace(pos_m, 1, "\\");
+    }
+    if (tableTitle.find("_") != string::npos) {
+        pos_m = tableTitle.find("_");
+        tableTitle.replace(pos_m, 1, "\\_");
+    }
+    //-------------------
+    
+    
+    
     FILE *outFile = fopen(outputTableName.c_str(),"w");
     fprintf(outFile, "\\input{header.tex} \n ");
     fprintf(outFile, "\\usepackage[cm]{fullpage} \n ");
     fprintf(outFile, "\\begin{document} \n ");
-    fprintf(outFile, "%s \\\\ \n ", outputTableName.c_str());
+    fprintf(outFile, "%s \\\\ \n ", tableTitle.c_str());
     fprintf(outFile, "\\\\ \n ");
-    fprintf(outFile, "\\footnotesize{\n\\begin{tabular}{l|ccccccc} \n ");
-    fprintf(outFile, "$N_{\\text{jets}}$ & $Tot. Err.(\\%)$ & $Stat(\\%)$ & $JES(\\%)$ & $PU(\\%)$ & $XSEC(\\%)$ & $JER(\\%)$ & $MC(\\%)$ \\\\ \\hline \n ");
+    fprintf(outFile, "\\resizebox{\\textwidth}{!}     {\n\\begin{tabular}{l|ccccccccccccccc} \n ");
+    fprintf(outFile, "$%s$ & ", xtitle.c_str());
+    fprintf(outFile, "$%s$ & ", temp.c_str());
+    fprintf(outFile, "$Tot. Err.(\\%%)$ & $Stat(\\%%)$ & $JES(\\%%)$ & $PU(\\%%)$ & $XSEC(\\%%)$ & $JER(\\%%)$ & $MC(\\%%)$ & $ttbar(\\%%)$ & $Wb(\\%%)$ & $Int.Lumi(\\%%)$ & $BtagCorr(\\%%)$ & $MES(\\%%)$ & $MER(\\%%)$ & $Resp(\\%%)$ \\\\ \\hline \n ");
     
-    for (int i=2; i< 9 ; i++){
-        fprintf(outFile, " $N_{\\text{jets}} =$ %d  & ", i-1);
+    // get array of bin edges
+    double arrX[50];
+    const double *arr = new double[nXbin+1];
+    arr = dataCenBackUp->GetXaxis()->GetXbins()->GetArray();
+    if (arr == 0){ // non-variable binning is defined
+        if (variable.find("ZNGood") != string::npos) {
+        }
+        else{
+            for (int j = 0; j < nXbin ; j++){
+                arrX[j] = dataCenBackUp->GetXaxis()->GetBinLowEdge(j+1);
+            }
+            arrX[nXbin] = dataCenBackUp->GetXaxis()->GetBinUpEdge(nXbin);
+        }
+    }
+    else{ // variable binning is defined
+        for (int j = 0; j <= nXbin ; j++){
+            arrX[j] = dataCenBackUp->GetXaxis()->GetXbins()->At(j);
+        }
+    }
+    
+    // fill out the table
+    for (int i = nbinStart; i<= nXbin ; i++){
+        if (variable.find("ZNGood") != string::npos) {
+            fprintf(outFile, " $N_{\\text{jets}} =$ %d  & ", i-1);
+        }
+        else{
+            fprintf(outFile, " %g - %g  & ", arrX[i-1], arrX[i]);
+        }
+        fprintf(outFile, "%.3g  &", double(dataCenBackUp->GetBinContent(i)));
         fprintf(outFile, "%.3g  &", double(hTotalError->GetBinContent(i)));
         fprintf(outFile, "%.3g  &", double(hStatError->GetBinContent(i)));
         
-        for (int j = 0 ; j < 5  ; j++ ) {
-            
-            if (j < 4)fprintf(outFile, "%.3g & ", double(hDiffer[j]->GetBinContent(i)));
-            else fprintf(outFile, "%.3g", double(hDiffer[j]->GetBinContent(i)));
-            
+        for (int j = 0 ; j < group  ; j++ ) {
+            if (j != group -1){
+                fprintf(outFile, "%.3g & ", double(hDiffer[j]->GetBinContent(i)));
+            }
+            else {
+                fprintf(outFile, "%.3g ", double(hDiffer[j]->GetBinContent(i)));
+            }
         }
-        
         fprintf(outFile, "\\\\ \n");
     }
-    fprintf( outFile, "\\end{tabular}} \n");
+    fprintf( outFile, "\\end{tabular}} \\\\ \\\\  \n");
     fprintf( outFile, "\\end{document}");
     
     fclose(outFile);

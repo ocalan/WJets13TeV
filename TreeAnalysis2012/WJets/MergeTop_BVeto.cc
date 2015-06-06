@@ -1,3 +1,7 @@
+// History
+//---- 2015_05_17
+// Also merge top and DY (and generate outputs) for the regions of QCD1,2,3.
+
 #include <iostream>
 #include <TH1.h>
 #include <TH2.h>
@@ -8,16 +12,19 @@
 void runMergeTop_BVeto(string lepSelection = "DE", int systematics =0  , int jetPtCutMin = 30 , int doQCD = 0 );
 
 void MergeTop_BVeto(){
+    
+    runMergeTop_BVeto("SMu",0,30,0);
+    runMergeTop_BVeto("SMu",0,30,1);
+    runMergeTop_BVeto("SMu",0,30,2);
+    runMergeTop_BVeto("SMu",0,30,3);
+
     //runMergeTop("DE",0,20,0);
     //runMergeTop("DE",1,20,0);
     //runMergeTop("DE",-1,20,0);
     //runMergeTop("DE",3,20,0);
-    //runMergeTop("DE",-3,20,0);	        
-    runMergeTop_BVeto("SMu",0,30,0);
-    //runMergeTop("DE",1,30,0);
-    //runMergeTop("DE",-1,30,0);
-    //runMergeTop("DE",3,30,0);
-    //runMergeTop("DE",-3,30,0);
+    //runMergeTop("DE",-3,20,0);
+    
+
 }
 
 void runMergeTop_BVeto(string lepSelection, int systematics, int jetPtCutMin, int doQCD)
@@ -34,26 +41,46 @@ void runMergeTop_BVeto(string lepSelection, int systematics, int jetPtCutMin, in
     else if (systematics == -1) syst = "Syst_1_Down_"; 
     else if (systematics == 3) syst = "Syst_3_Up_"; 
     else if (systematics == -3) syst = "Syst_3_Down_"; 
-
-
-
-    string str1 = "HistoFiles/"+ lepSelection +  "_8TeV_T_s_channel_dR_5311_EffiCorr_1_TrigCorr_1_" + syst + "JetPtMin_" + strJetPtCutMin.str() + "_VarWidth_BVeto.root";
-    string str2 = "HistoFiles/"+ lepSelection +  "_8TeV_T_t_channel_dR_5311_EffiCorr_1_TrigCorr_1_" + syst + "JetPtMin_" + strJetPtCutMin.str() + "_VarWidth_BVeto.root";
-    string str3 = "HistoFiles/"+ lepSelection +  "_8TeV_T_tW_channel_dR_5311_EffiCorr_1_TrigCorr_1_" + syst + "JetPtMin_" + strJetPtCutMin.str() + "_VarWidth_BVeto.root";
-    string str4 = "HistoFiles/"+ lepSelection +  "_8TeV_Tbar_s_channel_dR_5311_EffiCorr_1_TrigCorr_1_" + syst + "JetPtMin_" + strJetPtCutMin.str() + "_VarWidth_BVeto.root";
-    string str5 = "HistoFiles/"+ lepSelection +  "_8TeV_Tbar_t_channel_dR_5311_EffiCorr_1_TrigCorr_1_" + syst + "JetPtMin_" + strJetPtCutMin.str() + "_VarWidth_BVeto.root";
-    string str6 = "HistoFiles/"+ lepSelection +  "_8TeV_Tbar_tW_channel_dR_5311_EffiCorr_1_TrigCorr_1_" + syst + "JetPtMin_" + strJetPtCutMin.str() + "_VarWidth_BVeto.root";
-    string strf = "HistoFiles/"+ lepSelection +  "_8TeV_Top_dR_5311_EffiCorr_1_TrigCorr_1_" + syst + "JetPtMin_" + strJetPtCutMin.str() + "_VarWidth_BVeto.root";
-
-    /// DY
+    cout << doQCD << endl;
+    string str1, str2, str3, str4, str5, str6, strf;
     int nDYfiles = 3 ;
     string sstrDY[10];
-    sstrDY[0] = "HistoFiles/"+ lepSelection +  "_8TeV_DYJets10to50_dR_5311_EffiCorr_1_TrigCorr_1_" + syst + "JetPtMin_" + strJetPtCutMin.str() + "_VarWidth_BVeto.root";
-    //sstrDY[1] = "HistoFiles/"+ lepSelection +  "_8TeV_DYJets_FromTau_UNFOLDING_dR_5311_Inf3_EffiCorr_1_TrigCorr_1_" + syst + "JetPtMin_" + strJetPtCutMin.str() + "_VarWidth_InvMass_SS.root";
-    sstrDY[1] = "HistoFiles/"+ lepSelection +  "_8TeV_DYJets_MIX_UNFOLDING_dR_5311_Inf3_EffiCorr_1_TrigCorr_1_" + syst + "JetPtMin_" + strJetPtCutMin.str() + "_VarWidth_BVeto.root";
-    //sstrDY[3] = "HistoFiles/"+ lepSelection +  "_8TeV_DYJets_UNFOLDING_dR_5311_Inf3_EffiCorr_1_TrigCorr_1_" + syst + "JetPtMin_" + strJetPtCutMin.str() + "_VarWidth_InvMass_SS.root";
-    //sstrDY[4] = "HistoFiles/"+ lepSelection +  "_8TeV_DYJets_UNFOLDING_dR_5311_Inf3_scaleUp_EffiCorr_1_TrigCorr_1_" + syst + "JetPtMin_" + strJetPtCutMin.str() + "_VarWidth_InvMass_SS.root"; 
-    sstrDY[2] = "HistoFiles/"+ lepSelection +  "_8TeV_DYJets10toInf3_dR_5311_EffiCorr_1_TrigCorr_1_" + syst + "JetPtMin_" + strJetPtCutMin.str() + "_VarWidth_BVeto.root";
+    
+    if (doQCD == 0) {
+        str1 = "HistoFiles/"+ lepSelection +  "_8TeV_T_s_channel_dR_5311_EffiCorr_1_TrigCorr_1_" + syst + "JetPtMin_" + strJetPtCutMin.str() + "_VarWidth_BVeto.root";
+        str2 = "HistoFiles/"+ lepSelection +  "_8TeV_T_t_channel_dR_5311_EffiCorr_1_TrigCorr_1_" + syst + "JetPtMin_" + strJetPtCutMin.str() + "_VarWidth_BVeto.root";
+        str3 = "HistoFiles/"+ lepSelection +  "_8TeV_T_tW_channel_dR_5311_EffiCorr_1_TrigCorr_1_" + syst + "JetPtMin_" + strJetPtCutMin.str() + "_VarWidth_BVeto.root";
+        str4 = "HistoFiles/"+ lepSelection +  "_8TeV_Tbar_s_channel_dR_5311_EffiCorr_1_TrigCorr_1_" + syst + "JetPtMin_" + strJetPtCutMin.str() + "_VarWidth_BVeto.root";
+        str5 = "HistoFiles/"+ lepSelection +  "_8TeV_Tbar_t_channel_dR_5311_EffiCorr_1_TrigCorr_1_" + syst + "JetPtMin_" + strJetPtCutMin.str() + "_VarWidth_BVeto.root";
+        str6 = "HistoFiles/"+ lepSelection +  "_8TeV_Tbar_tW_channel_dR_5311_EffiCorr_1_TrigCorr_1_" + syst + "JetPtMin_" + strJetPtCutMin.str() + "_VarWidth_BVeto.root";
+        strf = "HistoFiles/"+ lepSelection +  "_8TeV_Top_dR_5311_EffiCorr_1_TrigCorr_1_" + syst + "JetPtMin_" + strJetPtCutMin.str() + "_VarWidth_BVeto.root";
+        
+        /// DY
+        
+        sstrDY[0] = "HistoFiles/"+ lepSelection +  "_8TeV_DYJets10to50_dR_5311_EffiCorr_1_TrigCorr_1_" + syst + "JetPtMin_" + strJetPtCutMin.str() + "_VarWidth_BVeto.root";
+        
+        sstrDY[1] = "HistoFiles/"+ lepSelection +  "_8TeV_DYJets_MIX_UNFOLDING_dR_5311_Inf3_EffiCorr_1_TrigCorr_1_" + syst + "JetPtMin_" + strJetPtCutMin.str() + "_VarWidth_BVeto.root";
+        
+        sstrDY[2] = "HistoFiles/"+ lepSelection +  "_8TeV_DYJets10toInf3_dR_5311_EffiCorr_1_TrigCorr_1_" + syst + "JetPtMin_" + strJetPtCutMin.str() + "_VarWidth_BVeto.root";
+    }
+    if (doQCD > 0){
+        str1 = "HistoFiles/"+ lepSelection +  "_8TeV_T_s_channel_dR_5311_EffiCorr_1_TrigCorr_1_" + syst + "JetPtMin_" + strJetPtCutMin.str() + "_VarWidth_BVeto_QCD" + doQCDStr.str() + ".root";
+        str2 = "HistoFiles/"+ lepSelection +  "_8TeV_T_t_channel_dR_5311_EffiCorr_1_TrigCorr_1_" + syst + "JetPtMin_" + strJetPtCutMin.str() + "_VarWidth_BVeto_QCD" + doQCDStr.str() + ".root";
+        str3 = "HistoFiles/"+ lepSelection +  "_8TeV_T_tW_channel_dR_5311_EffiCorr_1_TrigCorr_1_" + syst + "JetPtMin_" + strJetPtCutMin.str() + "_VarWidth_BVeto_QCD" + doQCDStr.str() + ".root";
+        str4 = "HistoFiles/"+ lepSelection +  "_8TeV_Tbar_s_channel_dR_5311_EffiCorr_1_TrigCorr_1_" + syst + "JetPtMin_" + strJetPtCutMin.str() + "_VarWidth_BVeto_QCD" + doQCDStr.str() + ".root";
+        str5 = "HistoFiles/"+ lepSelection +  "_8TeV_Tbar_t_channel_dR_5311_EffiCorr_1_TrigCorr_1_" + syst + "JetPtMin_" + strJetPtCutMin.str() + "_VarWidth_BVeto_QCD" + doQCDStr.str() + ".root";
+        str6 = "HistoFiles/"+ lepSelection +  "_8TeV_Tbar_tW_channel_dR_5311_EffiCorr_1_TrigCorr_1_" + syst + "JetPtMin_" + strJetPtCutMin.str() + "_VarWidth_BVeto_QCD" + doQCDStr.str() + ".root";
+        strf = "HistoFiles/"+ lepSelection +  "_8TeV_Top_dR_5311_EffiCorr_1_TrigCorr_1_" + syst + "JetPtMin_" + strJetPtCutMin.str() + "_VarWidth_BVeto_QCD" + doQCDStr.str() + ".root";
+        
+        /// DY
+        sstrDY[0] = "HistoFiles/"+ lepSelection +  "_8TeV_DYJets10to50_dR_5311_EffiCorr_1_TrigCorr_1_" + syst + "JetPtMin_" + strJetPtCutMin.str() + "_VarWidth_BVeto_QCD" + doQCDStr.str() + ".root";
+        
+        sstrDY[1] = "HistoFiles/"+ lepSelection +  "_8TeV_DYJets_MIX_UNFOLDING_dR_5311_Inf3_EffiCorr_1_TrigCorr_1_" + syst + "JetPtMin_" + strJetPtCutMin.str()+ "_VarWidth_BVeto_QCD" + doQCDStr.str() + ".root";
+        
+        sstrDY[2] = "HistoFiles/"+ lepSelection +  "_8TeV_DYJets10toInf3_dR_5311_EffiCorr_1_TrigCorr_1_" + syst + "JetPtMin_" + strJetPtCutMin.str() + "_VarWidth_BVeto_QCD" + doQCDStr.str() + ".root";
+    }
+
+    
 
 
 

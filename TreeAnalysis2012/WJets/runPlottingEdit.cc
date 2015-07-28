@@ -16,11 +16,11 @@
         }
         
         PlottingEdit(0, 1);
+        PlottingEdit(46, 47); //inc jetmultiplicity
         
         PlottingEdit(1, 6);
         PlottingEdit(11, 16);
         PlottingEdit(21, 26);
-        
         PlottingEdit(26, 43);
         
         

@@ -4,9 +4,9 @@
     vector<string> sources;
     sources.push_back("getFilesAndHistograms");
     sources.push_back("functions");
-    sources.push_back("writeFastPlotsTex");
-    sources.push_back("unfoldingFunctions");
-    sources.push_back("myUnfoldingSyst");
+    //sources.push_back("writeFastPlotsTex");
+    //sources.push_back("unfoldingFunctions");
+    //sources.push_back("myUnfoldingSyst");
     sources.push_back("myFinalUnfoldEdit");
     
     //--- Load shaared libraries ---
@@ -18,7 +18,13 @@
         gROOT->ProcessLine(string(".L " + srcdir + sources[i] + ".cc+").c_str());
     }
         
-    //myFinalUnfoldEdit(0, 2, "SMu", "Bayes");
-    myFinalUnfoldEdit(0, 43, "SMu", "Bayes");
+    myFinalUnfoldEdit(0, 1,);
+    myFinalUnfoldEdit(46, 47); //inc jetmultiplicity
+    
+    myFinalUnfoldEdit(1, 6);
+    myFinalUnfoldEdit(11, 16);
+    myFinalUnfoldEdit(21, 26);
+    myFinalUnfoldEdit(26, 43);
+        
         
 }

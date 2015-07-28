@@ -83,6 +83,10 @@ const xsecVariableStruct xsecVarNames[] = {
     {"MeanNJetsHT_Zinc2jet",                    "NA",                       "totNJhtjet2"},
     {"MeanNJetsdRapidity_Zinc2jet",             "NA",                       "totNJdyj1j2"},
     {"MeanNJetsdRapidityFB_Zinc2jet",           "NA",                       "totNJdyjFjB"}, //46
+    
+    //-- Mean number of Jets
+    {"ZNGoodJets_Zinc",                         "njetWJet_incl",            "njet_WMuNu"}, //47
+    
 
 };
 

@@ -27,6 +27,12 @@
 #include "fileNames.h"
 #include "variablesOfInterestVarWidth.h"
 
+int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfoldResponse *resp, TH1D *hRecDataMinusFakes, TH1D* &hUnfData, string variable, TString name);
+double MyChi2Test(TH1D *h1, TH1D *h2, int nBinsToSkip);
+TH1D* foldUnfData(TH1D *hUnfData, RooUnfoldResponse *hresp);
+TH1D* getFakes(TH1D *hRecDYJets, TH1D *hRecData, TH1D *hRecSumBg, TH2D *hResDYJets);
+RooUnfoldResponse* getResp(TFile *File, string variable, TH1D *recoMad, TH1D *genMad);
+
 void myFastPlots(string leptonFlavor, string var, bool closureTest)
 {
     TH1::SetDefaultSumw2();
@@ -51,14 +57,16 @@ void myFastPlots(string leptonFlavor, string var, bool closureTest)
         sel = FilesDYJets;
     }
     else if (leptonFlavor == "SMu" || leptonFlavor == "SE"){
+        //--- list of variable from : variablesOfInterestVarWidth.h
         nVarStruct = NVAROFINTERESTWJETS;
         varStruct = new variableStruct[nVarStruct];
         varStruct = VAROFINTERESTWJETS;
         makeLISTOFVAROFINTERESTWJETS();
         varList = LISTOFVAROFINTERESTWJETS;
-        nsel = NFILESTTBAR;
+        //--- list of files to be used from  : fileNames.h
+        nsel = NFILESWJETS_M;
         sel = new int[nsel];
-        sel = FilesTTbarWJets;
+        sel = FilesWJets_M;
     }
 
     //---------------------------------------------
@@ -107,10 +115,9 @@ void FastPlotsRun(const int *sel, int nsel, string leptonFlavor, string variable
     else if (leptonFlavor == "Muon" || leptonFlavor == "SE") leptonFlavor = "SE_";
     else if (leptonFlavor == "Electron" || leptonFlavor == "SMu") leptonFlavor = "SMu_";
 
-    //--- retreive the year from current location and set the energy accordingly
+    //--- retrieve the year from current location and set the energy accordingly
     string energy = getEnergy();
 
-    //if (variable.find("JetPt")!= string::npos && variable.find("Highest") == string::npos && JetPtMin == 30)  JetPtMin = 20 ;
     ostringstream jetPtMin; jetPtMin << JetPtMin;
     string outputDirectory = "PNGFiles/FastPlots_" + jetPtMin.str() ;
     if (doVarWidth)  outputDirectory+= "_VarWidth";
@@ -121,37 +128,20 @@ void FastPlotsRun(const int *sel, int nsel, string leptonFlavor, string variable
     string outputRootFileName = outputDirectory + leptonFlavor + energy + "_" + variable + "_fastplots";
     if (closureTest) outputRootFileName += "_ClosureTest";
     if (doVarWidth) outputRootFileName += "_VarWidth";
-    string outputTexFileName = outputRootFileName;
+    //string outputTexFileName = outputRootFileName;
     outputRootFileName += ".root";
-    outputTexFileName += ".tex";
+    //outputTexFileName += ".tex";
 
     TFile *outputRootFile = new TFile(outputRootFileName.c_str(), "RECREATE");
-    ofstream outputTexFile(outputTexFileName.c_str());
-    writeHeaderPage(outputTexFile, leptonFlavor, variable);
+    //ofstream outputTexFile(outputTexFileName.c_str());
+    //writeHeaderPage(outputTexFile, leptonFlavor, variable);
 
     //-- get data histogram (or MC Even for closure test) ----------------------------
     TFile *DataFile = NULL;
     if (!closureTest) DataFile = getFile(FILESDIRECTORY, leptonFlavor, energy, ProcessInfo[sel[0]].filename, JetPtMin, JetPtMax, doFlat, doVarWidth, 0, 0, 0, 0, -1, "", "0", false, 0);
     else DataFile = getFile(FILESDIRECTORY, leptonFlavor, energy, ProcessInfo[sel[nsel-1]].filename, JetPtMin, JetPtMax, doFlat, doVarWidth, 0, 0, 0, 0, -1, "", "0", false, 0);
-    
     TH1D *meas = getHisto(DataFile, variable);
     
-
-    //-- get MC madgraph histograms (or MC Odd for closure test) ---------------------
-    TFile *DY = NULL;
-    if (!closureTest) DY = getFile(FILESDIRECTORY, leptonFlavor, energy, ProcessInfo[sel[nsel-1]].filename, JetPtMin, JetPtMax, doFlat, doVarWidth, 0, 0, 0, 0, -1, "", "0", false, 0);
-    else DY = getFile(FILESDIRECTORY, leptonFlavor, energy, ProcessInfo[sel[nsel-1]].filename, JetPtMin, JetPtMax, doFlat, doVarWidth, 0, 0, 0, 0, -1, "", "0", false, 0);
-    
-    TH1D *recoMad = (TH1D*) getHisto(DY, variable);
-    outputRootFile->cd();
-    recoMad->Write("recoMad");
-
-    //-- get Powheg histograms -------------------------------------------------------
-    //TFile *Powheg = getFile(FILESDIRECTORY, leptonFlavor, energy, DYPOWHEGFILENAME, JetPtMin, JetPtMax, doFlat);
-
-    //-- get Powheg histograms -------------------------------------------------------
-    //TFile *Sherpa = getFile(FILESDIRECTORY, leptonFlavor, energy, DYSHERPAFILENAME, JetPtMin, JetPtMax, doFlat);
-
     //-- get BG histograms -----------------------------------------------------------
     int nBG(nsel-2);
     if (closureTest) nBG = 0;
@@ -160,26 +150,80 @@ void FastPlotsRun(const int *sel, int nsel, string leptonFlavor, string variable
     for (int i(0); i < nBG; i++){
         BG[i] = getFile(FILESDIRECTORY, leptonFlavor, energy, ProcessInfo[sel[i+1]].filename, JetPtMin, JetPtMax, doFlat, doVarWidth, 0, 0, 0, 0, -1, "", "0", false, 0);
         hBG[i] = getHisto(BG[i], variable);
-                
     }
-    //TH1D *measSubBG = (TH1D*) meas->Clone();//== some functions will need this as an input == need to add code to build this)//
+    TH1D *hSumBG = NULL;
+    for (int i(0); i < nBG; i++) {
+        if (i == 0) hSumBG = (TH1D*) hBG[i]->Clone();
+        else hSumBG->Add(hBG[i]);
+    }
+    //--- measSubBG
+    TH1D *measSubBG = (TH1D*) meas->Clone();
+    if (!closureTest) measSubBG->Add(hSumBG, -1);
+    else {
+        hSumBG = (TH1D*) meas->Clone();
+        hSumBG->Reset();
+    }
     
 
-    //-- build the repsonse matrix, MCtruth, MCreco ------------------------
-    string respName = "response" + variable;
-    RooUnfoldResponse *response = (RooUnfoldResponse*) DY->Get(respName.c_str());
-    response->UseOverflow();
+    //-- get MC madgraph histograms (or MC Odd for closure test) ---------------------
+    TFile *DY = NULL;
+    if (!closureTest) DY = getFile(FILESDIRECTORY, leptonFlavor, energy, ProcessInfo[sel[nsel-1]].filename, JetPtMin, JetPtMax, doFlat, doVarWidth, 0, 0, 0, 0, -1, "", "0", false, 0);
+    else DY = getFile(FILESDIRECTORY, leptonFlavor, energy, ProcessInfo[sel[nsel-1]].filename, JetPtMin, JetPtMax, doFlat, doVarWidth, 0, 0, 0, 0, -1, "", "0", false, 0);
+    TH1D *recoMad = (TH1D*) getHisto(DY, variable);
+    
     string genName = "gen" + variable;
     TH1D *genMad = NULL;
     if (!closureTest) genMad = (TH1D*) DY->Get(genName.c_str());
     else genMad = (TH1D*) DY->Get(genName.c_str());
-
-    TH2D *hResponse = (TH2D*) response->Hresponse();
-    TH2D *hNormResp = (TH2D*) hResponse->Clone(); 
-    normalizeTH2D(hNormResp);
-    //TH1D *MCtruth   = (TH1D*) response->Htruth();
-    //TH1D *MCreco    = (TH1D*) response->Hmeasured();
     
+    string hrespName = "hresponse" + variable;
+    TH2D *hresponse = NULL;
+    hresponse = (TH2D*) DY->Get(hrespName.c_str());
+    
+    //-- build the repsonse object ------------------------
+    RooUnfoldResponse *response = (RooUnfoldResponse*) getResp(DY, variable, recoMad, genMad);
+    response->UseOverflow();
+    
+    TH1D *MCtruth   = (TH1D*) response->Htruth();
+    TH1D *MCreco    = (TH1D*) response->Hmeasured();
+    TH1D *MCFakes   = (TH1D*) response->Hfakes();
+    
+    outputRootFile->cd();
+    meas      ->Write("DataReco");
+    measSubBG ->Write("DataMinusBG");
+    recoMad   ->Write("recoMadG");
+    genMad    ->Write("genMadG");
+    hresponse ->Write("hresponse");
+    MCtruth   ->Write("MCtruth");
+    MCreco    ->Write("MCreco");
+    MCFakes   ->Write("MCFakes");
+    
+    TH2D *hNormResp = (TH2D*) hresponse->Clone();
+    normalizeTH2D(hNormResp);
+    
+    
+    //--- setup for Zjets method
+    TH1D *recoMadZJ = (TH1D*) recoMad->Clone();
+    recoMadZJ->Reset();
+    RooUnfoldResponse *responseZJ = (RooUnfoldResponse*) getResp(DY, variable, recoMadZJ, genMad);
+    responseZJ->UseOverflow();
+    TH1D *hFakDYJets = getFakes(recoMad, meas, hSumBG, hresponse);
+    TH1D *hRecDataMinusFakes = (TH1D*) measSubBG->Clone();
+    hRecDataMinusFakes->Add(hFakDYJets, -1);
+    outputRootFile->cd();
+    hFakDYJets->Write("DataRecoFakes");
+    
+    //-- draw chi2 between foldUfolded and reco --------------------------------------------------------
+    TH1D *hUnfData= NULL;
+    int nIter = UnfoldData(leptonFlavor, "Bayes", Bayeskterm, responseZJ, hRecDataMinusFakes, hUnfData, variable, "");
+    outputRootFile->cd();
+    hUnfData->Write();
+    
+    //-- get Powheg histograms -------------------------------------------------------
+    //TFile *Powheg = getFile(FILESDIRECTORY, leptonFlavor, energy, DYPOWHEGFILENAME, JetPtMin, JetPtMax, doFlat);
+
+    //-- get Powheg histograms -------------------------------------------------------
+    //TFile *Sherpa = getFile(FILESDIRECTORY, leptonFlavor, energy, DYSHERPAFILENAME, JetPtMin, JetPtMax, doFlat);
 
     //-- get TH2D from Powheg -------------------------------------------------------
     //RooUnfoldResponse *respPow = (RooUnfoldResponse*) Powheg->Get(respName.c_str());
@@ -189,10 +233,8 @@ void FastPlotsRun(const int *sel, int nsel, string leptonFlavor, string variable
     //RooUnfoldResponse *respShe = (RooUnfoldResponse*) Sherpa->Get(respName.c_str());
     //TH2D *hRespShe = (TH2D*) respShe->Hresponse();
 
-    
     //-- draw normalized response matrix --------------------------------------------
     plotHNormResp(hNormResp, leptonFlavor, variable, energy, outputDirectory, outputRootFile, closureTest);
-    
     
     //-- draw Bayes selected kTerm and +/- 1 ----------------------------------------
     myplotSelectedMethod2("Bayes", response, genMad, Bayeskterm, meas, hBG, nBG, leptonFlavor, variable, logZ, decrease, outputDirectory, outputRootFile, closureTest, true);
@@ -200,13 +242,12 @@ void FastPlotsRun(const int *sel, int nsel, string leptonFlavor, string variable
     //-- draw chi2 of change --------------------------------------------------------
     myplotChi2OfChange(response, Bayeskterm, meas, hBG, nBG, leptonFlavor, variable, energy, outputDirectory, outputRootFile, closureTest);
     
-    
     //-- Bin by bin method ----------------------------------------------------------
     //myplotSelectedMethod2("BinByBin", response, genMad, 0, meas, hBG, nBG, leptonFlavor, variable, logZ, decrease, outputDirectory, outputRootFile, closureTest, true);
     
-    
     //-- draw SVD selected kTerm and +/- 1 ------------------------------------------
     //myplotSelectedMethod2("SVD", response, genMad, SVDkterm, meas, hBG, nBG, leptonFlavor, variable, logZ, decrease, outputDirectory, outputRootFile, closureTest, true);
+    
 
     //-- close every files ----------------------------------------------------------
     outputRootFile->Close();
@@ -215,7 +256,7 @@ void FastPlotsRun(const int *sel, int nsel, string leptonFlavor, string variable
     //closeFile(Powheg);
     //closeFile(Sherpa);
     for (int i(0); i < nBG; i++) closeFile(BG[i]);
-    outputTexFile.close();
+    //outputTexFile.close();
 }
 
 
@@ -490,6 +531,7 @@ void myplotSelectedMethod2(string method, RooUnfoldResponse *response, TH1D *gen
     }
 }
 
+
 void myplotChi2OfChange(RooUnfoldResponse *response, int kterm, TH1D *hData, TH1D *hBG[], int nBG, string leptonFlavor, string variable, string energy, string outputDirectory, TFile *outputRootFile, bool closureTest, bool save)
 {
     if (leptonFlavor == "Muons" || leptonFlavor == "DMu") leptonFlavor = "DMu_";
@@ -501,9 +543,9 @@ void myplotChi2OfChange(RooUnfoldResponse *response, int kterm, TH1D *hData, TH1
     TH1D *hMeas = (TH1D*) hData->Clone();
     int nBins(hMeas->GetNbinsX()  );
     
-    // not allow this to go futher than kterm = 20
+    // not allow this to go futher than kterm = 25
     int iterNum = nBins;
-    if (iterNum > 20) {iterNum = 20;}
+    if (iterNum > 25) {iterNum = 25;}
     
     for (int i(0); i < nBG; i++){
         hMeas->Add(hBG[i], -1);
@@ -565,6 +607,315 @@ void myplotChi2OfChange(RooUnfoldResponse *response, int kterm, TH1D *hData, TH1
         canChi2->Write();
     }
 }
+
+
+int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfoldResponse *resp, TH1D *hRecDataMinusFakes, TH1D* &hUnfData, string variable, TString name)
+{
+    //--- make sure we use OverFlow (should already be set to true) ---
+    resp->UseOverflow();
+    
+    //--- Set the required unfolding algorithm ---
+    RooUnfold::Algorithm alg;
+    if (algo == "Bayes") {
+        alg = RooUnfold::kBayes;
+    }
+    else if (algo == "SVD") {
+        alg = RooUnfold::kSVD;
+    }
+    else {
+        cerr << "Error: the specified algo: " << algo << " is not implemented!" << endl;
+        cerr << "       I will proceed with kBayes algo" << endl;
+        alg = RooUnfold::kBayes;
+    }
+    
+    std::cout << "-----------------------" << std::endl;
+    std::cout << "--------- start finding nIter -----------" << std::endl;
+    
+    
+    string command = "mkdir -p PNGFiles/UnfoldingCheck";
+    system(command.c_str());
+    
+    TFile *f = new TFile("PNGFiles/UnfoldingCheck/" + lepSel + "_" + variable + "_" + name + ".root", "RECREATE");
+    f->cd();
+    int finalNIter = -1;
+    int nIter = 99;
+    int nBinsTmp = hRecDataMinusFakes->GetNbinsX();
+    TH1D *hchi2 = new TH1D("hchi2", "hchi2", nBinsTmp, 0.5, nBinsTmp+0.5);
+    hchi2->SetTitle("#chi^{2}/ndf for reco vs folded-unfolded for " + TString(hRecDataMinusFakes->GetTitle()));
+    hchi2->GetYaxis()->SetTitle("#chi^{2}/ndf");
+    hchi2->GetYaxis()->SetTitleOffset(1.40);
+    hchi2->GetXaxis()->SetTitle("number of iterations of the Bayes method");
+    hchi2->GetXaxis()->CenterTitle();
+    hchi2->GetXaxis()->SetNdivisions(nBinsTmp, 0, 0);
+    hchi2->GetXaxis()->SetLabelSize(0.03);
+    hchi2->SetLineWidth(2);
+    for (int i = 1; i <= nBinsTmp; ++i) {
+        RooUnfoldResponse *respBis = (RooUnfoldResponse*) resp->Clone();
+        TH1D *hRecDataMinusFakesBis = (TH1D*) hRecDataMinusFakes->Clone();
+        RooUnfold *RObjectForDataTmp = RooUnfold::New(alg, respBis, hRecDataMinusFakesBis, i);
+        RObjectForDataTmp->SetVerbose(0);
+        int nBinsToSkip = (TString(hRecDataMinusFakesBis->GetName()).Index("JetPt_Zinc") > 0) ? 2 : 0;
+        
+        //cout << "nBinsToSkip " << nBinsToSkip << " " << TString(hRecDataMinusFakesBis->GetName()) << " " << TString(hRecDataMinusFakesBis->GetName()).Index("JetPt_Zinc") << endl;
+        
+        RObjectForDataTmp->IncludeSystematics(0); // new version of RooUnfold: will compute Cov based on Data Statistics only
+        std::cout << "niter = " << i << std::endl;
+        TH1D* hUnfDataBis = (TH1D*) RObjectForDataTmp->Hreco(RooUnfold::kCovariance);
+        
+        TString tmpName = "Unf" + name + "_";
+        tmpName += i;
+        hUnfDataBis->SetName(tmpName);
+        hUnfDataBis->SetTitle(tmpName);
+        tmpName = "fol" + name + "_";
+        tmpName += i;
+        
+        TH1D *hfoldUnfData = foldUnfData(hUnfDataBis, respBis);
+        hfoldUnfData->SetName(tmpName);
+        hfoldUnfData->SetTitle(tmpName);
+        
+        TH1D *hgen = (TH1D*) respBis->Htruth();
+        tmpName = "gen" + name + "_";
+        tmpName += i;
+        hgen->SetName(tmpName);
+        hgen->SetTitle(tmpName);
+        hgen->Write();
+        
+        TH1D *hfoldgen = foldUnfData(hgen, respBis);
+        tmpName = "folgen" + name + "_";
+        tmpName += i;
+        hfoldgen->SetName(tmpName);
+        hfoldgen->SetTitle(tmpName);
+        hfoldgen->Write();
+        
+        TH1D *hmes = (TH1D*) respBis->Hmeasured();
+        tmpName = "mes" + name + "_";
+        tmpName += i;
+        hmes->SetName(tmpName);
+        hmes->SetTitle(tmpName);
+        hmes->Write();
+        
+        double mychi2 = MyChi2Test(hfoldUnfData, hRecDataMinusFakesBis, nBinsToSkip);
+       
+        hchi2->SetBinContent(i, mychi2);
+        if (i==1) hRecDataMinusFakesBis->Write("Unf" + name + "_0");
+        hUnfDataBis->Write();
+        hfoldUnfData->Write();
+        if (mychi2 < 1./sqrt(2) && finalNIter < 0) {
+            nIter = i;
+            finalNIter = i;
+            std::cout << "Will use " << nIter << " iterations with a final Chi2/ndf of: " << mychi2 << std::endl;
+            //break;
+        }
+    }
+    
+    //nIter = min(nIter, 20);
+    nIter = min(nIter, nBinsTmp);
+    nIter = max(nIter, 4);
+    //nIter = 4;
+    
+    std::cout << "\n---------------------------------------------------------------------------------------------------------------\n-" << std::endl;
+    std::cout << " nIter: " << nIter << std::endl;
+    std::cout << " finalNIter: " << finalNIter << std::endl;
+    hchi2->GetYaxis()->SetRangeUser(0, max(1.3, 1.1*hchi2->GetMaximum()));
+    TArrow *arrowChi2 = new TArrow(nIter, min(1.2, hchi2->GetMaximum()), nIter, 0.8, 0.02, "|>");
+    arrowChi2->SetLineColor(kRed);
+    arrowChi2->SetFillColor(kRed);
+    arrowChi2->SetLineWidth(2);
+    TLine *line = new TLine(0.5, 0.7, nBinsTmp + 0.5, 0.7);
+    line->SetLineColor(kBlack);
+    line->SetLineStyle(kDashed);
+    line->SetLineWidth(2);
+    TCanvas *chchi2 = new TCanvas("chchi2", "chchi2", 600, 600);
+    chchi2->cd();
+    chchi2->SetGrid();
+    hchi2->DrawCopy();
+    arrowChi2->Draw();
+    line->Draw();
+    hchi2->Write();
+    chchi2->Write();
+    chchi2->Print("PNGFiles/UnfoldingCheck/" + lepSel + "_" + variable + "_" + name + "chi2.pdf");
+    
+    RooUnfold *RObjectForDataBinByBin = RooUnfold::New(RooUnfold::kBinByBin, resp, hRecDataMinusFakes);
+    RObjectForDataBinByBin->SetVerbose(0);
+    TH1D *hUnfDataBinByBin = (TH1D*) RObjectForDataBinByBin->Hreco(RooUnfold::kCovariance);
+    hUnfDataBinByBin->SetName("UnfDataBinByBin" + name);
+    hUnfDataBinByBin->Write();
+    
+    RooUnfold *RObjectForDataBayes = RooUnfold::New(RooUnfold::kBayes, resp, hRecDataMinusFakes, nIter);
+    RObjectForDataBayes->SetVerbose(0);
+    TH1D *hUnfDataBayes = (TH1D*) RObjectForDataBayes->Hreco(RooUnfold::kCovariance);
+    hUnfDataBayes->SetName("UnfDataBayes" + name);
+    hUnfDataBayes->Write();
+    
+    /*
+    for (int i(1); i <= nBinsTmp; i++) {
+        RooUnfold *RObjectForDataSVD = RooUnfold::New(RooUnfold::kSVD, resp, hRecDataMinusFakes, i);
+        TH1D *hUnfDataSVD = (TH1D*) RObjectForDataSVD->Hreco(RooUnfold::kCovariance);
+        hUnfDataSVD->SetName("UnfDataSVD_" + TString::Format("%d", i) + "_" + name);
+        hUnfDataSVD->Write();
+    }
+    
+    
+    TSVDUnfold *unfoldTSVD = new TSVDUnfold(hRecDataMinusFakes, (TH1D*)resp->Htruth(), (TH1D*)resp->Hmeasured(), (TH2D*)resp->Hresponse());
+    TH1D *unfresult = (TH1D*) unfoldTSVD->Unfold(1);
+    TH1D *hmodDOriginal = (TH1D*) unfoldTSVD->GetD();
+    TH1D *hSV       = (TH1D*) unfoldTSVD->GetSV();
+    
+    TH1D *hmodD = new TH1D("hmodD", "hmodD", nBinsTmp, 0.5, nBinsTmp+0.5);
+    for (int i(0); i <= nBinsTmp+1; i++) {
+        hmodD->SetBinContent(i, hmodDOriginal->GetBinContent(i));
+    }
+    hmodD->SetTitle(hmodDOriginal->GetTitle() + TString(" for ") + TString(hRecDataMinusFakes->GetTitle()));
+    hmodD->GetXaxis()->SetNdivisions(nBinsTmp, 0, 0);
+    hmodD->GetXaxis()->SetLabelSize(0.03);
+    hmodD->GetYaxis()->SetTitle("|d_{i}|");
+    hmodD->GetYaxis()->SetTitleOffset(1.40);
+    hmodD->GetXaxis()->SetTitle("regularization parameter of the SVD method");
+    hmodD->GetXaxis()->CenterTitle();
+    TArrow *arrowSvd = new TArrow(svdKterm, 20, svdKterm, 1.1*hmodD->GetBinContent(svdKterm), 0.02, "|>");
+    arrowSvd->SetLineColor(kRed);
+    arrowSvd->SetFillColor(kRed);
+    arrowSvd->SetLineWidth(2);
+    
+    hmodD->SetName("modD" + name);
+    TCanvas *chmodD = new TCanvas("chmodD", "chmodD", 600, 600);
+    chmodD->cd();
+    chmodD->SetGrid();
+    chmodD->SetLogy();
+    hmodD->DrawCopy();
+    arrowSvd->Draw();
+    chmodD->Write();
+    hmodD->Write();
+    */
+    f->Close();
+    
+    std::cout << "\n---------------------------------------------------------------------------------------------------------------\n-" << std::endl;
+    
+    //--- Unfold data minus background ---
+    RooUnfold *RObjectForData = RooUnfold::New(alg, resp, hRecDataMinusFakes, svdKterm);
+    RObjectForData->SetVerbose(0);
+    
+    //--- get the unfolded result ---
+    RObjectForData->IncludeSystematics(0); // new version of RooUnfold: will compute Cov based on Data Statistics only
+    hUnfData = (TH1D*) RObjectForData->Hreco(RooUnfold::kCovariance);
+    hUnfData->SetName("UnfData" + name);
+    hUnfData->SetTitle(hRecDataMinusFakes->GetTitle());
+    
+    
+    return nIter;
+}
+
+
+double MyChi2Test(TH1D *h1, TH1D *h2, int nBinsToSkip)
+{
+    TH1D *h1Copy = (TH1D*) h1->Clone();
+    TH1D *h2Copy = (TH1D*) h2->Clone();
+    
+    for (int i = 0; i <= nBinsToSkip; ++i) {
+        h1Copy->SetBinContent(i, 0.0);
+        h2Copy->SetBinContent(i, 0.0);
+    }
+    return h1Copy->Chi2Test(h2Copy, "WW,P,CHI2/NDF");
+    
+}
+
+TH1D* foldUnfData(TH1D *hUnfData, RooUnfoldResponse *hresp)
+{
+    TH1D *hfoldUnfData = (TH1D*) hUnfData->Clone();
+    RooUnfoldResponse *resp = (RooUnfoldResponse*) hresp->Clone();
+    TH2D *hres = (TH2D*) resp->Hresponse();
+    TH1D *hgen = (TH1D*) resp->Htruth();
+    
+    
+    int nBins = hfoldUnfData->GetNbinsX();
+    
+    for (int i = 0; i <= nBins; ++i) {
+        double totGen = hgen->GetBinContent(i);
+        for (int j = 0; j <= nBins; ++j) {
+            if (totGen != 0.0) {
+                hres->SetBinContent(j, i, hres->GetBinContent(j, i)/totGen);
+                hres->SetBinError(j, i, hres->GetBinError(j, i)/totGen);
+                hres->SetBinError(j, i, 0.0);
+            }
+            else {
+                hres->SetBinContent(i, j, 0);
+                hres->SetBinError(i, j, hres->GetBinError(i, j));
+                hres->SetBinError(i, j, 0.0);
+            }
+        }
+    }
+    
+    for (int i = 0; i <= nBins; ++i) {
+        double sum = 0.0;
+        double error2 = 0.0;
+        for (int j = 0; j <= nBins; ++j) {
+            sum += hres->GetBinContent(i, j) * hUnfData->GetBinContent(j);
+            error2 += pow(hres->GetBinContent(i, j) * hUnfData->GetBinError(j), 2);
+        }
+        hfoldUnfData->SetBinContent(i, sum);
+        hfoldUnfData->SetBinError(i, sqrt(error2));
+    }
+    return hfoldUnfData;
+}
+
+TH1D* getFakes(TH1D *hRecDYJets, TH1D *hRecData, TH1D *hRecSumBg, TH2D *hResDYJets)
+{
+    string variable = hRecData->GetName(); //cout << " Get Fakes: " << variable << endl;
+    TH1D *hFakDYJets = (TH1D*) hRecDYJets->Clone();
+    
+    int sm= hRecDYJets->GetSumw2N();
+    int s = hResDYJets->GetSumw2N();
+    int nm = hResDYJets->GetNbinsX() + 2;
+    int nt = hResDYJets->GetNbinsY() + 2;
+    
+    double dyIntegral = hRecDYJets->Integral(0, hRecDYJets->GetNbinsX()+1);
+    double dataIntegral = hRecData->Integral(0, hRecData->GetNbinsX()+1);
+    double bgIntegral = hRecSumBg->Integral(0, hRecSumBg->GetNbinsX()+1);
+    for (int i= 0; i<nm; i++) {
+        double nmes= 0.0, wmes= 0.0;
+        for (int j= 0; j<nt; j++) {
+            nmes += hResDYJets->GetBinContent(i, j);
+            if (s) wmes += pow(hResDYJets->GetBinError(i, j), 2);
+        }
+        double fake = hRecDYJets->GetBinContent(i) - nmes;
+        
+        if (variable == "ZNGoodJets_Zinc") {
+            dyIntegral = hRecDYJets->GetBinContent(i);
+            dataIntegral = hRecData->GetBinContent(i);
+            bgIntegral = hRecSumBg->GetBinContent(i);
+        }
+        
+        double factor = dyIntegral;
+        if (factor != 0) factor = (dataIntegral - bgIntegral) / factor;
+        
+        if (!s) wmes= nmes;
+        hFakDYJets->SetBinContent (i, factor*fake);
+        hFakDYJets->SetBinError   (i, sqrt (wmes + (sm ? pow(hRecDYJets->GetBinError(i),2) : hRecDYJets->GetBinContent(i))));
+    }
+    hFakDYJets->SetEntries (hFakDYJets->GetEffectiveEntries());  // 0 entries if 0 fakes
+    
+    return hFakDYJets;
+    
+}
+
+RooUnfoldResponse* getResp(TFile *File, string variable, TH1D *recoMad, TH1D *genMad)
+{
+    string hrespName = "hresponse" + variable;
+    TH2D *hresponse = (TH2D*) File->Get(hrespName.c_str());
+    RooUnfoldResponse *response = new RooUnfoldResponse(recoMad, genMad, hresponse);
+    return response;
+}
+
+
+
+
+
+
+
+
+
+
+
 
 
 

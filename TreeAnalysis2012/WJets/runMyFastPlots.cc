@@ -17,13 +17,16 @@
         //gROOT->LoadMacro(string(srcdir + sources[i] + ".cc++").c_str());
     }
         
-    
+    myFastPlots("SMu", "ZNGoodJets_Zinc", false);
+    //myFastPlots("SMu", "ZNGoodJets_Zinc", true);
+
     myFastPlots("SMu", "ZNGoodJets_Zexc", false);
     //myFastPlots("SMu", "ZNGoodJets_Zexc", true);
-    
         
     myFastPlots("SMu", "FirstJetPt_Zinc1jet", false);
     //myFastPlots("SMu", "FirstJetPt_Zinc1jet", true);
+
+
     myFastPlots("SMu", "SecondJetPt_Zinc2jet", false);
     //myFastPlots("SMu", "SecondJetPt_Zinc2jet", true);
     myFastPlots("SMu", "ThirdJetPt_Zinc3jet", false);
@@ -58,21 +61,8 @@
     //myFastPlots("SMu", "JetsHT_Zinc5jet", true);
     myFastPlots("SMu", "FifthJetEta_Zinc5jet", false);
     //myFastPlots("SMu", "FifthJetEta_Zinc5jet", true);
-    
-    /*
-    myFastPlots("SMu", "FirstJetPt_1_Zinc1jet", false);
-    myFastPlots("SMu", "SecondJetPt_1_Zinc2jet", false);
-    myFastPlots("SMu", "ThirdJetPt_1_Zinc3jet", false);
-    myFastPlots("SMu", "FourthJetPt_1_Zinc4jet", false);
-    myFastPlots("SMu", "FifthJetPt_1_Zinc5jet", false);
-    
-    myFastPlots("SMu", "JetsHT_1_Zinc1jet", false);
-    myFastPlots("SMu", "JetsHT_1_Zinc2jet", false);
-    myFastPlots("SMu", "JetsHT_1_Zinc3jet", false);
-    myFastPlots("SMu", "JetsHT_1_Zinc4jet", false);
-    myFastPlots("SMu", "JetsHT_1_Zinc5jet", false);
-    */
 
+        
     //--
     myFastPlots("SMu", "dRapidityJets_Zinc2jet", false);
     //myFastPlots("SMu", "dRapidityJets_Zinc2jet", true);
@@ -120,8 +110,20 @@
     //myFastPlots("SMu", "diJetPt_Zinc3jet", true);
     myFastPlots("SMu", "diJetPt_Zinc4jet", false);
     //myFastPlots("SMu", "diJetPt_Zinc4jet", true);
-        
 
+        /*
+         myFastPlots("SMu", "FirstJetPt_1_Zinc1jet", false);
+         myFastPlots("SMu", "SecondJetPt_1_Zinc2jet", false);
+         myFastPlots("SMu", "ThirdJetPt_1_Zinc3jet", false);
+         myFastPlots("SMu", "FourthJetPt_1_Zinc4jet", false);
+         myFastPlots("SMu", "FifthJetPt_1_Zinc5jet", false);
+         
+         myFastPlots("SMu", "JetsHT_1_Zinc1jet", false);
+         myFastPlots("SMu", "JetsHT_1_Zinc2jet", false);
+         myFastPlots("SMu", "JetsHT_1_Zinc3jet", false);
+         myFastPlots("SMu", "JetsHT_1_Zinc4jet", false);
+         myFastPlots("SMu", "JetsHT_1_Zinc5jet", false);
+         */
         
     
     //--- clean the *_cc.d and *_cc.so files ---

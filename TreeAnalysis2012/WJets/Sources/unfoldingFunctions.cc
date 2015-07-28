@@ -463,6 +463,7 @@ void plotSVDUnfoldedHistograms(RooUnfoldResponse *response, TH1D *hData, TH1D *h
     }
 }
 
+/*
 void plotChi2OfChange(RooUnfoldResponse *response, int kterm, TH1D *hData, TH1D *hBG[], int nBG, string leptonFlavor, string variable, string energy, string outputDirectory, TFile *outputRootFile, bool closureTest, bool save)
 {
     if (leptonFlavor == "Muons" || leptonFlavor == "DMu") leptonFlavor = "DMu_";
@@ -531,7 +532,8 @@ void plotChi2OfChange(RooUnfoldResponse *response, int kterm, TH1D *hData, TH1D 
         canChi2->Write();
     }
 }
-
+*/
+ 
 void plotBayesUnfoldedHistograms(RooUnfoldResponse *response, TH1D *hData, TH1D *hBG[], int nBG, string leptonFlavor, string variable, string energy, bool logZ, bool decrease, string outputDirectory, TFile *outputRootFile, bool closureTest, bool save)
 {
     if (leptonFlavor == "Muons" || leptonFlavor == "DMu") leptonFlavor = "DMu_";

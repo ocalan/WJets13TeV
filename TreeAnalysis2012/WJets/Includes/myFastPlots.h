@@ -10,6 +10,8 @@ void FastPlotsRun(const int *sel, int nsel, string leptonFlavor, string variable
 
 void myplotSelectedMethod2(string method, RooUnfoldResponse *response, TH1D *genMad, int kterm, TH1D *hData, TH1D *hBG[], int nBG, string leptonFlavor, string variable, bool logZ, bool decrease, string outputDirectory, TFile *outputRootFile, bool closureTest = false, bool save = true);
 
+
 void myplotChi2OfChange(RooUnfoldResponse *response, int kterm, TH1D *hData, TH1D *hBG[], int nBG, string leptonFlavor, string variable, string energy, string outputDirectory, TFile *outputRootFile, bool closureTest = false, bool save = true);
+
 
 #endif

@@ -11,6 +11,96 @@ struct variableStruct{
     int MuSVDkterm, MuBayeskterm, ESVDkterm, EBayeskterm, BayesktermCombine;
 };
 
+
+//--- W Jets ------------------------------------
+
+const int NVAROFINTERESTWJETS(48);
+variableStruct VAROFINTERESTWJETS[] = {
+    //--  Name  ----------------- log - decrease - Mu SVD kterm -  Mu Bayes kterm - E SVD kterm - E Bayes kterm - E Bayes kterm COMBINE
+    {"ZNGoodJets_Zexc",             1,      1,           4,              5,             4,            3,           7}, //0
+    
+    //-- jet Pt distribution
+    {"FirstJetPt_Zinc1jet",         1,      1,          14,              4,            14,           10,           7}, //1
+    {"SecondJetPt_Zinc2jet",        1,      1,          15,              4,            14,            8,           8},
+    {"ThirdJetPt_Zinc3jet",         1,      1,           5,              4,             5,            5,           7},
+    {"FourthJetPt_Zinc4jet",        1,      1,           5,              4,             4,            4,           7},
+    {"FifthJetPt_Zinc5jet",         1,      1,           4,              4,             3,            2,           7}, //5
+    
+    
+    {"FirstJetPt_1_Zinc1jet",       1,      1,          14,              4,            14,           10 ,          7},
+    {"SecondJetPt_1_Zinc2jet",      1,      1,          15,              4,            14,            8 ,          8},
+    {"ThirdJetPt_1_Zinc3jet",       1,      1,           5,              4,             5,            5,           7},
+    {"FourthJetPt_1_Zinc4jet",      1,      1,           5,              4,             4,            4,           7},
+    {"FifthJetPt_1_Zinc5jet",       1,      1,           4,              4,             3,            2,           7}, //10
+    
+    //-- jets HT distribution
+    {"JetsHT_Zinc1jet",             1,      1,           9,              4,             8,            4,           4},
+    {"JetsHT_Zinc2jet",             1,      1,           7,              4,             8,            4,           2},
+    {"JetsHT_Zinc3jet",             1,      1,           7,              4,             7,            5,           7},
+    {"JetsHT_Zinc4jet",             1,      1,           6,              4,             5,            9,           7},
+    {"JetsHT_Zinc5jet",             1,      1,           3,              4,             4,            2,           7}, //15
+    
+    {"JetsHT_1_Zinc1jet",           1,      1,           9,              4,             8,            4 ,          4},
+    {"JetsHT_1_Zinc2jet",           1,      1,           7,              4,             8,            4 ,          2},
+    {"JetsHT_1_Zinc3jet",           1,      1,           7,              4,             7,            5,           7},
+    {"JetsHT_1_Zinc4jet",           1,      1,           6,              4,             5,            9,           7},
+    {"JetsHT_1_Zinc5jet",           1,      1,           3,              4,             4,            2,           7}, //20
+    
+    //-- jet Eta distribution
+    {"FirstJetEta_Zinc1jet",        0,      1,          13,              4,            15,            3,           7},
+    {"SecondJetEta_Zinc2jet",       0,      1,          11,              4,            11,            4,           7},
+    {"ThirdJetEta_Zinc3jet",        0,      1,          10,              4,             8,            4,           7},
+    {"FourthJetEta_Zinc4jet",       0,      1,           5,              4,             3,            4,           7},
+    {"FifthJetEta_Zinc5jet",        0,      1,           3,              4,             2,            2,           7}, //25
+    
+    
+    //--  Name  ------------------------- log - decrease - Mu SVD kterm -  Mu Bayes kterm - E SVD kterm - E Bayes kterm - E Bayes kterm COMBINE
+    //-- angular variables
+    {"dRapidityJets_Zinc2jet",              1,      1,           3,              4,             2,            2,           7},
+    {"dRapidityJets_Zinc3jet",              1,      1,           3,              4,             2,            2,           7},
+    {"dRapidityJets_Zinc4jet",              1,      1,           3,              4,             2,            2,           7}, //28
+    
+    {"dRapidityJetsFB_Zinc2jet",            1,      1,           3,              4,             2,            2,           7},
+    {"dRapidityJetsFB_Zinc3jet",            1,      1,           3,              4,             2,            2,           7},
+    {"dRapidityJetsFB_Zinc4jet",            1,      1,           3,              4,             2,            2,           7}, //31
+    
+    {"dRapidityJets_First_Third_Zinc3jet",  1,      1,           3,              4,             2,            2,           7},
+    {"dRapidityJets_Second_Third_Zinc3jet", 1,      1,           3,              4,             2,            2,           7},
+    
+    {"dPhiJets_Zinc2jet",                   1,      0,           3,              4,             2,            2,           7},
+    {"dPhiJetsFB_Zinc2jet",                 1,      0,           3,              4,             2,            2,           7},
+    {"dRJets_Zinc2jet",                     1,      1,           3,              4,             2,            2,           7}, //36
+    
+    //-- dijet properties
+    {"diJetMass_Zinc2jet",                  1,      1,           3,              10,            2,            2,           7},
+    {"diJetMass_Zinc3jet",                  1,      1,           3,              10,            2,            2,           7},
+    {"diJetMass_Zinc4jet",                  1,      1,           3,              4,             2,            2,           7},
+    
+    {"diJetPt_Zinc2jet",                    1,      1,           3,              4,             2,            2,           7},
+    {"diJetPt_Zinc3jet",                    1,      1,           3,              4,             2,            2,           7},
+    {"diJetPt_Zinc4jet",                    1,      1,           3,              4,             2,            2,           7}, //42
+    
+    // Mean number of Jets
+    {"MeanNJetsHT_Zinc1jet",                0,      0,           8,              6,             9,            3,           7},
+    {"MeanNJetsHT_Zinc2jet",                0,      0,          10,              8,            10,            4,           7},
+    {"MeanNJetsdRapidity_Zinc2jet",         0,      0,           7,              3,             7,            5,           7},
+    {"MeanNJetsdRapidityFB_Zinc2jet",       0,      0,           6,              2,             5,            9,           7}, //46
+    
+    //--  Name  ------------------------- log - decrease - Mu SVD kterm -  Mu Bayes kterm - E SVD kterm - E Bayes kterm - E Bayes kterm COMBINE
+    {"ZNGoodJets_Zinc",                     1,      1,           4,              4,             4,            3,           7}, //47
+        
+};
+
+TList *LISTOFVAROFINTERESTWJETS = new TList();
+
+void makeLISTOFVAROFINTERESTWJETS(){
+    for (int i(0); i < NVAROFINTERESTWJETS; i++){
+        TObjString *name = new TObjString(VAROFINTERESTWJETS[i].name.c_str());
+        LISTOFVAROFINTERESTWJETS->Add(name);
+    }
+}
+
+
 //--- Z Jets ------------------------------------
 
 const int NVAROFINTERESTZJETS(62);
@@ -110,89 +200,6 @@ void makeLISTOFVAROFINTERESTZJETS(){
     }
 }
 
-//--- W Jets ------------------------------------
-
-const int NVAROFINTERESTWJETS(47);
-variableStruct VAROFINTERESTWJETS[] = {
-    //--  Name  ----------------- log - decrease - Mu SVD kterm -  Mu Bayes kterm - E SVD kterm - E Bayes kterm - E Bayes kterm COMBINE
-    {"ZNGoodJets_Zexc",             1,      1,           4,              4,             4,            3,           7}, //0
-    
-    //-- jet Pt distribution
-    {"FirstJetPt_Zinc1jet",         1,      1,          14,              6,            14,           10,           7}, //1
-    {"SecondJetPt_Zinc2jet",        1,      1,          15,              3,            14,            8,           8},
-    {"ThirdJetPt_Zinc3jet",         1,      1,           5,              4,             5,            5,           7},
-    {"FourthJetPt_Zinc4jet",        1,      1,           5,              3,             4,            4,           7},
-    {"FifthJetPt_Zinc5jet",         1,      1,           4,              3,             3,            2,           7}, //5
-    
-    {"FirstJetPt_1_Zinc1jet",       1,      1,          14,              6,            14,           10 ,          7},
-    {"SecondJetPt_1_Zinc2jet",      1,      1,          15,              3,            14,            8 ,          8},
-    {"ThirdJetPt_1_Zinc3jet",       1,      1,           5,              4,             5,            5,           7},
-    {"FourthJetPt_1_Zinc4jet",      1,      1,           5,              3,             4,            4,           7},
-    {"FifthJetPt_1_Zinc5jet",       1,      1,           4,              3,             3,            2,           7}, //10
-    
-    //-- jets HT distribution
-    {"JetsHT_Zinc1jet",             1,      1,           9,              4,             8,            4,           4},
-    {"JetsHT_Zinc2jet",             1,      1,           7,              4,             8,            4,           2},
-    {"JetsHT_Zinc3jet",             1,      1,           7,              3,             7,            5,           7},
-    {"JetsHT_Zinc4jet",             1,      1,           6,              3,             5,            9,           7},
-    {"JetsHT_Zinc5jet",             1,      1,           3,              2,             4,            2,           7}, //15
-    
-    {"JetsHT_1_Zinc1jet",           1,      1,           9,              4,             8,            4 ,          4},
-    {"JetsHT_1_Zinc2jet",           1,      1,           7,              4,             8,            4 ,          2},
-    {"JetsHT_1_Zinc3jet",           1,      1,           7,              3,             7,            5,           7},
-    {"JetsHT_1_Zinc4jet",           1,      1,           6,              3,             5,            9,           7},
-    {"JetsHT_1_Zinc5jet",           1,      1,           3,              2,             4,            2,           7}, //20
-    
-    //-- jet Eta distribution
-    {"FirstJetEta_Zinc1jet",        0,      1,          13,              4,            15,            3,           7},
-    {"SecondJetEta_Zinc2jet",       0,      1,          11,              5,            11,            4,           7},
-    {"ThirdJetEta_Zinc3jet",        0,      1,          10,              4,             8,            4,           7},
-    {"FourthJetEta_Zinc4jet",       0,      1,           5,              4,             3,            4,           7},
-    {"FifthJetEta_Zinc5jet",        0,      1,           3,              2,             2,            2,           7}, //25
-    
-    
-    //--  Name  ------------------------- log - decrease - Mu SVD kterm -  Mu Bayes kterm - E SVD kterm - E Bayes kterm - E Bayes kterm COMBINE
-    //-- angular variables
-    {"dRapidityJets_Zinc2jet",              1,      1,           3,              4,             2,            2,           7},
-    {"dRapidityJets_Zinc3jet",              1,      1,           3,              4,             2,            2,           7},
-    {"dRapidityJets_Zinc4jet",              1,      1,           3,              4,             2,            2,           7}, //28
-    
-    {"dRapidityJetsFB_Zinc2jet",            1,      1,           3,              4,             2,            2,           7},
-    {"dRapidityJetsFB_Zinc3jet",            1,      1,           3,              4,             2,            2,           7},
-    {"dRapidityJetsFB_Zinc4jet",            1,      1,           3,              4,             2,            2,           7}, //31
-    
-    {"dRapidityJets_First_Third_Zinc3jet",  1,      1,           3,              5,             2,            2,           7},
-    {"dRapidityJets_Second_Third_Zinc3jet", 1,      1,           3,              5,             2,            2,           7},
-    
-    {"dPhiJets_Zinc2jet",                   1,      0,           3,              4,             2,            2,           7},
-    {"dPhiJetsFB_Zinc2jet",                 1,      0,           3,              4,             2,            2,           7},
-    {"dRJets_Zinc2jet",                     1,      1,           3,              4,             2,            2,           7}, //36
-    
-    //-- dijet properties
-    {"diJetMass_Zinc2jet",                  1,      1,           3,              5,             2,            2,           7},
-    {"diJetMass_Zinc3jet",                  1,      1,           3,              4,             2,            2,           7},
-    {"diJetMass_Zinc4jet",                  1,      1,           3,              5,             2,            2,           7},
-    
-    {"diJetPt_Zinc2jet",                    1,      1,           3,              4,             2,            2,           7},
-    {"diJetPt_Zinc3jet",                    1,      1,           3,              4,             2,            2,           7},
-    {"diJetPt_Zinc4jet",                    1,      1,           3,              4,             2,            2,           7}, //42
-    
-    // Mean number of Jets
-    {"MeanNJetsHT_Zinc1jet",                0,      0,           8,              6,             9,            3,           7},
-    {"MeanNJetsHT_Zinc2jet",                0,      0,          10,              8,            10,            4,           7},
-    {"MeanNJetsdRapidity_Zinc2jet",         0,      0,           7,              3,             7,            5,           7},
-    {"MeanNJetsdRapidityFB_Zinc2jet",       0,      0,           6,              2,             5,            9,           7}, //46
-        
-};
-
-TList *LISTOFVAROFINTERESTWJETS = new TList();
-
-void makeLISTOFVAROFINTERESTWJETS(){
-    for (int i(0); i < NVAROFINTERESTWJETS; i++){
-        TObjString *name = new TObjString(VAROFINTERESTWJETS[i].name.c_str());
-        LISTOFVAROFINTERESTWJETS->Add(name);
-    }
-}
 #endif
 
 

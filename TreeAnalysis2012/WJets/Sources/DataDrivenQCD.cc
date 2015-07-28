@@ -1,9 +1,9 @@
 // History
+//---- 2015_06_23
+// Initialize the FILE variables and put them in local.
 //---- 2015_05_29
 // Further fix the error calculation for the non ZNGoodJets distribution. Make sure all calculation is ok now.
 //
-// ### CAUTION !! there is an unknown bug when running only ZNGoodJets_Zexc distribution. Need to run all distributions to avoid this bug.
-//      >> this bug makes the last histogram (QCD3 of DYJets_MIX be) 6.76403e+07 incidentally equal to the first histogram (data of histo name: ZNGoodJets_Zexc for QCD: 0)
 //---------------
 
 #include <vector>
@@ -45,36 +45,37 @@ using namespace std;
 #include "variablesOfInterestVarWidth.h"
 
 const int NQCD = 4 ;
-TFile *fData[NQCD], *fSignal[NQCD];
-TH1D  *hData[NQCD], *hSignal[NQCD], *hBack[NQCD];
-TFile *fMC[NQCD][NFILESWJETS];
 
-bool isMuon(0);
-string unfAlg = "Bayes";
 string energy = getEnergy();
 int JetPtMin(30);
 int JetPtMax(0);
-TFile *fOut;
 
 //-------------------------------------------------------------------------------------------
-void DataDrivenQCD(  string leptonFlavor, int METcut , int doBJets ){
+void DataDrivenQCD( string leptonFlavor, int METcut , int doBJets ){
     
     TH1::SetDefaultSumw2();
     
-    FuncOpenAllFiles(leptonFlavor, METcut, false, true, doBJets);
-    vector<string> histoNameRun = getVectorOfHistoNames();
+    TFile *fData[NQCD] = {NULL};
+    TFile *fMC[NQCD][NFILESWJETS] = {{NULL}};
     
-    for (int i(0); i < histoNameRun.size() ; i++){
+    FuncOpenAllFiles(fData, fMC, leptonFlavor, METcut, false, true, doBJets);
+    vector<string> histoNameRun = getVectorOfHistoNames(fData);
+    
+    string nameQCDout = fData[0]->GetName();
+    nameQCDout.insert(nameQCDout.find("Data") + 4,"QCD");
+    TFile *fOut = new TFile(nameQCDout.c_str(), "recreate");
+    
+    
+    for (int i(0); i < int(histoNameRun.size()) ; i++){
         cout << endl; cout << endl;
         cout << " --- processing histogram: " << i << " : " << histoNameRun[i] << endl;
-        FuncDataDrivenQCD(histoNameRun[i]);
+        FuncDataDrivenQCD(histoNameRun[i], fData, fMC, fOut);
     }
     
     //-- Close all the files ------------------------------
     cout << "I m closing the files" << endl;
     for (int i(0); i < NQCD; i++) {
         closeFile(fData[i]);
-        closeFile(fSignal[i]);
         for (int j(0); j < NFILESWJETS; j++){
             closeFile(fMC[i][j]);
         }
@@ -88,15 +89,10 @@ void DataDrivenQCD(  string leptonFlavor, int METcut , int doBJets ){
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-void FuncOpenAllFiles(string leptonFlavor,int METcut, bool doFlat , bool doVarWidth, int doBJets){
+void FuncOpenAllFiles(TFile *fData[], TFile *fMC[][14], string leptonFlavor,int METcut, bool doFlat , bool doVarWidth, int doBJets){
     // Get data files
     for ( int i = 0 ; i < NQCD ; i++){
         fData[i] = getFile(FILESDIRECTORY,  leptonFlavor, energy, ProcessInfo[DATAFILENAME].filename, JetPtMin, JetPtMax, doFlat, doVarWidth, i, 0, 0, METcut, doBJets, "", "0");
-        if ( i == 0 ) {
-            string nameQCDout = fData[i]->GetName();
-            nameQCDout.insert(nameQCDout.find("Data") + 4,"QCD");
-            fOut = new TFile(nameQCDout.c_str(),"recreate");
-        }
     }
     /// get MC files
     for ( int i=0 ; i < NQCD ; i++){
@@ -106,15 +102,15 @@ void FuncOpenAllFiles(string leptonFlavor,int METcut, bool doFlat , bool doVarWi
             if ( j == 1 ) sel = 24 ;
             cout << endl;
             fMC[i][j] = getFile(FILESDIRECTORY,  leptonFlavor, energy, ProcessInfo[sel].filename, JetPtMin, JetPtMax, doFlat, doVarWidth, i , 0, 0, METcut, doBJets, "", "0");
-            TH1D *hTemp = getHisto(fMC[i][j], "ZNGoodJets_Zexc");
-            cout << " going to fetch " << ProcessInfo[sel].filename << "   " << hTemp ->Integral()<<endl;
+            TH1D *hTemp2 = getHisto(fMC[i][j], "ZNGoodJets_Zexc");
+            cout << " going to fetch " << ProcessInfo[sel].filename << "   " << hTemp2 ->Integral()<<endl;
         }
     }
     cout << endl;
     cout << "--- opened all data and MC files ---"<< endl;
 }
 
-vector<string> getVectorOfHistoNames(){
+vector<string> getVectorOfHistoNames(TFile *fData[]){
     
     unsigned short nHist = fData[0]->GetListOfKeys()->GetEntries();
     vector<string> histoName;
@@ -123,7 +119,6 @@ vector<string> getVectorOfHistoNames(){
     for (unsigned short i(0); i < nHist; i++) {
         string histoNameTemp = fData[0]->GetListOfKeys()->At(i)->GetName();
         TH1D* histTemp = (TH1D*) fData[0]->Get(histoNameTemp.c_str());
-        //if ( histoNameTemp.find("ZMass_low") == -1 ) continue;
         if (histTemp->GetEntries() < 1) continue;
         if ( histTemp->InheritsFrom(TH1D::Class())) {
             histoName.push_back(fData[0]->GetListOfKeys()->At(i)->GetName());
@@ -140,9 +135,11 @@ vector<string> getVectorOfHistoNames(){
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void FuncDataDrivenQCD(string variable){
+void FuncDataDrivenQCD(string variable, TFile *fData[], TFile *fMC[][14], TFile *fOut){
     cout << " test" << endl;
     cout << " --- now opening histograms from Data files ---" << endl;
+    TH1D  *hData[NQCD], *hSignal[NQCD], *hBack[NQCD];
+    
     //--- fetch the data histograms -------------
     for ( int i=0 ; i < NQCD ; i++){
         
@@ -150,6 +147,7 @@ void FuncDataDrivenQCD(string variable){
         hData[i] = (TH1D *) hTemp->Clone();
         cout << " got data of histo name: " << variable << " for QCD: " << i << " " << ProcessInfo[DATAFILENAME].filename << endl;
         cout << "   integral: " << hData[i]->Integral() << endl;
+        delete hTemp;
     }
     cout << " --- got Data histos ---" << endl;
     
@@ -162,25 +160,25 @@ void FuncDataDrivenQCD(string variable){
             int sel = j ;
             if ( j == 1 ) sel = 24 ;
             //cout << endl;
-            TH1D *hTemp = getHisto(fMC[i][j], variable);
-            //cout << " going to fetch " << ProcessInfo[sel].filename << "   integral: " << hTemp ->Integral()<<endl;
-            if ( ProcessInfo[sel].filename.find("WJetsALL") != -1 ) {
-                //cout << " This is signal: " << ProcessInfo[sel].filename << endl;
-                hSignal[i] = (TH1D *) hTemp->Clone();
+            TH1D *hTemp1 = getHisto(fMC[i][j], variable);
+            cout << " going to fetch " << ProcessInfo[sel].filename << "   integral: " << hTemp1 ->Integral()<<endl;
+            if ( ProcessInfo[sel].filename.find("WJetsALL") != string::npos ) {
+                cout << " This is signal: " << ProcessInfo[sel].filename << endl;
+                hSignal[i] = (TH1D *) hTemp1->Clone();
             }
             else{
                 if ( j == 2 ) {
-                    //cout << " This is background ..." << endl;
-                    hBack[i] = (TH1D *) hTemp->Clone();
+                    cout << " This is background ..." << endl;
+                    hBack[i] = (TH1D *) hTemp1->Clone();
                 }
                 else {
-                    //cout << " adding... " << endl;
-                    hBack[i]->Add(hTemp);
+                    cout << " adding... " << endl;
+                    hBack[i]->Add(hTemp1);
                 }
             }
-            //cout << " got MC histo " << "  QCD: " << i << "   MC type: " << j << "   integral: " << hTemp->Integral() << endl;
+            cout << " got MC histo " << "  QCD: " << i << "   MC type: " << j << "   integral: " << hTemp1->Integral() << endl;
+            delete hTemp1;
         }
-        
     }
     cout << " --- got MC histos ---" << endl;
     

@@ -14,9 +14,9 @@ void runMergeTop_BVeto(string lepSelection = "DE", int systematics =0  , int jet
 void MergeTop_BVeto(){
     
     runMergeTop_BVeto("SMu",0,30,0);
-    runMergeTop_BVeto("SMu",0,30,1);
-    runMergeTop_BVeto("SMu",0,30,2);
-    runMergeTop_BVeto("SMu",0,30,3);
+    //runMergeTop_BVeto("SMu",0,30,1);
+    //runMergeTop_BVeto("SMu",0,30,2);
+    //runMergeTop_BVeto("SMu",0,30,3);
 
     //runMergeTop("DE",0,20,0);
     //runMergeTop("DE",1,20,0);
@@ -55,8 +55,7 @@ void runMergeTop_BVeto(string lepSelection, int systematics, int jetPtCutMin, in
         str6 = "HistoFiles/"+ lepSelection +  "_8TeV_Tbar_tW_channel_dR_5311_EffiCorr_1_TrigCorr_1_" + syst + "JetPtMin_" + strJetPtCutMin.str() + "_VarWidth_BVeto.root";
         strf = "HistoFiles/"+ lepSelection +  "_8TeV_Top_dR_5311_EffiCorr_1_TrigCorr_1_" + syst + "JetPtMin_" + strJetPtCutMin.str() + "_VarWidth_BVeto.root";
         
-        /// DY
-        
+        //--- DY Files
         sstrDY[0] = "HistoFiles/"+ lepSelection +  "_8TeV_DYJets10to50_dR_5311_EffiCorr_1_TrigCorr_1_" + syst + "JetPtMin_" + strJetPtCutMin.str() + "_VarWidth_BVeto.root";
         
         sstrDY[1] = "HistoFiles/"+ lepSelection +  "_8TeV_DYJets_MIX_UNFOLDING_dR_5311_Inf3_EffiCorr_1_TrigCorr_1_" + syst + "JetPtMin_" + strJetPtCutMin.str() + "_VarWidth_BVeto.root";
@@ -72,7 +71,7 @@ void runMergeTop_BVeto(string lepSelection, int systematics, int jetPtCutMin, in
         str6 = "HistoFiles/"+ lepSelection +  "_8TeV_Tbar_tW_channel_dR_5311_EffiCorr_1_TrigCorr_1_" + syst + "JetPtMin_" + strJetPtCutMin.str() + "_VarWidth_BVeto_QCD" + doQCDStr.str() + ".root";
         strf = "HistoFiles/"+ lepSelection +  "_8TeV_Top_dR_5311_EffiCorr_1_TrigCorr_1_" + syst + "JetPtMin_" + strJetPtCutMin.str() + "_VarWidth_BVeto_QCD" + doQCDStr.str() + ".root";
         
-        /// DY
+        //--- DY Files
         sstrDY[0] = "HistoFiles/"+ lepSelection +  "_8TeV_DYJets10to50_dR_5311_EffiCorr_1_TrigCorr_1_" + syst + "JetPtMin_" + strJetPtCutMin.str() + "_VarWidth_BVeto_QCD" + doQCDStr.str() + ".root";
         
         sstrDY[1] = "HistoFiles/"+ lepSelection +  "_8TeV_DYJets_MIX_UNFOLDING_dR_5311_Inf3_EffiCorr_1_TrigCorr_1_" + syst + "JetPtMin_" + strJetPtCutMin.str()+ "_VarWidth_BVeto_QCD" + doQCDStr.str() + ".root";
@@ -80,41 +79,38 @@ void runMergeTop_BVeto(string lepSelection, int systematics, int jetPtCutMin, in
         sstrDY[2] = "HistoFiles/"+ lepSelection +  "_8TeV_DYJets10toInf3_dR_5311_EffiCorr_1_TrigCorr_1_" + syst + "JetPtMin_" + strJetPtCutMin.str() + "_VarWidth_BVeto_QCD" + doQCDStr.str() + ".root";
     }
 
-    
-
-
-
-    cout << strf<< endl;
-    TFile *f1 = new TFile(str1.c_str());
-    TFile *f2 = new TFile(str2.c_str());
-    TFile *f3 = new TFile(str3.c_str());
-    TFile *f4 = new TFile(str4.c_str());
-    TFile *f5 = new TFile(str5.c_str());
-    TFile *f6 = new TFile(str6.c_str());
+    cout << "Output file: " << strf << endl;
+    TFile *f1 = new TFile(str1.c_str(), "read");
+    TFile *f2 = new TFile(str2.c_str(), "read");
+    TFile *f3 = new TFile(str3.c_str(), "read");
+    TFile *f4 = new TFile(str4.c_str(), "read");
+    TFile *f5 = new TFile(str5.c_str(), "read");
+    TFile *f6 = new TFile(str6.c_str(), "read");
     TFile *ff = new TFile(strf.c_str(), "RECREATE");
 
-    int nHist = f1->GetListOfKeys()->GetEntries();   
+    int nHist = f1->GetListOfKeys()->GetEntries();
     for (int i(0); i < nHist; i++){
         string hName = f1->GetListOfKeys()->At(i)->GetName();
 
-        //        cout << hName << endl;
-        if (hName.find("response") != string::npos){
-            RooUnfoldResponse *r1 = (RooUnfoldResponse*) f1->Get(hName.c_str());
-            RooUnfoldResponse *r2 = (RooUnfoldResponse*) f2->Get(hName.c_str());
-            RooUnfoldResponse *r3 = (RooUnfoldResponse*) f3->Get(hName.c_str());
-            RooUnfoldResponse *r4 = (RooUnfoldResponse*) f4->Get(hName.c_str());
-            RooUnfoldResponse *r5 = (RooUnfoldResponse*) f5->Get(hName.c_str());
-            RooUnfoldResponse *r6 = (RooUnfoldResponse*) f6->Get(hName.c_str());
+        if (hName.find("hresponse") != string::npos){
+            continue;
+            /*
+            TH2D *hr1 = (TH2D*) f1->Get(hName.c_str());
+            TH2D *hr2 = (TH2D*) f2->Get(hName.c_str());
+            TH2D *hr3 = (TH2D*) f3->Get(hName.c_str());
+            TH2D *hr4 = (TH2D*) f4->Get(hName.c_str());
+            TH2D *hr5 = (TH2D*) f5->Get(hName.c_str());
+            TH2D *hr6 = (TH2D*) f6->Get(hName.c_str());
 
-            RooUnfoldResponse *rSum = (RooUnfoldResponse*) r1->Clone();
-            rSum->Add(*r2);
-            rSum->Add(*r3);
-            rSum->Add(*r4);
-            rSum->Add(*r5);
-            rSum->Add(*r6);
+            TH2D *hrSum = (TH2D*) hr1->Clone();
+            hrSum->Add(*hr2);
+            hrSum->Add(*hr3);
+            hrSum->Add(*hr4);
+            hrSum->Add(*hr5);
+            hrSum->Add(*hr6);
             ff->cd();
-            rSum->Write(hName.c_str());
-
+            hrSum->Write(hName.c_str());
+             */
         }
         else {
             TH1D *h1 = (TH1D*) f1->Get(hName.c_str()); 
@@ -134,6 +130,7 @@ void runMergeTop_BVeto(string lepSelection, int systematics, int jetPtCutMin, in
             hSum->Write();
         }
     }
+    cout << "closing single top files" << endl;
     f1->Close();
     f2->Close();
     f3->Close();
@@ -142,41 +139,52 @@ void runMergeTop_BVeto(string lepSelection, int systematics, int jetPtCutMin, in
     f6->Close();
     ff->Close();
 
-    
-    //// merge DY files
+    //--- merge DY files
+    int countHist(0);
     if (lepSelection == "SMu"){
-        /// DY
-        //   int nDYfiles = 3 ;
-        //     string sstrDY[10];
-        //     sstrDY[0] = "HistoFiles/"+ lepSelection +  "_8TeV_DYJets10to50_dR_5311_EffiCorr_0_TrigCorr_1_" + syst + "JetPtMin_" + strJetPtCutMin.str() + "_VarWidth_InvMass_SS.root";
-        //     sstrDY[1] = "HistoFiles/"+ lepSelection +  "_8TeV_DYJets_MIX_UNFOLDING_dR_5311_Inf3_EffiCorr_0_TrigCorr_1_" + syst + "JetPtMin_" + strJetPtCutMin.str() + "_VarWidth_InvMass_SS.root";
-        //     sstrDY[2] = "HistoFiles/"+ lepSelection +  "_8TeV_DYJets10toInf3_dR_5311_EffiCorr_0_TrigCorr_1" + syst + "JetPtMin_" + strJetPtCutMin.str() + "_VarWidth_InvMass_SS.root"; 
-        TFile *fDY[10];
+        TFile *fDY[10] = {NULL};
         for ( int i = 0 ; i < nDYfiles ; i++){
             if ( i == nDYfiles - 1 )  fDY[i] =  new TFile(sstrDY[i].c_str(), "recreate");
             else fDY[i] =  new TFile(sstrDY[i].c_str(), "read");
-            cout << sstrDY[i] << endl;
-
         }
+        cout << "Output file: " << sstrDY[nDYfiles - 1] << endl;
 
         nHist = fDY[0]->GetListOfKeys()->GetEntries();
         for (int i(0); i < nHist; i++){
+            
             string hName = fDY[0]->GetListOfKeys()->At(i)->GetName();
-            cout << i <<"  " << hName << nHist << endl;
-            TH1D* hSum; TH1D* hDY[10];
-            for ( int j = 0 ; j < nDYfiles -1 ; j++){
-                hDY[j] = (TH1D*) fDY[j]->Get(hName.c_str());
-                if ( j == 0 ) hSum = (TH1D*) hDY[j]->Clone();
-                else hSum->Add(hDY[j]);
+            if (hName.find("hresponse") != string::npos){
+                continue;
+                /*
+                cout << i << " TH2D " << hName << "  " << nHist << endl;
+                TH2D* hrSum = NULL; TH2D* hrDY[10] = {NULL};
+                for ( int j = 0 ; j < nDYfiles -1 ; j++){
+                    hrDY[j] = (TH2D*) fDY[j]->Get(hName.c_str());
+                    if ( j == 0 ) hrSum = (TH2D*) hrDY[j]->Clone();
+                    else hrSum->Add(hrDY[j]);
+                }
+                fDY[nDYfiles -1]->cd();
+                hrSum->Write();
+                */
             }
-            fDY[nDYfiles -1]->cd();
-            hSum->Write();
+            else {
+                countHist++;
+                cout << countHist << " " << i << " TH1D " << hName << "  " << nHist << endl;
+                TH1D* hSum = NULL; TH1D* hDY[10] = {NULL};
+                for ( int j = 0 ; j < nDYfiles -1 ; j++){
+                    hDY[j] = (TH1D*) fDY[j]->Get(hName.c_str());
+                    if ( j == 0 ) hSum = (TH1D*) hDY[j]->Clone();
+                    else hSum->Add(hDY[j]);
+                }
+                fDY[nDYfiles -1]->cd();
+                hSum->Write();
+            }
         }
+        
+        cout << "closing DY files" << endl;
         for ( int i = 0 ; i < nDYfiles ; i++){
             fDY[i] ->Close();
         }
-
-    } /// end if DY
+    }
     
-
 }

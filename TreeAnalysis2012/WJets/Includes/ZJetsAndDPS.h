@@ -111,7 +111,7 @@ class ZJetsAndDPS: public HistoSet {
     vector<double>  *patJetPfAk05jetBZ_;
     vector<double>  *patJetPfAk05jetpuMVA_;
     vector<double>  *patJetPfAk05OCSV_;
-    vector<int>     *patJetPfAk05PartonFlavour_;
+    vector<double>  *patJetPfAk05PartonFlavour_;
     // -- MET ---
     vector<double>  *patMetPt_;
     vector<double>  *patMetPhi_;

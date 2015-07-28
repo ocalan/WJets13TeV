@@ -77,35 +77,43 @@ void FuncPlot(string variable, bool logZ, bool decrease)
     TFile *f  = new TFile(fileName.c_str());
     
     // get cental and gen
-    //TH1D *data              = (TH1D*) f->Get("Data"); // reco data
+    
     TH1D *dataCentral       = (TH1D*) f->Get("Central"); // unfolded central (data -BG)
+    //TH1D *data              = (TH1D*) f->Get("Data"); // reco data
     //TH1D *genMad            = (TH1D*) f->Get("genMad");
     //TH1D *dataCentralBackUp = (TH1D*) dataCentral->Clone();
     
     
     
     // get unfolded histogram for systematics
-    int nSyst(13);
-    TH1D *hSyst[13];
+    int nSyst(18), nGroup(11);
+    TH1D *hSyst[19];
     hSyst[0]          = (TH1D*) f->Get("JESup");
     hSyst[1]          = (TH1D*) f->Get("JESdown");
     hSyst[2]          = (TH1D*) f->Get("PUup");
     hSyst[3]          = (TH1D*) f->Get("PUdown");
     hSyst[4]          = (TH1D*) f->Get("XSECup");
     hSyst[5]          = (TH1D*) f->Get("XSECdown");
-    hSyst[6]          = (TH1D*) f->Get("BtagEFFup");
-    hSyst[7]          = (TH1D*) f->Get("BtagEFFdown");
-    hSyst[8]          = (TH1D*) f->Get("JERup");
-    hSyst[9]          = (TH1D*) f->Get("WBup");
-    hSyst[10]         = (TH1D*) f->Get("TTBARup");
-    hSyst[11]         = (TH1D*) f->Get("RESPup");
-    hSyst[12]         = (TH1D*) f->Get("MC");
-    //hSyst[12]         = (TH1D*) hErrorFromToyResponse->Clone();
-    //hSyst[12]         = (TH1D*) hSyst[11]->Clone();
+    hSyst[6]          = (TH1D*) f->Get("JERup");
+    hSyst[7]          = (TH1D*) f->Get("JERdown");
+    hSyst[8]  = (TH1D*) f->Get("LepSFup");
+    hSyst[9]  = (TH1D*) f->Get("LepSFdown");
+    hSyst[10] = (TH1D*) f->Get("BtagEFFup");
+    hSyst[11] = (TH1D*) f->Get("BtagEFFdown");
+    hSyst[12] = (TH1D*) f->Get("MESup");
+    hSyst[13] = (TH1D*) f->Get("MESdown");
+    hSyst[14] = (TH1D*) f->Get("MER");
+    hSyst[15] = (TH1D*) f->Get("WB");
+    hSyst[16] = (TH1D*) f->Get("TTBAR");
+    hSyst[17] = (TH1D*) f->Get("MC");
+    if (variable.find("ZNGoodJets") == string::npos) {
+        hSyst[18] = (TH1D*) f->Get("RESP");
+        nSyst = 19;
+        nGroup = 12;
+    }
     
-    
-    string hNames[13] = {"JESup", "JESdown", "PUup", "PUdown", "XSECup", "XSECdown", "BtagEFFup", "BtagEFFdown", "JER", "Wb", "ttbar", "Resp", "MC"};
-    string cutNames[9] = {"JES", "PU", "XSEC", "BtagEFF", "JER", "Wb", "ttbar", "Resp", "MC"};
+    string hNames[19] = {"JESup", "JESdown", "PUup", "PUdown", "XSECup", "XSECdown", "JERup", "JERdown", "LepSFup", "LepSFdown", "BtagSFup", "BtagSFdown", "MESup", "MESdown", "MER", "Wb", "ttbar", "MC", "Resp"};
+    string cutNames[12] = {"JES", "PU", "XSEC", "JER", "LepSF", "BtagSF", "MES", "MER", "Wb", "ttbar", "MC", "Resp"};
     
     
     // print out integral value for testing
@@ -130,7 +138,10 @@ void FuncPlot(string variable, bool logZ, bool decrease)
         tempXTitle = "#Delta y(j_{F}j_{B})";
     }
     
-    for (int i = 0 ; i < 4 ; i ++){
+    string command = "mkdir -p PNGFiles/plotUnfoldSystMeanNJ" ;
+    system(command.c_str());
+    
+    for (int i = 0 ; i < 7 ; i ++){
         TLatex *cmsColl = new TLatex();
         cmsColl->SetTextSize(0.025);
         cmsColl->SetTextFont(42);
@@ -238,19 +249,14 @@ void FuncPlot(string variable, bool logZ, bool decrease)
         pad2->Draw();
         
         
-        string outputDirectory = "PNGFiles/FinalUnfoldMeanNJets/";
+        string outputDirectory = "PNGFiles/plotUnfoldSystMeanNJ/";
         string outputFileName = outputDirectory + variable + "Unfolded" + cutNames[i] + ".pdf";
         canUnfoldedJES->Print(outputFileName.c_str());
         cout << " save pdf file of " << outputFileName << " " << hSyst[2*i]->GetName() << hSyst[2*i+1]->GetName() << endl;
         
     }
     
-    for (int k = 8; k < 13; k++){
-        
-        // for "MC" the saved values are the absolute errors
-        if (k == 12){
-            hSyst[k]->Add(dataCentral);
-        }
+    for (int k = 14; k < nSyst; k++){
         
         TLatex *cmsColl = new TLatex();
         cmsColl->SetTextSize(0.025);
@@ -300,7 +306,7 @@ void FuncPlot(string variable, bool logZ, bool decrease)
         leg->AddEntry(hSyst[k], hNames[k].c_str(), "pl");
         leg->Draw();
         
-        cmsColl->DrawLatex(0.11,0.905, (" Systematic: " + cutNames[k-4]).c_str());
+        cmsColl->DrawLatex(0.11,0.905, (" Systematic: " + cutNames[k-7]).c_str());
         pad1->Draw();
         canUnfoldedJES->cd();
         
@@ -340,10 +346,10 @@ void FuncPlot(string variable, bool logZ, bool decrease)
         pad2->Draw();
         
         
-        string outputDirectory = "PNGFiles/FinalUnfoldMeanNJets/";
-        string outputFileName = outputDirectory + variable + "Unfolded" + cutNames[k-4] + ".pdf";
+        string outputDirectory = "PNGFiles/plotUnfoldSystMeanNJ/";
+        string outputFileName = outputDirectory + variable + "Unfolded" + cutNames[k-7] + ".pdf";
         canUnfoldedJES->Print(outputFileName.c_str());
-        cout << " save pdf file of " << outputFileName << " " << hSyst[k]->GetName() << " " << hSyst[k]->GetName() << endl;
+        cout << " save pdf file of " << outputFileName << " " << hSyst[k]->GetName() << " " << cutNames[k-7] << endl;
     }
     
 

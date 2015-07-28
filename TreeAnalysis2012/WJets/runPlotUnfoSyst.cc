@@ -16,8 +16,16 @@
         
         //PlotUnfoSyst(0, 1);
         //PlotUnfoSyst(1, 2);
-        PlotUnfoSyst(0, 43);
         
+        PlotUnfoSyst(0, 1);
+        /*
+        PlotUnfoSyst(1, 6);
+        PlotUnfoSyst(11, 16);
+        PlotUnfoSyst(21, 26);
+        PlotUnfoSyst(26, 43);
+         */
+        
+         
         //--- clean the *_cc.d and *_cc.so files ---
         
         string cmd = "if ls *_cc.d &> .ls_tmp.list; then rm *_cc.d; fi";

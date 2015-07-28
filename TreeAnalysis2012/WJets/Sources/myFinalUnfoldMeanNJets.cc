@@ -1,7 +1,3 @@
-// History
-//---- 2015_05_10
-// Add Blackhat, Sherpa2, MES/MER
-
 #include <iostream>
 #include <cstdlib>
 #include <iomanip>
@@ -42,23 +38,25 @@
 #include <TStyle.h>
 #include <TDatime.h>
 
+#include <TRandom3.h>
+#include <TMath.h>
+
 #include "getFilesAndHistograms.h"
 #include "unfoldingFunctions.h"
-#include "writeFastPlotsTex.h"
-
-#include "myUnfoldingSyst.h"
+//#include "writeFastPlotsTex.h"
+//#include "myUnfoldingSyst.h"
 #include "myFinalUnfoldMeanNJets.h"
 
 using namespace std;
 
 //--  Setting global variables --------------------------------------------------------------
-#include <TRandom3.h>
-#include <TMath.h>
 #include "fileNames.h"
 #include "variablesOfInterestVarWidth.h"
-TRandom3* RandGen = new TRandom3();
-const int NFILESWJETS_M(15);
-const int FilesWJets_M[NFILESWJETS_M] = {0, 2, 3, 4, 23, 5, 6, 7, 8, 9, 10, 11, 12, 13, 24};
+//TRandom3* RandGen = new TRandom3();
+const int NDatSyst(3);
+const int NDYJSyst(14);
+const int NBkgSyst(12);
+const int NCaseSyst(18);
 //-------------------------------------------------------------------------------------------
 
 
@@ -81,9 +79,8 @@ void myFinalUnfoldMeanNJets(string var, string leptonFlavor, string unfAlg)
     //---------------------------------------------
     
     //--- check whether muon or electron is used ---
-    bool isMuon;
+    bool isMuon(0);
     if (leptonFlavor.find("Mu") != string::npos) isMuon = 1;
-    else isMuon = 0;
     cout << " Are you doing Muon? : " << isMuon << endl;
     //---------------------------------------------
     
@@ -91,62 +88,58 @@ void myFinalUnfoldMeanNJets(string var, string leptonFlavor, string unfAlg)
     unsigned short j(varList->IndexOf(ObjNameVar));
     cout << " Processing variable: " << varStruct[j].name << " with BayesKterm : " << varStruct[j].MuBayeskterm << endl;
     
-    
     if (leptonFlavor == "SMu" || leptonFlavor == "SE"){
         if (isMuon) FuncUnfold(leptonFlavor, isMuon, unfAlg, varStruct[j].name, varStruct[j].MuBayeskterm, varStruct[j].MuSVDkterm);
         else FuncUnfold(leptonFlavor, isMuon, unfAlg, varStruct[j].name, varStruct[j].EBayeskterm, varStruct[j].ESVDkterm);
     }
-
     /*
     else if (leptonFlavor == "DMu" || leptonFlavor == "DE"){
         if (isMuon) FuncUnfold(leptonFlavor, isMuon, unfAlg, VAROFINTERESTZJETS[i].name, VAROFINTERESTZJETS[i].MuBayeskterm, VAROFINTERESTZJETS[i].MuSVDkterm);
         else FuncUnfold(leptonFlavor, isMuon, unfAlg, VAROFINTERESTZJETS[i].name, VAROFINTERESTZJETS[i].EBayeskterm, VAROFINTERESTZJETS[i].ESVDkterm);
     }
     */
-    
-    
 }
 
 
 void FuncUnfold(string leptonFlavor, bool isMuon, string unfAlg, string variable, int UsedKtermBayes, int UsedKtermSVD, bool doFlat, bool doVarWidth)
 {
+    TH1::SetDefaultSumw2();
+    TH2::SetDefaultSumw2();
+    
     int JetPtMin(30);
     int JetPtMax(0);
     
     string energy = getEnergy();
     string outputDirectory = "PNGFiles/FinalUnfoldMeanNJets/";
-    TH1::SetDefaultSumw2();
-    TH2::SetDefaultSumw2();
     string command = "mkdir -p " + outputDirectory;
     system(command.c_str());
-    
     
     //--- set number of toys used in getErrorRespToy2D()
     int NumberOfToys(2000), oppNumberOfToys(4);
     int UsedKterm = UsedKtermBayes, oppUsedKterm = UsedKtermSVD;
     string oppUnfAlg = "SVD";
     if (unfAlg == "SVD") {
+        oppUnfAlg = "Bayes";
         NumberOfToys = 4;
         oppNumberOfToys = 2000;
-        oppUnfAlg = "Bayes";
         UsedKterm = UsedKtermSVD;
         oppUsedKterm = UsedKtermBayes;
     }
     
-    
+    /*
     //====== set efficiency errors ===============
     double muonIDIsoHLTError = 0.025;// 2012 : id,iso = 0.005, 0.002 --> 1.4% for dimuon + HLT: 2% ??????
     double electronIDIsoHLTError = 0.005; // SF factors for 2012: 0.002
     double EffError = muonIDIsoHLTError;
     if (!isMuon) EffError = electronIDIsoHLTError;
     //--------------------------------------------
-    
+    */
     cout << " We now unfold:  " << variable << " with jet pt cut of:" << JetPtMin << " - " << JetPtMax << endl;
     
     //-- fetch the data files and histograms --------------
     cout << " Fetch Data files " << endl;
-    TFile *fData[5] = {NULL};  // 0 = central, 1 = JES Up, 2 = JES Down , 3 - SF Up , 4 - SF down
-    TH2D *hData[5] = {NULL};
+    TFile *fData[NDatSyst] = {NULL};
+    TH2D *hData[NDatSyst] = {NULL};
     getFilesNew(FILESDIRECTORY, fData, leptonFlavor, energy, ProcessInfo[DATAFILENAME].filename, JetPtMin, JetPtMax, doFlat, doVarWidth, 0, 0, 0, 0, -1, false);
     get2DHistos(hData, fData, variable, false);
     
@@ -154,8 +147,8 @@ void FuncUnfold(string leptonFlavor, bool isMuon, string unfAlg, string variable
     
     //-- fetch the WJets files and histograms ----------------
     cout << " Fetch WJets files " << endl;
-    TFile *fDYMadGraph[11] = {NULL}; // WJets File : 0 = central, 1 = PU Up,  2 = PU Down,  3 = JER Up, 4 = BtagEff Up, 5 = BtagEff Down, 6 = Wb, 7 = Resp, 8 = MES Up, 9 = MES Down, 10 = MER
-    TH2D *hDY[11] = {NULL}; // Reco Wjets Hist => actually these are not used
+    TFile *fDYMadGraph[NDYJSyst] = {NULL};
+    TH2D *hDY[NDYJSyst] = {NULL}; // Reco Wjets Hist => actually these are not used
     TH2D *hDYGenMadGraph = NULL; // GenMadGraph Hist
     
     getFilesNew(FILESDIRECTORY, fDYMadGraph, leptonFlavor, energy, ProcessInfo[24].filename, JetPtMin, JetPtMax, doFlat, doVarWidth, 0, 0, 0, 0, -1, false);
@@ -167,7 +160,7 @@ void FuncUnfold(string leptonFlavor, bool isMuon, string unfAlg, string variable
     
     
     //--- Get MadGraph Resp Matrix ------------------------
-    RooUnfoldResponse *resDY[11] = {NULL};
+    RooUnfoldResponse *resDY[NDYJSyst] = {NULL};
     getRespsNew(resDY, fDYMadGraph, "response" + variable);
     cout << "line th " << __LINE__ << endl;
     //-----------------------------------------------------
@@ -175,14 +168,12 @@ void FuncUnfold(string leptonFlavor, bool isMuon, string unfAlg, string variable
     
     //--- fetch the BG files and histograms ----------------
     cout << " Fetch background files " << endl;
-    
-    const int NBkgSyst(10); // 0 = central, 1 = PU Up,  2 = PU Down,  3 = XS Up,  4 = XS Down,  5 = BtagEff Up,  6 = BtagEff Down, 7 = MES Up, 8 = MES Down, 9 = MER
     int nFilesBkg(0);
     
     TFile *fBG[15][NBkgSyst] = {{NULL}};
     TH2D *hBG[15][NBkgSyst] = {{NULL}}, *hSumBG[NBkgSyst] = {NULL} ;
     
-    int nFiles = NFILESDYJETS; //
+    int nFiles = NFILESDYJETS; // from "Includes/fileNames.h"
     bool isDoubleLep(1);
     if (leptonFlavor == "SMuE" || leptonFlavor == "SMu" || leptonFlavor == "Muon") {
         isDoubleLep = 0;
@@ -229,7 +220,6 @@ void FuncUnfold(string leptonFlavor, bool isMuon, string unfAlg, string variable
         countFiles++;
     }
     //--- End fetch the BG files and histograms ------------------
-    
     
     //------ Get Sherpa ------
     //-- for getting sherpa2
@@ -284,12 +274,12 @@ void FuncUnfold(string leptonFlavor, bool isMuon, string unfAlg, string variable
     
     cout << " loaded all files: 1 Data : 1 Wjets : " <<  nFilesBkg << " Background files" << endl;
     
-    
     // set the output
     string outputRootFileName = outputDirectory + leptonFlavor + "_" + energy + "_unfolded_" + variable + "_histograms_" + unfAlg;
     if (doVarWidth) outputRootFileName += "_VarWidth";
     outputRootFileName += ".root";
     TFile* outputRootFile = new TFile(outputRootFileName.c_str(), "RECREATE");
+    
     
     //--- produce projected 1D hist for gen ----
     //-- Madgraph
@@ -310,13 +300,13 @@ void FuncUnfold(string leptonFlavor, bool isMuon, string unfAlg, string variable
     genBhatMeanJ->Write("genBhat"); //-- save BH gen into the file
     //--- End produce projected 1D hist for gen ----
     
-    //--- unfolding 15 different cases
+    //--- unfolding 18 different cases
     cout << "Start unfolding" << endl;
-    string hNames[15] = {"Central", "JESup", "JESdown", "PUup", "PUdown", "XSECup", "XSECdown", "JERup", "BtagEFFup", "BtagEFFdown", "WBup", "RESPup", "MESup", "MESdown", "MER"};
-    int SelData[15] = {0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-    int SelDY[15]   = {0, 0, 0, 1, 2, 0, 0, 3, 4, 5, 6, 7, 8, 9, 10};
-    int SelBG[15]   = {0, 0, 0, 1, 2, 3, 4, 0, 5, 6, 0, 0, 7, 8, 9};
-    for ( int n(0); n < 15; n++){
+    string hNames[NCaseSyst] = {"Central", "JESup", "JESdown", "PUup", "PUdown", "XSECup", "XSECdown", "JERup", "JERdown", "LepSFup", "LepSFdown", "BtagEFFup", "BtagEFFdown", "MESup", "MESdown", "MER", "WB", "RESP"};
+    int SelData[NCaseSyst] = {0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0,  0,  0};
+    int SelDY[NCaseSyst]   = {0, 0, 0, 1, 2, 0, 0, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
+    int SelBG[NCaseSyst]   = {0, 0, 0, 1, 2, 3, 4, 0, 0, 5, 6, 7, 8, 9, 10, 11,  0,  0};
+    for ( int n(0); n < NCaseSyst; n++){
         //TH1D* hUnfolded = Unfold(unfAlg, resDY[SelDY[i]], hData[SelData[i]], hSumBG[SelBG[i]],  UsedKterm, hNames[i]);
         cout << "Start unfolding histograms on : " << hNames[n] <<endl;
         TH2D *hMeas = (TH2D*) hData[SelData[n]]->Clone();
@@ -362,7 +352,7 @@ void FuncUnfold(string leptonFlavor, bool isMuon, string unfAlg, string variable
     for (int i(0); i < nFilesBkg; i++){
         
         if (i == 0) hSumBGForTT = (TH2D*) hBG[0][0]->Clone();
-        else if (i == 10){
+        else if (i == 10){ // index 10 in hBG is ttbar (index 11 in  FilesWJets_M[i])
             TH2D *TempScaledBG = (TH2D*) hBG[i][0]->Clone();
             TempScaledBG->Multiply(hisSF);
             hSumBGForTT->Add(TempScaledBG);
@@ -379,10 +369,10 @@ void FuncUnfold(string leptonFlavor, bool isMuon, string unfAlg, string variable
     unfoldCtt.SetVerbose(0);
     hUnfoldedCtt = (TH2D*) unfoldCtt.Hreco();
     
-    cout << "Start computing MeanNjets histograms on : " << "TTBARup" << endl;
+    cout << "Start computing MeanNjets histograms on : " << "TTBAR" << endl;
     TH1D* hUnfoldedCMeanJtt = NULL;
     hUnfoldedCMeanJtt = computeProject1DMeanNJets(hUnfoldedCtt, variable);
-    hUnfoldedCMeanJtt->SetName("TTBARup");
+    hUnfoldedCMeanJtt->SetName("TTBAR");
     outputRootFile->cd();
     hUnfoldedCMeanJtt->Write();
     //----- End get uncertainty (ttbar) ----------------------------
@@ -497,10 +487,12 @@ TH1D* getErrorRespToy2D(int myNToys, TH2D* hMeas2D, RooUnfoldResponse* response,
         cout << "absolute error for binth " << i << " " << hUncerFromToyResp->GetBinContent(i) << endl;
     }
     
+    TH1D *hSystematicMC = (TH1D*) hUncerFromToyResp->Clone();
+    hSystematicMC->Add(hUnfoldedCTest);
     cout << "--- End Toy experiment on Response matrix ---" << endl;
     cout << endl;
     
-    return hUncerFromToyResp;
+    return hSystematicMC;
 }
 
 TH1D* computeProject1DMeanNJets( TH2D *hUnfoldedC, string variable )
@@ -692,17 +684,14 @@ void get2DHistos(TH2D *histograms2D[], TFile *Files[], string variable, bool isD
 {
     string fileName = Files[0]->GetName();
     int nFiles;
-    if ((fileName.find("Data") != string::npos) && (fileName.find("QCD") == string::npos)){
-        nFiles = 3;
-        if (fileName.find("DE") != string::npos) nFiles = 5;
-    }
-    else if (((isDoubleLep && fileName.find("DYJets") != string::npos) || (!isDoubleLep && fileName.find("WJets") != string::npos)) && fileName.find("UNFOLDING") != string::npos) nFiles = 11;
-    // for BG
-    else nFiles = 10;
+    if ((fileName.find("Data") != string::npos) && (fileName.find("QCD") == string::npos)) nFiles = NDatSyst;
+    else if (((isDoubleLep && fileName.find("DYJets") != string::npos) || (!isDoubleLep && fileName.find("WJets") != string::npos)) && fileName.find("UNFOLDING") != string::npos) nFiles = NDYJSyst;
+    else nFiles = NBkgSyst; // for BG
     
+    cout << "  " << nFiles << " Histos will be obtained " << endl;
     for (int i(0); i < nFiles; i++){
         histograms2D[i] = (TH2D*) Files[i]->Get(variable.c_str());
-        cout << "Integral() " << histograms2D[i]->Integral() << endl;
+        cout << " get histo " << i << " "<< "Integral() " << histograms2D[i]->Integral() << endl;
         //histograms2D[i]->SetDirectory(0);
     }
 }
@@ -711,11 +700,9 @@ void getRespsNew(RooUnfoldResponse *responses[], TFile *Files[], string variable
 {
     string fileName = Files[0]->GetName();
     int nFiles;
-    //if (fileName.find("Data") != string::npos) nFiles = 3;
-    if ((fileName.find("Data") != string::npos) && (fileName.find("QCD") == string::npos)) nFiles = 3;
-    else if (fileName.find("UNFOLDING") != string::npos) nFiles = 11;
-    // for BG
-    else nFiles = 10;
+    if ((fileName.find("Data") != string::npos) && (fileName.find("QCD") == string::npos)) nFiles = NDatSyst;
+    else if (fileName.find("UNFOLDING") != string::npos) nFiles = NDYJSyst;
+    else nFiles = NBkgSyst; // for BG
     
     for (int i(0); i < nFiles; i++){
         responses[i] = (RooUnfoldResponse*) Files[i]->Get(variable.c_str());
@@ -744,10 +731,6 @@ void getFilesNew(string histoFilesDirectory, TFile *Files[], string leptonFlavor
         Syst.push_back("0");                 //   0: central
         Syst.push_back("2_Up");              //   2 up: JES up
         Syst.push_back("2_Down");            //   2 down: JES down
-        if (leptonFlavor == "DE") {          // additionaly for electron:
-            Syst.push_back("5_Up");          //   5 up: scale factor up
-            Syst.push_back("5_Down");        //   5 down: scale factor down
-        }
     }
     else if (Name.find("UNFOLDING") != string::npos && ((isDoubleLep && Name.find("DYJets") != string::npos) || (!isDoubleLep && Name.find("WJets") != string::npos))) {
         // for DYJets in case of Z+Jets or for WJets in case of W+Jets analysis we have:
@@ -755,13 +738,16 @@ void getFilesNew(string histoFilesDirectory, TFile *Files[], string leptonFlavor
         Syst.push_back("1_Up");      // 1 up:   PU up
         Syst.push_back("1_Down");    // 1 down: PU down
         Syst.push_back("4_Up");      // 4 up:   JER up
+        Syst.push_back("4_Down");    // 4 down: JER down
+        Syst.push_back("5_Up");      // 5 up:   LepSF up
+        Syst.push_back("5_Down");    // 5 down: LepSF down
         Syst.push_back("6_Up");      // 6 up:   BtagEff up
         Syst.push_back("6_Down");    // 6 down: BtagEff down
-        Syst.push_back("7_Up");      // 7 up:   Wb
-        Syst.push_back("8_Up");      // 8 up:   Resp
-        Syst.push_back("9_Up");      // 9 up:   MES up
-        Syst.push_back("9_Down");    // 9 down: MES down
-        Syst.push_back("10_Up");     // 10 up:  MER
+        Syst.push_back("7_Up");      // 7 up:   MES up
+        Syst.push_back("7_Down");    // 7 down: MES down
+        Syst.push_back("8_Up");      // 8 up:   MER
+        Syst.push_back("9_Up");      // 9 up:   Wb
+        Syst.push_back("10_Up");     // 10 up:  Resp
     }
     else { // for background we have
         Syst.push_back("0");         // 0:      central
@@ -769,11 +755,13 @@ void getFilesNew(string histoFilesDirectory, TFile *Files[], string leptonFlavor
         Syst.push_back("1_Down");    // 1 down: PU down
         Syst.push_back("3_Up");      // 3 up:   XSec up
         Syst.push_back("3_Down");    // 3 down: Xsec down
+        Syst.push_back("5_Up");      // 5 up:   LepSF up
+        Syst.push_back("5_Down");    // 5 down: LepSF down
         Syst.push_back("6_Up");      // 6 up:   BtagEff up
         Syst.push_back("6_Down");    // 6 down: BtagEff down
-        Syst.push_back("9_Up");      // 9 up:   MES up
-        Syst.push_back("9_Down");    // 9 down: MES down
-        Syst.push_back("10_Up");     // 10 up:  MER
+        Syst.push_back("7_Up");      // 7 up:   MES up
+        Syst.push_back("7_Down");    // 7 down: MES down
+        Syst.push_back("8_Up");      // 8 up:   MER
     };
     
     //--- determnie how many files we have and open them all ---
@@ -789,14 +777,9 @@ void closeFilesNew(TFile *Files[])
     if (Files[0]) {
         string fileName = Files[0]->GetName();
         int nFiles;
-        //if (fileName.find("Data") != string::npos) {
-        if ((fileName.find("Data") != string::npos) && (fileName.find("QCD") == string::npos)){
-            nFiles = 3;
-            if (fileName.find("DE") != string::npos) nFiles = 5;
-        }
-        else if (fileName.find("UNFOLDING") != string::npos) nFiles = 11;
-        // for BG
-        else nFiles = 10;
+        if ((fileName.find("Data") != string::npos) && (fileName.find("QCD") == string::npos)) nFiles = NDatSyst;
+        else if (fileName.find("UNFOLDING") != string::npos) nFiles = NDYJSyst;
+        else nFiles = NBkgSyst; // for BG
         
         for (int i(0); i < nFiles; i++){
             closeFile(Files[i]);

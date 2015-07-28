@@ -33,8 +33,9 @@ using namespace std;
 //--- Declaring functions -------------
 void PlottingEditMeanNJets(int start = 0, int end = -1);
 void FuncPlot(string variable = "ZNGoodJets_Zexc", bool log = 1, bool decrease = 1);
-void GetSysErrorTable (string variable, string outputTableName, TH1D* dataCenBackUp = NULL, TH1D* hDiffer[] = {NULL}, TH1D* hStatError = NULL, TH1D* hTotalError = NULL, int nGroup = 10);
-void plotSystematicBreakdown (string outputDirectory, string variable, TH1D* dataCentral = NULL, TH1D* hSyst[] = NULL, TH1D* hErrorFromToyResponse = NULL);
+//void GetSysErrorTable (string variable, string outputTableName, TH1D* dataCenBackUp = NULL, TH1D* hDiffer[] = {NULL}, TH1D* hStatError = NULL, TH1D* hTotalError = NULL, int nGroup = 10);
+void plotSystematicBreakdown (string outputDirectory, string variable, TH1D* dataCentral = NULL, TH1D* hSyst[] = NULL);
+TH1D* computeProject1DMeanNJets( TH2D *hUnfoldedC= NULL, string variable = "ZNGoodJets_Zexc");
 //--------------------------------
 
 
@@ -85,32 +86,32 @@ void FuncPlot(string variable, bool logZ, bool decrease)
     TH1D *dataCentralBackUp = (TH1D*) dataCentral->Clone();
     
     // get unfolded histogram for systematics
-    int nSyst(15);
-    TH1D *hSyst[15];
-    hSyst[0] = (TH1D*) f->Get("JESup");
-    hSyst[1] = (TH1D*) f->Get("JESdown");
-    hSyst[2] = (TH1D*) f->Get("PUup");
-    hSyst[3] = (TH1D*) f->Get("PUdown");
-    hSyst[4] = (TH1D*) f->Get("XSECup");
-    hSyst[5] = (TH1D*) f->Get("XSECdown");
-    hSyst[6] = (TH1D*) f->Get("JERup");
-    hSyst[7] = (TH1D*) f->Get("BtagEFFup");
-    hSyst[8] = (TH1D*) f->Get("BtagEFFdown");
-    hSyst[9] = (TH1D*) f->Get("WBup");
-    hSyst[10] = (TH1D*) f->Get("TTBARup");
-    hSyst[11] = (TH1D*) f->Get("RESPup");
+    int nSyst(19);
+    TH1D *hSyst[19];
+    hSyst[0]  = (TH1D*) f->Get("JESup");
+    hSyst[1]  = (TH1D*) f->Get("JESdown");
+    hSyst[2]  = (TH1D*) f->Get("PUup");
+    hSyst[3]  = (TH1D*) f->Get("PUdown");
+    hSyst[4]  = (TH1D*) f->Get("XSECup");
+    hSyst[5]  = (TH1D*) f->Get("XSECdown");
+    hSyst[6]  = (TH1D*) f->Get("JERup");
+    hSyst[7]  = (TH1D*) f->Get("JERdown");
+    hSyst[8]  = (TH1D*) f->Get("LepSFup");
+    hSyst[9]  = (TH1D*) f->Get("LepSFdown");
+    hSyst[10] = (TH1D*) f->Get("BtagEFFup");
+    hSyst[11] = (TH1D*) f->Get("BtagEFFdown");
     hSyst[12] = (TH1D*) f->Get("MESup");
     hSyst[13] = (TH1D*) f->Get("MESdown");
     hSyst[14] = (TH1D*) f->Get("MER");
-    
-    //--- get uncer from Toy Resp (MC)
-    TH1D *hErrorFromToyResponse = (TH1D*) f->Get("MC");
+    hSyst[15] = (TH1D*) f->Get("WB");
+    hSyst[16] = (TH1D*) f->Get("TTBAR");
+    hSyst[17] = (TH1D*) f->Get("MC");
+    hSyst[18] = (TH1D*) f->Get("RESP");
     
     //--- Get BlackHat ------
-    TH1D *genBhatALL = (TH1D*) f->Get("genBhat");
+    //TH1D *genBhatALL = (TH1D*) f->Get("genBhat");
     
-    /*
-     // if you want to do BH here then uncomment this part
+    // if you want to do BH here then uncomment this part
     TFile *fBhat[3];
     fBhat[0] = new TFile("PNGFiles/BlackHat/W1j_all.root", "READ");
     fBhat[1] = new TFile("PNGFiles/BlackHat/W2j_all.root", "READ");
@@ -121,43 +122,209 @@ void FuncPlot(string variable, bool logZ, bool decrease)
     
     //-- matching variable name
     string varBlackHatName, varBlackHatName2;
-    int useBHFile(0);
+    string varBlackHatName1_1, varBlackHatName1_2, varBlackHatName1_3, varBlackHatName1_4, varBlackHatName1_5;
+    string varBlackHatName2_1, varBlackHatName2_2, varBlackHatName2_3, varBlackHatName2_4, varBlackHatName2_5;
+    
+    
+    //int useBHFile(0);
     if (variable == "MeanNJetsHT_Zinc1jet") {
-        varBlackHatName = "totNJhtjet1";
-        varBlackHatName2 = "htjet1";
-        useBHFile = 0;
+        varBlackHatName1_1 = "totNJhtExcjet1bin1";
+        varBlackHatName1_2 = "totNJhtExcjet2bin1";
+        varBlackHatName1_3 = "totNJhtExcjet3bin1";
+        varBlackHatName1_4 = "totNJhtExcjet4bin1";
+        varBlackHatName1_5 = "totNJhtExcjet5bin1";
+        
+        varBlackHatName2_1 = "htExcjet1bin1";
+        varBlackHatName2_2 = "htExcjet2bin1";
+        varBlackHatName2_3 = "htExcjet3bin1";
+        varBlackHatName2_4 = "htExcjet4bin1";
+        varBlackHatName2_5 = "htExcjet5bin1";
+        
     }
     else if (variable == "MeanNJetsHT_Zinc2jet") {
-        varBlackHatName = "totNJhtjet2";
-        varBlackHatName2 = "htjet2";
-        useBHFile = 1;
+        
+        varBlackHatName1_2 = "totNJhtExcjet2bin2";
+        varBlackHatName1_3 = "totNJhtExcjet3bin2";
+        varBlackHatName1_4 = "totNJhtExcjet4bin2";
+        varBlackHatName1_5 = "totNJhtExcjet5bin2";
+        
+        varBlackHatName2_2 = "htExcjet2bin2";
+        varBlackHatName2_3 = "htExcjet3bin2";
+        varBlackHatName2_4 = "htExcjet4bin2";
+        varBlackHatName2_5 = "htExcjet5bin2";
+        
     }
     else if (variable == "MeanNJetsdRapidity_Zinc2jet") {
-        varBlackHatName = "totNJdyj1j2";
-        varBlackHatName2 = "dyj1j2jet2";
-        useBHFile = 1;
+        
+        varBlackHatName1_2 = "totNJdyj1j2Excjet2";
+        varBlackHatName1_3 = "totNJdyj1j2Excjet3";
+        varBlackHatName1_4 = "totNJdyj1j2Excjet4";
+        varBlackHatName1_5 = "totNJdyj1j2Excjet5";
+        
+        varBlackHatName2_2 = "dyj1j2Excjet2";
+        varBlackHatName2_3 = "dyj1j2Excjet3";
+        varBlackHatName2_4 = "dyj1j2Excjet4";
+        varBlackHatName2_5 = "dyj1j2Excjet5";
+        
+        
     }
     else if (variable == "MeanNJetsdRapidityFB_Zinc2jet") {
-        varBlackHatName = "totNJdyjFjB";
-        varBlackHatName2 = "dyjFjBjet2";
-        useBHFile = 1;
+        varBlackHatName1_2 = "totNJdyjFjBExcjet2";
+        varBlackHatName1_3 = "totNJdyjFjBExcjet3";
+        varBlackHatName1_4 = "totNJdyjFjBExcjet4";
+        varBlackHatName1_5 = "totNJdyjFjBExcjet5";
+        
+        varBlackHatName2_2 = "dyjFjBExcjet2";
+        varBlackHatName2_3 = "dyjFjBExcjet3";
+        varBlackHatName2_4 = "dyjFjBExcjet4";
+        varBlackHatName2_5 = "dyjFjBExcjet5";
+        
     }
     
-    TH1D *genBhat[3], *genBhatDeno[3];
-    genBhat[0] = (TH1D*) fBhat[0]->Get(varBlackHatName.c_str()); genBhat[0]->Scale(0.001);
-    genBhat[1] = (TH1D*) fBhat[1]->Get(varBlackHatName.c_str()); genBhat[1]->Scale(0.001);
-    genBhat[2] = (TH1D*) fBhat[2]->Get(varBlackHatName.c_str()); genBhat[2]->Scale(0.001);
+    TH1D *genBhat[5], *genBhatDeno[5];
     
-    genBhatDeno[0] = (TH1D*) fBhat[0]->Get(varBlackHatName2.c_str()); genBhatDeno[0]->Scale(0.001);
-    genBhatDeno[1] = (TH1D*) fBhat[1]->Get(varBlackHatName2.c_str()); genBhatDeno[1]->Scale(0.001);
-    genBhatDeno[2] = (TH1D*) fBhat[2]->Get(varBlackHatName2.c_str()); genBhatDeno[2]->Scale(0.001);
+    TH1D* genBHMeanJ = NULL;
+    
+    if (variable == "MeanNJetsHT_Zinc1jet") {
+        /*
+         genBhat[0] = (TH1D*) fBhat[0]->Get(varBlackHatName1_1.c_str()); genBhat[0]->Scale(0.001);
+         genBhat[1] = (TH1D*) fBhat[1]->Get(varBlackHatName1_2.c_str()); genBhat[1]->Scale(0.001);
+         genBhat[2] = (TH1D*) fBhat[2]->Get(varBlackHatName1_3.c_str()); genBhat[2]->Scale(0.001);
+         genBhat[3] = (TH1D*) fBhat[2]->Get(varBlackHatName1_4.c_str()); genBhat[3]->Scale(0.001);
+         
+         */
+        genBhatDeno[0] = (TH1D*) fBhat[0]->Get(varBlackHatName2_1.c_str()); genBhatDeno[0]->Scale(0.001);
+        genBhatDeno[1] = (TH1D*) fBhat[1]->Get(varBlackHatName2_2.c_str()); genBhatDeno[1]->Scale(0.001);
+        genBhatDeno[2] = (TH1D*) fBhat[2]->Get(varBlackHatName2_3.c_str()); genBhatDeno[2]->Scale(0.001);
+        genBhatDeno[3] = (TH1D*) fBhat[2]->Get(varBlackHatName2_4.c_str()); genBhatDeno[3]->Scale(0.001);
+        
+        genBhat[0] = (TH1D*) genBhatDeno[0]->Clone(); genBhat[0]->Scale(1.0);
+        genBhat[1] = (TH1D*) genBhatDeno[1]->Clone(); genBhat[1]->Scale(2.0);
+        genBhat[2] = (TH1D*) genBhatDeno[2]->Clone(); genBhat[2]->Scale(3.0);
+        genBhat[3] = (TH1D*) genBhatDeno[3]->Clone(); genBhat[3]->Scale(4.0);
+        
+        int nBinsX(genBhatDeno[0]->GetNbinsX());
+        double xmin = genBhatDeno[0]->GetXaxis()->GetXmin();
+        double xmax = genBhatDeno[0]->GetXaxis()->GetXmax();
+        cout << " nBinsX: " << nBinsX << endl;
+        
+        const double *xBins = new double[nBinsX+1];
+        xBins = genBhatDeno[0]->GetXaxis()->GetXbins()->GetArray();
+        
+        TH2D* genBhat2D;
+        
+        if (xBins == 0){
+            genBhat2D = new TH2D(variable.c_str(), variable.c_str(), nBinsX, xmin, xmax, 4, 0.5, 4.5);
+        }
+        else{
+            genBhat2D = new TH2D(variable.c_str(), variable.c_str(), nBinsX, xBins, 4, 0.5, 4.5);
+        }
+        
+        for (int j = 1; j<= 4; j++){
+            for (int i = 1; i<= nBinsX; i++){
+                genBhat2D->SetBinContent(i, j, genBhatDeno[j-1]->GetBinContent(i));
+                genBhat2D->SetBinError(i, j, genBhatDeno[j-1]->GetBinError(i));
+            }
+        }
+        
+        
+        genBHMeanJ = computeProject1DMeanNJets(genBhat2D, variable);
+    }
+    
+    else {
+        //genBhat[0] = NULL;
+        //genBhat[1] = (TH1D*) fBhat[1]->Get(varBlackHatName1_2.c_str()); genBhat[1]->Scale(0.001);
+        //genBhat[2] = (TH1D*) fBhat[2]->Get(varBlackHatName1_3.c_str()); genBhat[2]->Scale(0.001);
+        //genBhat[3] = (TH1D*) fBhat[2]->Get(varBlackHatName1_4.c_str()); genBhat[3]->Scale(0.001);
+        
+        genBhatDeno[0] = NULL;
+        genBhatDeno[1] = (TH1D*) fBhat[1]->Get(varBlackHatName2_2.c_str()); genBhatDeno[1]->Scale(0.001);
+        genBhatDeno[2] = (TH1D*) fBhat[2]->Get(varBlackHatName2_3.c_str()); genBhatDeno[2]->Scale(0.001);
+        genBhatDeno[3] = (TH1D*) fBhat[2]->Get(varBlackHatName2_4.c_str()); genBhatDeno[3]->Scale(0.001);
+        
+        genBhat[0] = NULL;
+        genBhat[1] = (TH1D*) genBhatDeno[1]->Clone(); genBhat[1]->Scale(2.0);
+        genBhat[2] = (TH1D*) genBhatDeno[2]->Clone(); genBhat[2]->Scale(3.0);
+        genBhat[3] = (TH1D*) genBhatDeno[3]->Clone(); genBhat[3]->Scale(4.0);
+        
+        cout << "Stop after line " << __LINE__ << endl;
+        genBhatDeno[0] = (TH1D*) genBhatDeno[1]->Clone();
+        for (int i = 1; i<= genBhatDeno[1]->GetNbinsX(); i++){
+            cout << "Stop after line " << __LINE__ << endl;
+            genBhatDeno[0]->SetBinContent(i,0);
+            genBhatDeno[0]->SetBinError(i,0);
+        }
+        
+        cout << "Stop after line " << __LINE__ << endl;
+        int nBinsX(genBhatDeno[1]->GetNbinsX());
+        double xmin = genBhatDeno[1]->GetXaxis()->GetXmin();
+        double xmax = genBhatDeno[1]->GetXaxis()->GetXmax();
+        cout << " nBinsX: " << nBinsX << endl;
+        
+        const double *xBins = new double[nBinsX+1];
+        xBins = genBhatDeno[1]->GetXaxis()->GetXbins()->GetArray();
+        
+        TH2D* genBhat2D;
+        
+        if (xBins == 0){
+            genBhat2D = new TH2D(variable.c_str(), variable.c_str(), nBinsX, xmin, xmax, 4, 0.5, 4.5);
+        }
+        else{
+            genBhat2D = new TH2D(variable.c_str(), variable.c_str(), nBinsX, xBins, 4, 0.5, 4.5);
+        }
+        
+        cout << "Stop after line " << __LINE__ << endl;
+        for (int j = 1; j<= 4; j++){
+            for (int i = 1; i<= nBinsX; i++){
+                genBhat2D->SetBinContent(i, j, genBhatDeno[j-1]->GetBinContent(i));
+                genBhat2D->SetBinError(i, j, genBhatDeno[j-1]->GetBinError(i));
+            }
+        }
+        cout << "Stop after line " << __LINE__ << endl;
+        genBHMeanJ = computeProject1DMeanNJets(genBhat2D, variable);
+        cout << "Stop after line " << __LINE__ << endl;
+    }
+    
     
     TH1D *genBhatMeanJ = NULL;
-    genBhatMeanJ = (TH1D*) genBhat[useBHFile]->Clone();
-    genBhatMeanJ->Divide(genBhatDeno[useBHFile]);
+    TH1D *genBhatDenoSum = NULL;
     
-    TH1D *genBhatALL = (TH1D*) genBhatMeanJ->Clone();
-    */
+    if (variable == "MeanNJetsHT_Zinc1jet") {
+        cout << "----- tot N jets ---" << endl;
+        genBhatMeanJ = (TH1D*) genBhat[0]->Clone();
+        cout << " exc1      " << genBhatMeanJ->GetBinContent(9) << endl;
+        genBhatMeanJ->Add(genBhat[1]);
+        cout << " add exc2  " << genBhatMeanJ->GetBinContent(9) << endl;
+        genBhatMeanJ->Add(genBhat[2]);
+        cout << " add exc3  " << genBhatMeanJ->GetBinContent(9) << endl;
+        genBhatMeanJ->Add(genBhat[3]);
+        cout << " add exc4  " << genBhatMeanJ->GetBinContent(9) << endl;
+        
+        cout << "----- tot # events ---" << endl;
+        genBhatDenoSum = (TH1D*) genBhatDeno[0]->Clone();
+        cout << " exc1      " << genBhatDenoSum->GetBinContent(9) << endl;
+        genBhatDenoSum->Add(genBhatDeno[1]);
+        cout << " add exc2  " << genBhatDenoSum->GetBinContent(9) << endl;
+        genBhatDenoSum->Add(genBhatDeno[2]);
+        cout << " add exc3  " << genBhatDenoSum->GetBinContent(9) << endl;
+        genBhatDenoSum->Add(genBhatDeno[3]);
+        cout << " add exc4  " << genBhatDenoSum->GetBinContent(9) << endl;
+    }
+    else {
+        genBhatMeanJ = (TH1D*) genBhat[1]->Clone();
+        genBhatMeanJ->Add(genBhat[2]);
+        genBhatMeanJ->Add(genBhat[3]);
+        
+        genBhatDenoSum = (TH1D*) genBhatDeno[1]->Clone();
+        genBhatDenoSum->Add(genBhatDeno[2]);
+        genBhatDenoSum->Add(genBhatDeno[3]);
+    }
+    
+    genBhatMeanJ->Divide(genBhatDenoSum);
+    cout << " average  " << genBhatMeanJ->GetBinContent(9) << "  "  << genBHMeanJ->GetBinContent(9) << endl;
+    cout << " average  " << genBhatMeanJ->GetBinContent(10) << "  "  << genBHMeanJ->GetBinContent(10) << endl;
+    
+    TH1D *genBhatALL = (TH1D*) genBHMeanJ->Clone();
     //--- End Get BlackHat ------
     
     
@@ -193,9 +360,9 @@ void FuncPlot(string variable, bool logZ, bool decrease)
         totalSystematicsUp += pow( pow((1.+effSF), 2) - 1 , 2);
         totalSystematicsDown += pow( pow((1.+effSF), 2) - 1 , 2);
         
-        for(int i = 0; i< 10; i++) {
-            // contribution from JES PU and Xsec
-            if (i < 3) {
+        for(int i = 0; i< 12; i++) {
+            // contribution from JES PU Xsec JER LepSF Btag MES
+            if (i <= 6) {
                 double diffFromUp(hSyst[2*i]->GetBinContent(bin) - centralValue);
                 double diffFromDown(hSyst[(2*i)+1]->GetBinContent(bin) - centralValue);
                 double SysDiffUPTemp(0);
@@ -217,79 +384,33 @@ void FuncPlot(string variable, bool logZ, bool decrease)
                     totalSystematicsDown += SysDiffDownTemp * SysDiffDownTemp;
                 }
             }
-            // contribution from JER
-            if (i == 3) {
-                double difference(hSyst[2*i]->GetBinContent(bin) - centralValue);
-                totalSystematicsUp += difference * difference;
-                totalSystematicsDown += difference * difference;
-            }
-            // contribution from BtagEff
-            if (i == 4){
-                double diffFromUp(hSyst[7]->GetBinContent(bin) - centralValue);
-                double diffFromDown(hSyst[8]->GetBinContent(bin) - centralValue);
-                double SysDiffUPTemp(0);
-                double SysDiffDownTemp(0);
-                
-                if (diffFromUp >= diffFromDown) {
-                    SysDiffUPTemp = diffFromUp;
-                    SysDiffDownTemp = diffFromDown;
-                }
-                else {
-                    SysDiffUPTemp = diffFromDown;
-                    SysDiffDownTemp = diffFromUp;
-                }
-                
-                if (SysDiffUPTemp >= 0) {
-                    totalSystematicsUp += SysDiffUPTemp * SysDiffUPTemp;
-                }
-                if (SysDiffDownTemp <= 0) {
-                    totalSystematicsDown += SysDiffDownTemp * SysDiffDownTemp;
-                }
-            }
-            // contribution from Wb
-            if (i == 5) {
-                double difference(hSyst[9]->GetBinContent(bin) - centralValue);
-                totalSystematicsUp += difference * difference;
-                totalSystematicsDown += difference * difference;
-            }
-            // contribution from ttbar
-            if (i == 6) {
-                double difference(hSyst[10]->GetBinContent(bin) - centralValue);
-                totalSystematicsUp += difference * difference;
-                totalSystematicsDown += difference * difference;
-            }
-            // contribution from Resp
+            // contribution from MER hSyst[14] = (TH1D*) f->Get("MER");
             if (i == 7) {
-                double difference(hSyst[11]->GetBinContent(bin) - centralValue);
+                double difference(hSyst[14]->GetBinContent(bin) - centralValue);
                 totalSystematicsUp += difference * difference;
                 totalSystematicsDown += difference * difference;
             }
-            // contribution from MES
+            // contribution from Wb hSyst[15] = (TH1D*) f->Get("WB");
             if (i == 8) {
-                double diffFromUp(hSyst[12]->GetBinContent(bin) - centralValue);
-                double diffFromDown(hSyst[13]->GetBinContent(bin) - centralValue);
-                double SysDiffUPTemp(0);
-                double SysDiffDownTemp(0);
-                
-                if (diffFromUp >= diffFromDown) {
-                    SysDiffUPTemp = diffFromUp;
-                    SysDiffDownTemp = diffFromDown;
-                }
-                else {
-                    SysDiffUPTemp = diffFromDown;
-                    SysDiffDownTemp = diffFromUp;
-                }
-                
-                if (SysDiffUPTemp >= 0) {
-                    totalSystematicsUp += SysDiffUPTemp * SysDiffUPTemp;
-                }
-                if (SysDiffDownTemp <= 0) {
-                    totalSystematicsDown += SysDiffDownTemp * SysDiffDownTemp;
-                }
+                double difference(hSyst[15]->GetBinContent(bin) - centralValue);
+                totalSystematicsUp += difference * difference;
+                totalSystematicsDown += difference * difference;
             }
-            // contribution from MER
+            // contribution from ttbar hSyst[16] = (TH1D*) f->Get("TTBAR");
             if (i == 9) {
-                double difference(hSyst[14]->GetBinContent(bin) - centralValue);
+                double difference(hSyst[16]->GetBinContent(bin) - centralValue);
+                totalSystematicsUp += difference * difference;
+                totalSystematicsDown += difference * difference;
+            }
+            // contribution from MC hSyst[17] = (TH1D*) f->Get("MC");
+            if (i == 10) {
+                double difference(hSyst[17]->GetBinContent(bin) - centralValue);
+                totalSystematicsUp += difference * difference;
+                totalSystematicsDown += difference * difference;
+            }
+            // contribution from Resp hSyst[18] = (TH1D*) f->Get("RESP");
+            if (i == 11) {
+                double difference(hSyst[18]->GetBinContent(bin) - centralValue);
                 totalSystematicsUp += difference * difference;
                 totalSystematicsDown += difference * difference;
             }
@@ -302,9 +423,9 @@ void FuncPlot(string variable, bool logZ, bool decrease)
         
         // contribution from Toy Resp (MC)
             // (what written in the file is the absolute error value in "counts", so we need the dataCentralBackUp for normalization to xsec) => this is not true for meanNjets >> I do not need this step anymore >> FIXME
-        hErrorFromToyResponse->SetBinContent( bin, ((hErrorFromToyResponse->GetBinContent(bin))/(dataCentralBackUp->GetBinContent(bin))) * centralValue );
-        totalSystematicsUp += pow( hErrorFromToyResponse->GetBinContent(bin)  ,  2);
-        totalSystematicsDown += pow( hErrorFromToyResponse->GetBinContent(bin)  ,  2);
+        //hErrorFromToyResponse->SetBinContent( bin, ((hErrorFromToyResponse->GetBinContent(bin))/(dataCentralBackUp->GetBinContent(bin))) * centralValue );
+        //totalSystematicsUp += pow( hErrorFromToyResponse->GetBinContent(bin)  ,  2);
+        //totalSystematicsDown += pow( hErrorFromToyResponse->GetBinContent(bin)  ,  2);
         
         
         
@@ -346,7 +467,7 @@ void FuncPlot(string variable, bool logZ, bool decrease)
     //-------
     //Set x axis title
     string tempXTitle;
-    double RyMin, RyMax;
+    double RyMin(0), RyMax(0);
     if (variable == "MeanNJetsHT_Zinc1jet"){
         tempXTitle = "H_{T}(jets) [GeV]";
         RyMin = 0.9;
@@ -416,8 +537,8 @@ void FuncPlot(string variable, bool logZ, bool decrease)
     genBhatALL->SetLineWidth(2);
     genBhatALL->SetMarkerColor(kOrange+10);
     genBhatALL->SetMarkerStyle(25);
-    //genBhatALL->Draw("E2 same");
-    //genBhatALL->Draw("E same");
+    genBhatALL->Draw("E2 same");
+    genBhatALL->Draw("E same");
     cout << "Stop after line " << __LINE__ << endl;
     
     genShe->SetFillStyle(ZJetsFillStyle);
@@ -614,8 +735,8 @@ void FuncPlot(string variable, bool logZ, bool decrease)
     gen2->SetLineWidth(2);
     gen2->SetMarkerColor(kOrange+10);
     gen2->SetMarkerStyle(25);
-    //gen2->Draw("E2 same");
-    //gen2->Draw("E1 same");
+    gen2->Draw("E2 same");
+    gen2->Draw("E1 same");
     
     // Text BlackHat
     TLatex *latexLabel1 = new TLatex();
@@ -688,8 +809,11 @@ void FuncPlot(string variable, bool logZ, bool decrease)
     pad4->cd();
     can->cd();
     
-    //// Set output .pdf file in the direcctory "PNGFiles/FinalUnfold/"
-    string outputDirectory = "PNGFiles/FinalUnfoldMeanNJets/";
+    
+    //// Set output .pdf file in the direcctory "PNGFiles/FinalResults/"
+    string command = "mkdir -p PNGFiles/FinalResults" ;
+    system(command.c_str());
+    string outputDirectory = "PNGFiles/FinalResults/";
     string outputFileNamePNG = outputDirectory + leptonFlavor + "_" + energy + "_RunPlotting_";
     
     if (doXSec) outputFileNamePNG += "XSec_";
@@ -702,16 +826,20 @@ void FuncPlot(string variable, bool logZ, bool decrease)
     
     
     //--- Generate new plot to see Contribution : all input histo are already scaled to the final unit ---
-    plotSystematicBreakdown(outputDirectory, variable, dataCentral, hSyst, hErrorFromToyResponse);
+    plotSystematicBreakdown(outputDirectory, variable, dataCentral, hSyst);
 
 }
 
 
-void plotSystematicBreakdown (string outputDirectory, string variable, TH1D* dataCentral, TH1D* hSyst[], TH1D* hErrorFromToyResponse)
+void plotSystematicBreakdown (string outputDirectory, string variable, TH1D* dataCentral, TH1D* hSyst[])
 {
+    outputDirectory = "PNGFiles/SystBreakDown/";
+    string command = "mkdir -p PNGFiles/SystBreakDown" ;
+    system(command.c_str());
+    
     TH1D *dataCenBackUp = (TH1D*) dataCentral->Clone();
     
-    const int nGroup = 12;
+    const int nGroup = 13;
     const int nBins(dataCentral->GetNbinsX());
     
     int group = nGroup -1;
@@ -719,7 +847,7 @@ void plotSystematicBreakdown (string outputDirectory, string variable, TH1D* dat
         group = nGroup;
     }
     
-    TH1D *hUpDiffer[nGroup] = {NULL}, *hDownDiffer[nGroup] = {NULL}, *hStatError = {NULL}, *hTotalErrorUp = {NULL}, *hTotalErrorDown = {NULL} ; //nSyst(12);
+    TH1D *hUpDiffer[nGroup] = {NULL}, *hDownDiffer[nGroup] = {NULL}, *hStatError = {NULL}, *hTotalErrorUp = {NULL}, *hTotalErrorDown = {NULL} ; //nSyst(7);
     
     // set up histogram
     hStatError =  (TH1D*) dataCentral->Clone();
@@ -753,8 +881,8 @@ void plotSystematicBreakdown (string outputDirectory, string variable, TH1D* dat
             hDownDiffer[i]->SetBinContent(bin, 0.);
             
             if( dataCentral->GetBinContent(bin) > 0 ){
-                // contribution from JES PU and Xsec
-                if (i < 3){
+                // contribution from JES PU Xsec JER LepSF Btag MES
+                if (i <= 6){
                     double SysDiffUPTemp(0);
                     double SysDiffDownTemp(0);
                     
@@ -772,105 +900,56 @@ void plotSystematicBreakdown (string outputDirectory, string variable, TH1D* dat
                     }
                     
                     if (SysDiffUPTemp >= 0){
-                        hUpDiffer[i]->SetBinContent( bin, SysDiffUPTemp * (100 / dataCentral->GetBinContent(bin)) ) ;
+                        hUpDiffer[i]->SetBinContent( bin, SysDiffUPTemp * (100. / dataCentral->GetBinContent(bin)) ) ;
                     }
                     if (SysDiffDownTemp <= 0){
-                        hDownDiffer[i]->SetBinContent( bin, (fabs(SysDiffDownTemp)) * (100 / dataCentral->GetBinContent(bin)) ) ;
-                    }
-                }
-                // contribution from JER
-                if (i == 3){
-                    double difference(hSyst[2*i]->GetBinContent(bin) - (dataCentral->GetBinContent(bin)));
-                    hUpDiffer[i]  ->SetBinContent( bin, (fabs(difference)) * (100 / dataCentral->GetBinContent(bin)) ) ;
-                    hDownDiffer[i]->SetBinContent( bin, (fabs(difference)) * (100 / dataCentral->GetBinContent(bin)) ) ;
-                }
-                // contribution from MC
-                if (i == 4){
-                    double uncer(hErrorFromToyResponse->GetBinContent(bin));
-                    hUpDiffer[i]  ->SetBinContent( bin, uncer * (100 / dataCentral->GetBinContent(bin)) ) ;
-                    hDownDiffer[i]->SetBinContent( bin, uncer * (100 / dataCentral->GetBinContent(bin)) ) ;
-                }
-                // contribution from ttbar
-                if (i == 5){
-                    double difference(hSyst[10]->GetBinContent(bin) - (dataCentral->GetBinContent(bin)));
-                    hUpDiffer[i]  ->SetBinContent( bin, (fabs(difference)) * (100 / dataCentral->GetBinContent(bin)) ) ;
-                    hDownDiffer[i]->SetBinContent( bin, (fabs(difference)) * (100 / dataCentral->GetBinContent(bin)) ) ;
-                }
-                // contribution from Wb
-                if (i == 6){
-                    double difference(hSyst[9]->GetBinContent(bin) - (dataCentral->GetBinContent(bin)));
-                    hUpDiffer[i]  ->SetBinContent( bin, (fabs(difference)) * (100 / dataCentral->GetBinContent(bin)) ) ;
-                    hDownDiffer[i]->SetBinContent( bin, (fabs(difference)) * (100 / dataCentral->GetBinContent(bin)) ) ;
-                }
-                // contribution from integrated lumi
-                if (i == 7){
-                    hUpDiffer[i]  ->SetBinContent( bin, 2.6 ) ;
-                    hDownDiffer[i]->SetBinContent( bin, 2.6 ) ;
-                }
-                // contribution from Btag CorrFactor
-                if (i == 8){
-                    double BdiffFromUp(hSyst[7]->GetBinContent(bin) - (dataCentral->GetBinContent(bin)));
-                    double BdiffFromDown(hSyst[8]->GetBinContent(bin) - (dataCentral->GetBinContent(bin)));
-                    double BSysDiffUPTemp(0);
-                    double BSysDiffDownTemp(0);
-                    
-                    if (BdiffFromUp >= BdiffFromDown) {
-                        BSysDiffUPTemp = BdiffFromUp;
-                        BSysDiffDownTemp = BdiffFromDown;
-                    }
-                    else {
-                        BSysDiffUPTemp = BdiffFromDown;
-                        BSysDiffDownTemp = BdiffFromUp;
-                    }
-                    
-                    if (BSysDiffUPTemp >= 0) {
-                        hUpDiffer[i]->SetBinContent( bin, BSysDiffUPTemp * (100. / dataCentral->GetBinContent(bin)) ) ;
-                    }
-                    if (BSysDiffDownTemp <= 0) {
-                        hDownDiffer[i]->SetBinContent( bin, (fabs(BSysDiffDownTemp)) * (100. / dataCentral->GetBinContent(bin)) ) ;
-                    }
-                }
-                // contribution from MES
-                if (i == 9){
-                    double BdiffFromUp(hSyst[12]->GetBinContent(bin) - (dataCentral->GetBinContent(bin)));
-                    double BdiffFromDown(hSyst[13]->GetBinContent(bin) - (dataCentral->GetBinContent(bin)));
-                    double BSysDiffUPTemp(0);
-                    double BSysDiffDownTemp(0);
-                    
-                    if (BdiffFromUp >= BdiffFromDown) {
-                        BSysDiffUPTemp = BdiffFromUp;
-                        BSysDiffDownTemp = BdiffFromDown;
-                    }
-                    else {
-                        BSysDiffUPTemp = BdiffFromDown;
-                        BSysDiffDownTemp = BdiffFromUp;
-                    }
-                    
-                    if (BSysDiffUPTemp >= 0) {
-                        hUpDiffer[i]->SetBinContent( bin, BSysDiffUPTemp * (100. / dataCentral->GetBinContent(bin)) ) ;
-                    }
-                    if (BSysDiffDownTemp <= 0) {
-                        hDownDiffer[i]->SetBinContent( bin, (fabs(BSysDiffDownTemp)) * (100. / dataCentral->GetBinContent(bin)) ) ;
+                        hDownDiffer[i]->SetBinContent( bin, (fabs(SysDiffDownTemp)) * (100. / dataCentral->GetBinContent(bin)) ) ;
                     }
                 }
                 // contribution from MER
+                if (i == 7){
+                    double difference( hSyst[14]->GetBinContent(bin) - (dataCentral->GetBinContent(bin)) );
+                    hUpDiffer[i]  ->SetBinContent( bin, (fabs(difference)) * (100. / dataCentral->GetBinContent(bin)) ) ;
+                    hDownDiffer[i]->SetBinContent( bin, (fabs(difference)) * (100. / dataCentral->GetBinContent(bin)) ) ;
+                }
+                // contribution from Wb
+                if (i == 8){
+                    double difference( hSyst[15]->GetBinContent(bin) - (dataCentral->GetBinContent(bin)) );
+                    hUpDiffer[i]  ->SetBinContent( bin, (fabs(difference)) * (100. / dataCentral->GetBinContent(bin)) ) ;
+                    hDownDiffer[i]->SetBinContent( bin, (fabs(difference)) * (100. / dataCentral->GetBinContent(bin)) ) ;
+                }
+                // contribution from ttbar
+                if (i == 9){
+                    double difference( hSyst[16]->GetBinContent(bin) - (dataCentral->GetBinContent(bin)) );
+                    hUpDiffer[i]  ->SetBinContent( bin, (fabs(difference)) * (100. / dataCentral->GetBinContent(bin)) ) ;
+                    hDownDiffer[i]->SetBinContent( bin, (fabs(difference)) * (100. / dataCentral->GetBinContent(bin)) ) ;
+                }
+                // contribution from MC
                 if (i == 10){
-                    double difference(hSyst[14]->GetBinContent(bin) - (dataCentral->GetBinContent(bin)));
-                    hUpDiffer[i]  ->SetBinContent( bin, (fabs(difference)) * (100 / dataCentral->GetBinContent(bin)) ) ;
-                    hDownDiffer[i]->SetBinContent( bin, (fabs(difference)) * (100 / dataCentral->GetBinContent(bin)) ) ;
+                    double difference( hSyst[17]->GetBinContent(bin) - (dataCentral->GetBinContent(bin)) );
+                    hUpDiffer[i]  ->SetBinContent( bin, (fabs(difference)) * (100. / dataCentral->GetBinContent(bin)) ) ;
+                    hDownDiffer[i]->SetBinContent( bin, (fabs(difference)) * (100. / dataCentral->GetBinContent(bin)) ) ;
+                }
+                // contribution from integrated lumi
+                if (i == 11){
+                    hUpDiffer[i]  ->SetBinContent( bin, 2.6 ) ;
+                    hDownDiffer[i]->SetBinContent( bin, 2.6 ) ;
                 }
                 // contribution from Resp
                 if (i == nGroup-1){
-                    double difference(hSyst[11]->GetBinContent(bin) - (dataCentral->GetBinContent(bin)));
-                    hUpDiffer[i]  ->SetBinContent( bin, (fabs(difference)) * (100 / dataCentral->GetBinContent(bin)) ) ;
-                    hDownDiffer[i]->SetBinContent( bin, (fabs(difference)) * (100 / dataCentral->GetBinContent(bin)) ) ;
+                    double difference( hSyst[18]->GetBinContent(bin) - (dataCentral->GetBinContent(bin)) );
+                    hUpDiffer[i]  ->SetBinContent( bin, (fabs(difference)) * (100. / dataCentral->GetBinContent(bin)) ) ;
+                    hDownDiffer[i]->SetBinContent( bin, (fabs(difference)) * (100. / dataCentral->GetBinContent(bin)) ) ;
+                    //double uncer(hSyst[18]->GetBinContent(bin));
+                    //hUpDiffer[i]  ->SetBinContent( bin, (fabs(uncer)) * (100. / dataCentral->GetBinContent(bin)) ) ;
+                    //hDownDiffer[i]->SetBinContent( bin, (fabs(uncer)) * (100. / dataCentral->GetBinContent(bin)) ) ;
                 }
             }
         }
         
         hStatError->SetBinContent(bin, 0.);
         if (dataCentral->GetBinContent(bin) > 0){
-            hStatError->SetBinContent( bin, (dataCentral->GetBinError(bin)) * (100 / dataCentral->GetBinContent(bin)) ) ;
+            hStatError->SetBinContent( bin, (dataCentral->GetBinError(bin)) * (100. / dataCentral->GetBinContent(bin)) ) ;
             //cout << " Binth: " << bin << " Stat  difference = " << dataCentral->GetBinError(bin)  << "  % difference = " << (dataCentral->GetBinError(bin)) * (100 / dataCentral->GetBinContent(bin))  << endl;
         }
         //cout << endl;
@@ -916,73 +995,85 @@ void plotSystematicBreakdown (string outputDirectory, string variable, TH1D* dat
         tempXTitle = "#Delta y(j_{F}j_{B})";
     }
     
+    
+    string titleCan1 = "Systematic Up : " + variable;
+    
     if (variable.find("ZNGood") != string::npos){
         hUpDiffer[0]->GetXaxis()->SetRange(2, 8);
     }
     hUpDiffer[0]->SetMaximum(1000);
     hUpDiffer[0]->SetMinimum(0.1);
-    hUpDiffer[0]->SetTitle("Systematic Up");
+    hUpDiffer[0]->SetTitle(titleCan1.c_str());
     hUpDiffer[0]->GetYaxis()->SetTitle("Uncertainty (%)");
     hUpDiffer[0]->GetXaxis()->SetTitle(tempXTitle.c_str());
+    
+    //JES
     hUpDiffer[0]->SetLineColor(kRed);
     hUpDiffer[0]->SetLineWidth(2);
     hUpDiffer[0]->SetLineStyle(2);
     hUpDiffer[0]->DrawCopy("HIST");
-    
+    //PU
     hUpDiffer[1]->SetLineColor(kBlue);
     hUpDiffer[1]->SetLineWidth(2);
     hUpDiffer[1]->SetLineStyle(5);
     hUpDiffer[1]->DrawCopy("HIST same");
-    
+    //Xsec
     hUpDiffer[2]->SetLineColor(kGreen);
     hUpDiffer[2]->SetLineWidth(2);
     hUpDiffer[2]->SetLineStyle(5);
     hUpDiffer[2]->DrawCopy("HIST same");
-    
+    //JER
     hUpDiffer[3]->SetLineColor(kGray+2);
     hUpDiffer[3]->SetLineWidth(3);
     hUpDiffer[3]->SetLineStyle(3);
     hUpDiffer[3]->DrawCopy("HIST same");
-    
-    hUpDiffer[4]->SetLineColor(kCyan);
-    hUpDiffer[4]->SetLineWidth(3);
-    hUpDiffer[4]->SetLineStyle(3);
+    //LepSF
+    hUpDiffer[4]->SetLineColor(kPink+5);
+    hUpDiffer[4]->SetLineWidth(2);
+    hUpDiffer[4]->SetLineStyle(2);
     hUpDiffer[4]->DrawCopy("HIST same");
-    
-    hUpDiffer[5]->SetLineColor(kGreen+3);
+    //BtagSF
+    hUpDiffer[5]->SetLineColor(kPink+2);
     hUpDiffer[5]->SetLineWidth(2);
     hUpDiffer[5]->SetLineStyle(5);
     hUpDiffer[5]->DrawCopy("HIST same");
-    
-    hUpDiffer[6]->SetLineColor(kOrange);
-    hUpDiffer[6]->SetLineWidth(3);
+    //MES
+    hUpDiffer[6]->SetLineColor(kSpring+9);
+    hUpDiffer[6]->SetLineWidth(2);
     hUpDiffer[6]->SetLineStyle(3);
     hUpDiffer[6]->DrawCopy("HIST same");
-    
-    hUpDiffer[7]->SetLineColor(kViolet+5);
+    //MER
+    hUpDiffer[7]->SetLineColor(kAzure+4);
     hUpDiffer[7]->SetLineWidth(2);
-    hUpDiffer[7]->SetLineStyle(5);
+    hUpDiffer[7]->SetLineStyle(2);
     hUpDiffer[7]->DrawCopy("HIST same");
-    
-    hUpDiffer[8]->SetLineColor(kPink+2);
-    hUpDiffer[8]->SetLineWidth(2);
-    hUpDiffer[8]->SetLineStyle(5);
+    //WB
+    hUpDiffer[8]->SetLineColor(kOrange);
+    hUpDiffer[8]->SetLineWidth(3);
+    hUpDiffer[8]->SetLineStyle(3);
     hUpDiffer[8]->DrawCopy("HIST same");
-    
-    hUpDiffer[9]->SetLineColor(kSpring+9);
+    //ttbar
+    hUpDiffer[9]->SetLineColor(kGreen+3);
     hUpDiffer[9]->SetLineWidth(2);
-    hUpDiffer[9]->SetLineStyle(3);
+    hUpDiffer[9]->SetLineStyle(5);
     hUpDiffer[9]->DrawCopy("HIST same");
-    
-    hUpDiffer[10]->SetLineColor(kAzure+4);
-    hUpDiffer[10]->SetLineWidth(2);
-    hUpDiffer[10]->SetLineStyle(2);
+    //MC
+    hUpDiffer[10]->SetLineColor(kCyan);
+    hUpDiffer[10]->SetLineWidth(3);
+    hUpDiffer[10]->SetLineStyle(3);
     hUpDiffer[10]->DrawCopy("HIST same");
-    
-    hUpDiffer[nGroup-1]->SetLineColor(kYellow);
-    hUpDiffer[nGroup-1]->SetLineWidth(3);
-    hUpDiffer[nGroup-1]->SetLineStyle(3);
-    hUpDiffer[nGroup-1]->DrawCopy("HIST same");
+    //lumi
+    hUpDiffer[11]->SetLineColor(kViolet+5);
+    hUpDiffer[11]->SetLineWidth(2);
+    hUpDiffer[11]->SetLineStyle(5);
+    hUpDiffer[11]->DrawCopy("HIST same");
+    //Resp
+    if (variable != "ZNGoodJets_Zexc") {
+        hUpDiffer[nGroup-1]->SetLineColor(kYellow);
+        hUpDiffer[nGroup-1]->SetLineWidth(3);
+        hUpDiffer[nGroup-1]->SetLineStyle(3);
+        hUpDiffer[nGroup-1]->DrawCopy("HIST same");
+    }
     
     hStatError->SetLineColor(kMagenta);
     hStatError->SetLineWidth(2);
@@ -997,25 +1088,28 @@ void plotSystematicBreakdown (string outputDirectory, string variable, TH1D* dat
     TLegend *leg = new TLegend(0.15, 0.63, 0.34, 0.89);
     leg->SetFillStyle(0);
     leg->SetBorderSize(0);
-    leg->AddEntry(hUpDiffer[0]   , "JES" , "l");
-    leg->AddEntry(hUpDiffer[1]   , "PU"  , "l");
-    leg->AddEntry(hUpDiffer[2]   , "XSEC", "l");
-    leg->AddEntry(hUpDiffer[3]   , "JER" , "l");
-    leg->AddEntry(hUpDiffer[4]   , "MC"  , "l");
-    leg->AddEntry(hUpDiffer[5]   , "ttbar"    , "l");
-    leg->AddEntry(hUpDiffer[6]   , "Wb"    , "l");
-    leg->AddEntry(hUpDiffer[7]   , "Int.Lumi"    , "l");
-    leg->AddEntry(hUpDiffer[8]   , "Btag Corr"  , "l");
-    leg->AddEntry(hUpDiffer[9]  , "MES"    , "l");
-    leg->AddEntry(hUpDiffer[10] , "MER"    , "l");
-    leg->AddEntry(hUpDiffer[nGroup-1]  , "Resp", "l");
-    
-    leg->AddEntry(hStatError     , "Statistical", "l");
-    leg->AddEntry(hTotalErrorUp  , "Total"      , "l");
+    leg->AddEntry(hUpDiffer[0]  , "JES"    , "l");
+    leg->AddEntry(hUpDiffer[1]  , "PU"     , "l");
+    leg->AddEntry(hUpDiffer[2]  , "XSEC"   , "l");
+    leg->AddEntry(hUpDiffer[3]  , "JER"    , "l");
+    leg->AddEntry(hUpDiffer[4]  , "LepSF"  , "l");
+    leg->AddEntry(hUpDiffer[5]  , "BtagSF" , "l");
+    leg->AddEntry(hUpDiffer[6]  , "MES"    , "l");
+    leg->AddEntry(hUpDiffer[7]  , "MER"    , "l");
+    leg->AddEntry(hUpDiffer[8]  , "Wb"     , "l");
+    leg->AddEntry(hUpDiffer[9]  , "ttbar"  , "l");
+    leg->AddEntry(hUpDiffer[10] , "MC"     , "l");
+    leg->AddEntry(hUpDiffer[11] , "Lumi"   , "l");
+    if (variable != "ZNGoodJets_Zexc") {
+        leg->AddEntry(hUpDiffer[nGroup-1]  , "Resp", "l");
+    }
+    leg->AddEntry(hStatError    , "Statistical", "l");
+    leg->AddEntry(hTotalErrorUp , "Total"      , "l");
     leg->Draw();
     
     string outputFileNameErrorUpPNG = outputDirectory + variable + "ErrorUp.pdf";
     canvas1->Print(outputFileNameErrorUpPNG.c_str());
+    
     
     // canvas2
     TCanvas* canvas2 = new TCanvas("c2", "canvas2", 900, 900);
@@ -1023,73 +1117,84 @@ void plotSystematicBreakdown (string outputDirectory, string variable, TH1D* dat
     canvas2->SetLogy();
     canvas2->SetTicks();
     
+    string titleCan2 = "Systematic Down : " + variable;
+    
     if (variable.find("ZNGood") != string::npos){
         hDownDiffer[0]->GetXaxis()->SetRange(2, 8);
     }
     hDownDiffer[0]->SetMaximum(1000);
     hDownDiffer[0]->SetMinimum(0.1);
-    hDownDiffer[0]->SetTitle("Systematic Down");
+    hDownDiffer[0]->SetTitle(titleCan2.c_str());
     hDownDiffer[0]->GetYaxis()->SetTitle("Uncertainty (%)");
     hDownDiffer[0]->GetXaxis()->SetTitle(tempXTitle.c_str());
+    
+    //JES
     hDownDiffer[0]->SetLineColor(kRed);
     hDownDiffer[0]->SetLineWidth(2);
     hDownDiffer[0]->SetLineStyle(2);
     hDownDiffer[0]->DrawCopy("HIST");
-    
+    //PU
     hDownDiffer[1]->SetLineColor(kBlue);
     hDownDiffer[1]->SetLineWidth(2);
     hDownDiffer[1]->SetLineStyle(5);
     hDownDiffer[1]->DrawCopy("HIST same");
-    
+    //Xsec
     hDownDiffer[2]->SetLineColor(kGreen);
     hDownDiffer[2]->SetLineWidth(2);
     hDownDiffer[2]->SetLineStyle(5);
     hDownDiffer[2]->DrawCopy("HIST same");
-    
+    //JER
     hDownDiffer[3]->SetLineColor(kGray+2);
     hDownDiffer[3]->SetLineWidth(3);
     hDownDiffer[3]->SetLineStyle(3);
     hDownDiffer[3]->DrawCopy("HIST same");
-    
-    hDownDiffer[4]->SetLineColor(kCyan);
-    hDownDiffer[4]->SetLineWidth(3);
-    hDownDiffer[4]->SetLineStyle(3);
+    //LepSF
+    hDownDiffer[4]->SetLineColor(kPink+5);
+    hDownDiffer[4]->SetLineWidth(2);
+    hDownDiffer[4]->SetLineStyle(2);
     hDownDiffer[4]->DrawCopy("HIST same");
-    
-    hDownDiffer[5]->SetLineColor(kGreen+3);
+    //BtagSF
+    hDownDiffer[5]->SetLineColor(kPink+2);
     hDownDiffer[5]->SetLineWidth(2);
     hDownDiffer[5]->SetLineStyle(5);
     hDownDiffer[5]->DrawCopy("HIST same");
-    
-    hDownDiffer[6]->SetLineColor(kOrange);
-    hDownDiffer[6]->SetLineWidth(3);
+    //MES
+    hDownDiffer[6]->SetLineColor(kSpring+9);
+    hDownDiffer[6]->SetLineWidth(2);
     hDownDiffer[6]->SetLineStyle(3);
     hDownDiffer[6]->DrawCopy("HIST same");
-    
-    hDownDiffer[7]->SetLineColor(kViolet+5);
+    //MER
+    hDownDiffer[7]->SetLineColor(kAzure+4);
     hDownDiffer[7]->SetLineWidth(2);
-    hDownDiffer[7]->SetLineStyle(5);
+    hDownDiffer[7]->SetLineStyle(2);
     hDownDiffer[7]->DrawCopy("HIST same");
-    
-    hDownDiffer[8]->SetLineColor(kPink+2);
-    hDownDiffer[8]->SetLineWidth(2);
-    hDownDiffer[8]->SetLineStyle(5);
+    //WB
+    hDownDiffer[8]->SetLineColor(kOrange);
+    hDownDiffer[8]->SetLineWidth(3);
+    hDownDiffer[8]->SetLineStyle(3);
     hDownDiffer[8]->DrawCopy("HIST same");
-    
-    hDownDiffer[9]->SetLineColor(kSpring+9);
+    //ttbar
+    hDownDiffer[9]->SetLineColor(kGreen+3);
     hDownDiffer[9]->SetLineWidth(2);
-    hDownDiffer[9]->SetLineStyle(3);
+    hDownDiffer[9]->SetLineStyle(5);
     hDownDiffer[9]->DrawCopy("HIST same");
-    
-    hDownDiffer[10]->SetLineColor(kAzure+4);
-    hDownDiffer[10]->SetLineWidth(2);
-    hDownDiffer[10]->SetLineStyle(2);
+    //MC
+    hDownDiffer[10]->SetLineColor(kCyan);
+    hDownDiffer[10]->SetLineWidth(3);
+    hDownDiffer[10]->SetLineStyle(3);
     hDownDiffer[10]->DrawCopy("HIST same");
-    
-    hDownDiffer[nGroup-1]->SetLineColor(kYellow);
-    hDownDiffer[nGroup-1]->SetLineWidth(3);
-    hDownDiffer[nGroup-1]->SetLineStyle(3);
-    hDownDiffer[nGroup-1]->DrawCopy("HIST same");
+    //lumi
+    hDownDiffer[11]->SetLineColor(kViolet+5);
+    hDownDiffer[11]->SetLineWidth(2);
+    hDownDiffer[11]->SetLineStyle(5);
+    hDownDiffer[11]->DrawCopy("HIST same");
+    //Resp
+    if (variable != "ZNGoodJets_Zexc") {
+        hDownDiffer[nGroup-1]->SetLineColor(kYellow);
+        hDownDiffer[nGroup-1]->SetLineWidth(3);
+        hDownDiffer[nGroup-1]->SetLineStyle(3);
+        hDownDiffer[nGroup-1]->DrawCopy("HIST same");
+    }
     
     hStatError->SetLineColor(kMagenta);
     hStatError->SetLineWidth(2);
@@ -1104,19 +1209,22 @@ void plotSystematicBreakdown (string outputDirectory, string variable, TH1D* dat
     TLegend *leg2 = new TLegend(0.15, 0.63, 0.34, 0.89);
     leg2->SetFillStyle(0);
     leg2->SetBorderSize(0);
-    leg2->AddEntry(hDownDiffer[0]   , "JES" , "l");
-    leg2->AddEntry(hDownDiffer[1]   , "PU"  , "l");
-    leg2->AddEntry(hDownDiffer[2]   , "XSEC", "l");
-    leg2->AddEntry(hDownDiffer[3]   , "JER" , "l");
-    leg2->AddEntry(hDownDiffer[4]   , "MC"  , "l");
-    leg2->AddEntry(hDownDiffer[5]   , "ttbar"    , "l");
-    leg2->AddEntry(hDownDiffer[6]   , "Wb"    , "l");
-    leg2->AddEntry(hDownDiffer[7]   , "Int.Lumi"    , "l");
-    leg2->AddEntry(hDownDiffer[8]   , "Btag Corr"  , "l");
-    leg2->AddEntry(hDownDiffer[9]  , "MES"    , "l");
-    leg2->AddEntry(hDownDiffer[10] , "MER"    , "l");
-    leg2->AddEntry(hDownDiffer[nGroup-1]   , "Resp", "l");
+    leg2->AddEntry(hDownDiffer[0]  , "JES"    , "l");
+    leg2->AddEntry(hDownDiffer[1]  , "PU"     , "l");
+    leg2->AddEntry(hDownDiffer[2]  , "XSEC"   , "l");
+    leg2->AddEntry(hDownDiffer[3]  , "JER"    , "l");
+    leg2->AddEntry(hDownDiffer[4]  , "LepSF"  , "l");
+    leg2->AddEntry(hDownDiffer[5]  , "BtagSF" , "l");
+    leg2->AddEntry(hDownDiffer[6]  , "MES"    , "l");
+    leg2->AddEntry(hDownDiffer[7]  , "MER"    , "l");
+    leg2->AddEntry(hDownDiffer[8]  , "Wb"     , "l");
+    leg2->AddEntry(hDownDiffer[9]  , "ttbar"  , "l");
+    leg2->AddEntry(hDownDiffer[10] , "MC"     , "l");
+    leg2->AddEntry(hDownDiffer[11] , "Lumi"   , "l");
     
+    if (variable != "ZNGoodJets_Zexc") {
+        leg2->AddEntry(hDownDiffer[nGroup-1]   , "Resp", "l");
+    }
     leg2->AddEntry(hStatError       , "Statistical", "l");
     leg2->AddEntry(hTotalErrorDown  , "Total"      , "l");
     leg2->Draw();
@@ -1127,12 +1235,73 @@ void plotSystematicBreakdown (string outputDirectory, string variable, TH1D* dat
     string outputTableErrorDown = outputDirectory + "Table/" + variable + "TableErrorDown.tex";
     string outputTableErrorUp   = outputDirectory + "Table/" + variable + "TableErrorUp.tex";
     
-    GetSysErrorTable(variable, outputTableErrorDown, dataCenBackUp, hDownDiffer, hStatError, hTotalErrorDown, nGroup);
-    GetSysErrorTable(variable, outputTableErrorUp,   dataCenBackUp, hUpDiffer,   hStatError, hTotalErrorUp, nGroup);
+    //GetSysErrorTable(variable, outputTableErrorDown, dataCenBackUp, hDownDiffer, hStatError, hTotalErrorDown, nGroup);
+    //GetSysErrorTable(variable, outputTableErrorUp,   dataCenBackUp, hUpDiffer,   hStatError, hTotalErrorUp, nGroup);
     
 }
 
 
+TH1D* computeProject1DMeanNJets( TH2D *hUnfoldedC, string variable )
+{
+    
+    int nBinsX(hUnfoldedC->GetNbinsX());
+    int nBinsY(hUnfoldedC->GetNbinsY());
+    double xmin = hUnfoldedC->GetXaxis()->GetXmin();
+    double xmax = hUnfoldedC->GetXaxis()->GetXmax();
+    //cout << " nBinsX: " << nBinsX << endl;
+    //cout << " nBinsY: " << nBinsY << endl;
+    
+    const double *xBins = new double[nBinsX+1];
+    xBins = hUnfoldedC->GetXaxis()->GetXbins()->GetArray();
+    
+    TH1D* hUnfoldedCMeanJ;
+    
+    if (xBins == 0){
+        hUnfoldedCMeanJ = new TH1D(variable.c_str(), variable.c_str(), nBinsX, xmin, xmax);
+    }
+    else{
+        hUnfoldedCMeanJ = new TH1D(variable.c_str(), variable.c_str(), nBinsX, xBins);
+    }
+    
+    //--- produce projected 1D hist for hUnfoldedC ---
+    for (int i=0; i<nBinsX; i++){
+        // calculate mean # of jets
+        double meanNJets(0);
+        double NEvents(0);
+        double NJetsTot(0);
+        for(int j=0; j<nBinsY; j++){
+            double NEventsTemp(0);
+            double NJetsTemp(0);
+            NEventsTemp = hUnfoldedC->GetBinContent(i+1,j+1);
+            NEvents = NEvents + NEventsTemp;
+            
+            NJetsTemp = (hUnfoldedC->GetBinContent(i+1,j+1)) * (j+1);
+            NJetsTot = NJetsTot + NJetsTemp;
+        }
+        if (NEvents > 0) meanNJets = NJetsTot/NEvents;
+        
+        hUnfoldedCMeanJ->SetBinContent(i+1, meanNJets);
+        
+        // calculate error
+        double errOfMean(0);
+        if (NEvents > 0) {
+            for(int k=0; k<nBinsY; k++){
+                double errTemp(0);
+                errTemp = (((NEvents * (k+1)) - NJetsTot) / pow(NEvents, 2)) * (hUnfoldedC->GetBinError(i+1,k+1));
+                errTemp = pow(errTemp, 2);
+                errOfMean = errOfMean + errTemp;
+            }
+            errOfMean = sqrt(errOfMean);
+        }
+        hUnfoldedCMeanJ->SetBinError(i+1, errOfMean);
+        //cout << " loop " << i << endl;
+    }
+    
+    return hUnfoldedCMeanJ;
+    
+}
+
+/*
 void GetSysErrorTable (string variable, string outputTableName, TH1D* dataCenBackUp, TH1D* hDiffer[], TH1D* hStatError, TH1D* hTotalError, const int nGroup)
 {
     cout << "Now producing table of " << outputTableName << endl;
@@ -1251,6 +1420,7 @@ void GetSysErrorTable (string variable, string outputTableName, TH1D* dataCenBac
     fclose(outFile);
 }
 //cout << "Stop after line " << __LINE__ << endl;
+ */
 ////////////////////////////////////////////////////////////////////////////////////
 
 

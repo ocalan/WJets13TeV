@@ -24,7 +24,7 @@
     }
         
     //------
-    int doWhat       = 100;
+    int doWhat       = 0;
                               // 100 - all ; 0 - data, 1 - background , 2 - tau ?, 3 - DY, 4 - W+jets,
                               // 51 - MC gen, 90 - PDF Syst., 1001 - do pull DY samples
         
@@ -36,7 +36,7 @@
     int doQCD        = 0;
                              // 0-3 : 4 combination between isolation/anti-isolation and MT cuts
         
-    int doBJets      = -1;
+    int doBJets      = 0;
                             // 0 - no infor on B-jets will be used ;
                             // 1, 2 .. require at least 1, 2, .. ; use 2 for ttbar systmatics;
                             // -1, -2, .. veto the event if you have 1 or more, 2 or more .. b-jets ;
@@ -55,7 +55,7 @@
 
     int doRoch   = 0;
     int doFlat   = 0;
-    int doPUStudy = -10 ;  // default int the ZJets
+    int doPUStudy = 0 ;  // -10 default int the ZJets
     bool doSSign  =  0;     // contribution of QCD to emu in TTbar
     bool doInvMassCut = 0 ;
     bool doDataEff(0);
